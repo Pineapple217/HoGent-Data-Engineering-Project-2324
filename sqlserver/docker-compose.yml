@@ -3,14 +3,15 @@ services:
   sqlserver:
     container_name: sqlserver-db
     image: sqlserver-image
+    build:
+      context: .
     ports:
       - "1433:1433"
     environment:
       SA_PASSWORD: "Password123*"
       ACCEPT_EULA: "Y"
-
 # Run: docker-compose up -d
 # Stop: docker-compose down
 
-# Sources: 
+# Sources:
 # https://blog.logrocket.com/docker-sql-server/
