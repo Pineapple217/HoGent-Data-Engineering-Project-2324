@@ -1,0 +1,5 @@
+python-dotenv==1.0.0
+pyodbc==4.0.39
+SQLAlchemy==2.0.21
+pandas==2.1.1
+tqdm==4.66.1
