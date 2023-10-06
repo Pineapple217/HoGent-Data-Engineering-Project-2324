@@ -25,6 +25,7 @@ def get_engine():
 from reposiroty.pageviews import seed_pageviews
 from reposiroty.sessie_inschrijving import seed_sessie_inschrijving
 from reposiroty.sessie import seed_sessie
+from reposiroty.inschrijving import seed_inschrijving
 
 
 Base.metadata.reflect(engine)
@@ -42,3 +43,4 @@ def db_seed():
     seed_pageviews()
     seed_sessie_inschrijving()
     seed_sessie()
+    seed_inschrijving()
