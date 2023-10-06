@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy import String, DateTime, Numeric, Integer, Date
 from sqlalchemy.orm import sessionmaker
-from repository.main import get_engine
+from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -39,8 +39,9 @@ def seed_sessie():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
+    csv = DATA_PATH + '/Sessie.csv'
     df = pd.read_csv(
-        "../Data/Sessie.csv",
+        csv,
         delimiter=",",
         encoding="utf-8",
         keep_default_na=True,
