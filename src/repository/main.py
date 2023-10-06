@@ -27,6 +27,7 @@ from repository.pageviews import seed_pageviews
 from repository.sessie_inschrijving import seed_sessie_inschrijving
 from repository.sessie import seed_sessie
 from repository.inschrijving import seed_inschrijving
+from repository.gebruiker import seed_gebruiker
 
 
 Base.metadata.reflect(engine)
@@ -45,4 +46,5 @@ def db_seed():
     seed_sessie_inschrijving()
     seed_sessie()
     seed_inschrijving()
+    seed_gebruiker()
 
