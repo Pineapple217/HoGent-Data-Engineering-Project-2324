@@ -9,6 +9,10 @@ from repository import get_engine
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+import concurrent.futures
+
+NUM_THREADS = 2
+BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +28,10 @@ class Sessie(Base):
     SessieNr: Mapped[str] = mapped_column(String(50), nullable=True)
     Start_Datum_Tijd: Mapped[Date] = mapped_column(Date, nullable=True)
     ThemaNaam: Mapped[str] = mapped_column(String(50), nullable=True)
+
+def insert_sessie_data(sessie_data, session):
+    session.bulk_save_objects(sessie_data)
+    session.commit()
 
 
 def seed_sessie():
@@ -48,30 +56,32 @@ def seed_sessie():
         df["crm_Sessie_Start_Datum_Tijd"], format="%d-%m-%Y %H:%M:%S"
     )
     sessie_data = []
-    BATCH_SIZE = 10_000
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    for i, row in df.iterrows():
-        p = Sessie(
-            Sessie=row["crm_Sessie_Sessie"],
-            Activiteitstype=row["crm_Sessie_Activiteitstype"],
-            Campagne=row["crm_Sessie_Campagne"],
-            Eind_Datum_Tijd=row["crm_Sessie_Eind_Datum_Tijd"],
-            Product=row["crm_Sessie_Product"],
-            SessieNr=row["crm_Sessie_Sessie_nr_"],
-            Start_Datum_Tijd=row["crm_Sessie_Start_Datum_Tijd"],
-            ThemaNaam=row["crm_Sessie_Thema_Naam_"],
-        )
+    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
+        futures = []
+        for i, row in df.iterrows():
+            p = Sessie(
+                Sessie=row["crm_Sessie_Sessie"],
+                Activiteitstype=row["crm_Sessie_Activiteitstype"],
+                Campagne=row["crm_Sessie_Campagne"],
+                EindDatum_Tijd=row["crm_Sessie_Eind_Datum_Tijd"],
+                Product=row["crm_Sessie_Product"],
+                SessieNr=row["crm_Sessie_Sessie_nr_"],
+                StartDatumTijd=row["crm_Sessie_Start_Datum_Tijd"],
+                ThemaNaam=row["crm_Sessie_Thema_Naam_"],
+            )
 
-        sessie_data.append(p)
+            sessie_data.append(p)
 
-        if len(sessie_data) >= BATCH_SIZE:
-            session.bulk_save_objects(sessie_data)
-            session.commit()
-            sessie_data = []
-            progress_bar.update(BATCH_SIZE)
+            if len(sessie_data) >= BATCH_SIZE:
+                futures.append(executor.submit(insert_sessie_data, sessie_data, session))
+                sessie_data = []
+                progress_bar.update(BATCH_SIZE)
 
-    # Insert any remaining data
-    if sessie_data:
-        session.bulk_save_objects(sessie_data)
-        session.commit()
+
+        # Insert any remaining data
+        if sessie_data:
+            futures.append(executor.submit(insert_sessie_data, sessie_data, session))
+
+        concurrent.futures.wait(futures)
