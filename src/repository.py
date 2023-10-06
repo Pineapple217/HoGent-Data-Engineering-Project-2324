@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, MetaData
 
-from reposiroty.base import Base
+from repository.base import Base
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +22,10 @@ def get_engine():
 
 # Import moeten hier door depenesie en anders worden de Classes ook niet ingeladen
 # Voeg and adere seed imports hier onder toe
-from reposiroty.pageviews import seed_pageviews
-from reposiroty.sessie_inschrijving import seed_sessie_inschrijving
-from reposiroty.sessie import seed_sessie
-from reposiroty.inschrijving import seed_inschrijving
+from repository.pageviews import seed_pageviews
+from repository.sessie_inschrijving import seed_sessie_inschrijving
+from repository.sessie import seed_sessie
+from repository.inschrijving import seed_inschrijving
 
 
 Base.metadata.reflect(engine)
