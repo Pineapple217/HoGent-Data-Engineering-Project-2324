@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy import String, DateTime, Numeric, Integer, Date
 from sqlalchemy.orm import sessionmaker
-from repository import get_engine
+from repository.main import get_engine
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
