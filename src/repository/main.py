@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 DB_URL = os.getenv("DB_URL")
+DATA_PATH = os.getenv("DATA_PATH")
 logger.info("Connecting to database...")  # IDK why dit niet logged
 engine = create_engine(DB_URL)
 conn = engine.connect()
@@ -44,3 +45,4 @@ def db_seed():
     seed_sessie_inschrijving()
     seed_sessie()
     seed_inschrijving()
+

@@ -1,6 +1,6 @@
 import argparse
 import logging
-from repository import db_init, db_seed
+from repository.main import db_init, db_seed
 
 logging.basicConfig(
     level=logging.INFO,

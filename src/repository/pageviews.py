@@ -3,13 +3,14 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date
+from sqlalchemy import String, DateTime, Integer, Date
 from sqlalchemy.orm import sessionmaker
-from repository import get_engine
+from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import concurrent.futures
+import os
 
 NUM_THREADS = 2
 BATCH_SIZE = 10_000
@@ -17,7 +18,7 @@ BATCH_SIZE = 10_000
 logger = logging.getLogger(__name__)
 
 class Pageview(Base):
-    __tablename__ = "pageviews" # snakecase
+    __tablename__ = "Pageviews" # snakecase
     __table_args__ = {'extend_existing': True}
     Id: Mapped[int] = mapped_column(primary_key=True) # Gebruik deze key voor iedere table
     Anonymous_Visitor: Mapped[str] = mapped_column(String(50), nullable=True)
@@ -51,7 +52,8 @@ def seed_pageviews():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    df = pd.read_csv('../Data/cdi_pageviews.csv',delimiter=";",encoding='utf-8', keep_default_na=True, na_values=[''])
+    csv = DATA_PATH + '/cdi_pageviews.csv'
+    df = pd.read_csv(csv, delimiter=";",encoding='utf-8', keep_default_na=True, na_values=[''])
     df = df.replace({np.nan: None})
     # Sommige lege waardes worden als NaN ingelezeno
     # NaN mag niet in een varchar
@@ -64,7 +66,7 @@ def seed_pageviews():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
         futures = []
-        for i, row in df.iterrows():
+        for _, row in df.iterrows():
             p = Pageview(
                 Anonymous_Visitor=row['crm CDI_PageView[Anonymous Visitor]'],
                 Browser=row['crm CDI_PageView[Browser]'],
