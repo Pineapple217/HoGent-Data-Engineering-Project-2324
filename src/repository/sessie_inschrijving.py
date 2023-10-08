@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 class SessieInschrijving(Base):
     __tablename__ = "sessie_inschrijving"  # snakecase
     __table_args__ = {"extend_existing": True}
-    Sessie_Inschrijving: Mapped[str] = mapped_column(
-        String(50), nullable=False, primary_key=True
+    SessieInschrijving: Mapped[str] = mapped_column(
+        String(50), nullable=True, primary_key=True
     )
     Sessie: Mapped[str] = mapped_column(String(50), nullable=True)
     Inschrijving: Mapped[str] = mapped_column(String(50), nullable=True)
