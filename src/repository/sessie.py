@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sessie(Base):
-    __tablename__ = "sessie"  # snakecase
+    __tablename__ = "Sessie"
     __table_args__ = {"extend_existing": True}
     Sessie: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
     Activiteitstype: Mapped[str] = mapped_column(String(50), nullable=True)
