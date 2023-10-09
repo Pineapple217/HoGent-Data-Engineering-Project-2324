@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 DB_URL = os.getenv("DB_URL")
 DATA_PATH = os.getenv("DATA_PATH")
-engine = create_engine(DB_URL, connect_args={"connect_timeout": 100})
+engine = create_engine(
+    DB_URL, connect_args={"connect_timeout": 100}
+)  # mogelijks overbodig
 conn = engine.connect()
 metadata = MetaData()
 

@@ -23,7 +23,7 @@ def main():
         "db_seed", help="Fills all tables of the database"
     ).set_defaults(func=db_seed)
     subparsers.add_parser(
-        "db_test", help="Drops all tables and recreates them"
+        "db_test", help="Test if the database is working"
     ).set_defaults(func=db_test)
     args = parser.parse_args()
 
