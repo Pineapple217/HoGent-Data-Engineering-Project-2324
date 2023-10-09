@@ -34,7 +34,7 @@ def seed_gebruiker():
     logger.info("Reading CSV...")
     # df = pd.read_csv('../Data/csv/Gebruikers.csv', delimiter=",", encoding='latin-1', keep_default_na=True, na_values=[''])
     csv = DATA_PATH + '/Gebruikers.csv'
-    df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
+    df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=['']) # utf-8-sig is nodig om rare tekens te vermijden die er wel zijn bij utf-8
     df = df.replace({np.nan: None})
     gebruiker_data = []
     logger.info("Seeding inserting rows")
@@ -54,10 +54,7 @@ def seed_gebruiker():
                 gebruiker_data = []
                 progress_bar.update(BATCH_SIZE)
 
-        # Insert any remaining data
         if gebruiker_data:
             futures.append(executor.submit(insert_gebruiker_data, gebruiker_data, session))
 
         concurrent.futures.wait(futures)
-
-# lokaal getest
