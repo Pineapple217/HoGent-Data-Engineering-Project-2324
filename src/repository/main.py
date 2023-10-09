@@ -28,6 +28,7 @@ from repository.sessie_inschrijving import seed_sessie_inschrijving
 from repository.sessie import seed_sessie
 from repository.inschrijving import seed_inschrijving
 from repository.gebruiker import seed_gebruiker
+from repository.info_en_klachten import seed_info_en_klachten
 
 
 Base.metadata.reflect(engine)
@@ -42,9 +43,6 @@ def db_init():
 # Voeg hier je seedfunctie toe
 def db_seed():
     logger.info("Starting seeding...")
-    seed_pageviews()
-    seed_sessie_inschrijving()
-    seed_sessie()
-    seed_inschrijving()
     seed_gebruiker()
+    seed_info_en_klachten()
 
