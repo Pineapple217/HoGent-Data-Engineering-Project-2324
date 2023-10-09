@@ -43,6 +43,8 @@ def seed_sessie_inschrijving():
         keep_default_na=True,
         na_values=[""],
     )
+    # csv bevat veel lege rijen, dit drop alle rijen die volledig leeg zijn
+    df = df.dropna(how='all', axis=0)
     df = df.replace({np.nan: None})
     # Sommige lege waardes worden als NaN ingelezeno
     # NaN mag niet in een varchar
