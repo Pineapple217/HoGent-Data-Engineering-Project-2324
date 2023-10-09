@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class Campagne(Base):
-    __tablename__ = "campagne"  # snakecase
+    __tablename__ = "Campagne"  # snakecase
     __table_args__ = {"extend_existing": True}
     Campagne: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
     CampagneNr: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -69,7 +69,7 @@ def seed_campagne():
                 Campagne=row["crm_Campagne_Campagne"],
                 CampagneNr=row["crm_Campagne_Campagne_Nr"],
                 Einddatum=row["crm_Campagne_Einddatum"],
-                CampagneNaam=row["crm_Campagne_Campagne_Naam"],
+                CampagneNaam=row["crm_Campagne_Naam"],
                 NaamInMail=row["crm_Campagne_Naam_in_email"],
                 RedenVanStatus=row["crm_Campagne_Reden_van_status"],
                 Startdatum=row["crm_Campagne_Startdatum"],

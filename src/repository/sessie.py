@@ -23,11 +23,12 @@ class Sessie(Base):
     Sessie: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
     Activiteitstype: Mapped[str] = mapped_column(String(50), nullable=False)
     Campagne: Mapped[str] = mapped_column(String(50), nullable=True)
-    Eind_Datum_Tijd: Mapped[Date] = mapped_column(Date, nullable=True)
+    EindDatumTijd: Mapped[Date] = mapped_column(Date, nullable=True)
     Product: Mapped[str] = mapped_column(String(50), nullable=True)
     SessieNr: Mapped[str] = mapped_column(String(50), nullable=True)
-    Start_Datum_Tijd: Mapped[Date] = mapped_column(Date, nullable=True)
+    StartDatumTijd: Mapped[Date] = mapped_column(Date, nullable=True)
     ThemaNaam: Mapped[str] = mapped_column(String(50), nullable=True)
+
 
 def insert_sessie_data(sessie_data, session):
     session.bulk_save_objects(sessie_data)
@@ -39,7 +40,7 @@ def seed_sessie():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + '/Sessie.csv'
+    csv = DATA_PATH + "/Sessie.csv"
     df = pd.read_csv(
         csv,
         delimiter=",",
@@ -76,10 +77,11 @@ def seed_sessie():
             sessie_data.append(p)
 
             if len(sessie_data) >= BATCH_SIZE:
-                futures.append(executor.submit(insert_sessie_data, sessie_data, session))
+                futures.append(
+                    executor.submit(insert_sessie_data, sessie_data, session)
+                )
                 sessie_data = []
                 progress_bar.update(BATCH_SIZE)
-
 
         # Insert any remaining data
         if sessie_data:

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class Inschrijving(Base):
-    __tablename__ = "inschrijving"  # snakecase
+    __tablename__ = "Inschrijving"  # snakecase
     __table_args__ = {"extend_existing": True}
     Inschrijving: Mapped[str] = mapped_column(
         String(50), nullable=False, primary_key=True
@@ -25,8 +25,9 @@ class Inschrijving(Base):
     Aanwezig_Afwezig: Mapped[str] = mapped_column(String(50), nullable=True)
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
     Contactfiche: Mapped[str] = mapped_column(String(50), nullable=True)
-    Datum_Inschrijving: Mapped[Date] = mapped_column(Date, nullable=True)
-    Facturatie_Bedrag: Mapped[int] = mapped_column(Integer, nullable=True)
+    DatumInschrijving: Mapped[Date] = mapped_column(Date, nullable=True)
+    FacturatieBedrag: Mapped[int] = mapped_column(Integer, nullable=True)
+
 
 def insert_inschrijving_data(inschrijving_data, session):
     session.bulk_save_objects(inschrijving_data)
@@ -38,7 +39,7 @@ def seed_inschrijving():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + '/Inschrijving.csv'
+    csv = DATA_PATH + "/Inschrijving.csv"
     df = pd.read_csv(
         csv,
         delimiter=",",
@@ -70,13 +71,18 @@ def seed_inschrijving():
             inschrijving_data.append(p)
 
             if len(inschrijving_data) >= BATCH_SIZE:
-                futures.append(executor.submit(insert_inschrijving_data, inschrijving_data, session))
+                futures.append(
+                    executor.submit(
+                        insert_inschrijving_data, inschrijving_data, session
+                    )
+                )
                 inschrijving_data = []
                 progress_bar.update(BATCH_SIZE)
 
-
         # Insert any remaining data
         if inschrijving_data:
-            futures.append(executor.submit(insert_inschrijving_data, inschrijving_data, session))
+            futures.append(
+                executor.submit(insert_inschrijving_data, inschrijving_data, session)
+            )
 
         concurrent.futures.wait(futures)
