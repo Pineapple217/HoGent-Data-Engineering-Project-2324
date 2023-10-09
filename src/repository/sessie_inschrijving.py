@@ -11,7 +11,7 @@ import numpy as np
 from tqdm import tqdm
 import concurrent.futures
 
-NUM_THREADS = 2
+
 BATCH_SIZE = 10_000
 logger = logging.getLogger(__name__)
 
@@ -50,23 +50,23 @@ def seed_sessie_inschrijving():
 
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
-        futures = []
-        for i, row in df.iterrows():
-            p = SessieInschrijving(
-                SessieInschrijving=row["crm_SessieInschrijving_SessieInschrijving"],
-                Sessie=row["crm_SessieInschrijving_Sessie"],
-                Inschrijving=row["crm_SessieInschrijving_Inschrijving"],
-            )
-            sessie_inschrijving_data.append(p)
 
-            if len(sessie_inschrijving_data) >= BATCH_SIZE:
-                futures.append(executor.submit(insert_sessie_inschrijving_data, sessie_inschrijving_data, session))
-                sessie_inschrijving_data = []
-                progress_bar.update(BATCH_SIZE)
+    for i, row in df.iterrows():
+        p = SessieInschrijving(
+            SessieInschrijving=row["crm_SessieInschrijving_SessieInschrijving"],
+            Sessie=row["crm_SessieInschrijving_Sessie"],
+            Inschrijving=row["crm_SessieInschrijving_Inschrijving"],
+        )
+        sessie_inschrijving_data.append(p)
 
-        # Insert any remaining data
-        if sessie_inschrijving_data:
-            futures.append(executor.submit(insert_sessie_inschrijving_data, sessie_inschrijving_data, session))
+        if len(sessie_inschrijving_data) >= BATCH_SIZE:
+            insert_sessie_inschrijving_data(sessie_inschrijving_data, session)
+            sessie_inschrijving_data = []
+            progress_bar.update(BATCH_SIZE)
 
-        concurrent.futures.wait(futures)
+    # Insert any remaining data
+    if sessie_inschrijving_data:
+        insert_sessie_inschrijving_data(sessie_inschrijving_data, session)
+        progress_bar.update(len(sessie_inschrijving_data))
+
+

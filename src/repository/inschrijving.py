@@ -11,7 +11,7 @@ import numpy as np
 from tqdm import tqdm
 import concurrent.futures
 
-NUM_THREADS = 2
+
 BATCH_SIZE = 10_000
 logger = logging.getLogger(__name__)
 
@@ -56,33 +56,26 @@ def seed_inschrijving():
     inschrijving_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
-        futures = []
-        for i, row in df.iterrows():
-            p = Inschrijving(
-                Inschrijving=row["crm_Inschrijving_Inschrijving"],
-                AanwezigAfwezig=row["crm_Inschrijving_Aanwezig_Afwezig"],
-                Bron=row["crm_Inschrijving_Bron"],
-                Contactfiche=row["crm_Inschrijving_Contactfiche"],
-                DatumInschrijving=row["crm_Inschrijving_Datum_inschrijving"],
-                FacturatieBedrag=row["crm_Inschrijving_Facturatie_Bedrag"],
-            )
+    for i, row in df.iterrows():
+        p = Inschrijving(
+            Inschrijving=row["crm_Inschrijving_Inschrijving"],
+            AanwezigAfwezig=row["crm_Inschrijving_Aanwezig_Afwezig"],
+            Bron=row["crm_Inschrijving_Bron"],
+            Contactfiche=row["crm_Inschrijving_Contactfiche"],
+            DatumInschrijving=row["crm_Inschrijving_Datum_inschrijving"],
+            FacturatieBedrag=row["crm_Inschrijving_Facturatie_Bedrag"],
+        )
 
-            inschrijving_data.append(p)
+        inschrijving_data.append(p)
 
-            if len(inschrijving_data) >= BATCH_SIZE:
-                futures.append(
-                    executor.submit(
-                        insert_inschrijving_data, inschrijving_data, session
-                    )
-                )
-                inschrijving_data = []
-                progress_bar.update(BATCH_SIZE)
+        if len(inschrijving_data) >= BATCH_SIZE:
+            insert_inschrijving_data(inschrijving_data, session)
+            inschrijving_data = []
+            progress_bar.update(BATCH_SIZE)
 
-        # Insert any remaining data
-        if inschrijving_data:
-            futures.append(
-                executor.submit(insert_inschrijving_data, inschrijving_data, session)
-            )
+    # Insert any remaining data
+    if inschrijving_data:
+        insert_inschrijving_data(inschrijving_data, session)
+        progress_bar.update(len(inschrijving_data))
 
-        concurrent.futures.wait(futures)
+

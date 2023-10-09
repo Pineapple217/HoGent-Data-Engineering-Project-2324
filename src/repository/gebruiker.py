@@ -9,10 +9,9 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
-import os
 
-NUM_THREADS = 2
+
+
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
@@ -39,22 +38,21 @@ def seed_gebruiker():
     gebruiker_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
-        futures = []
-        for _, row in df.iterrows():
-            # print(row)
-            p = Gebruiker(
-                Id=row["crm_Gebruikers_CRM_User_ID"],
-                BusinessUnitNaam=row["crm_Gebruikers_Business_Unit_Naam_"]
-            )
-            gebruiker_data.append(p)
-            
-            if len(gebruiker_data) >= BATCH_SIZE:
-                futures.append(executor.submit(insert_gebruiker_data, gebruiker_data, session))
-                gebruiker_data = []
-                progress_bar.update(BATCH_SIZE)
 
-        if gebruiker_data:
-            futures.append(executor.submit(insert_gebruiker_data, gebruiker_data, session))
+    for _, row in df.iterrows():
+        # print(row)
+        p = Gebruiker(
+            Id=row["crm_Gebruikers_CRM_User_ID"],
+            BusinessUnitNaam=row["crm_Gebruikers_Business_Unit_Naam_"]
+        )
+        gebruiker_data.append(p)
+        
+        if len(gebruiker_data) >= BATCH_SIZE:
+            insert_gebruiker_data(gebruiker_data, session)
+            gebruiker_data = []
+            progress_bar.update(BATCH_SIZE)
 
-        concurrent.futures.wait(futures)
+    if gebruiker_data:
+        insert_gebruiker_data(gebruiker_data, session)
+        progress_bar.update(len(gebruiker_data))
+

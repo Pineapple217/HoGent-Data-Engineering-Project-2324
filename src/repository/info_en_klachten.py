@@ -9,10 +9,9 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
-import os
 
-NUM_THREADS = 2
+
+
 BATCH_SIZE = 1_000
 
 logger = logging.getLogger(__name__)
@@ -48,26 +47,24 @@ def seed_info_en_klachten():
     info_en_klachten_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
-        futures = []
-        for _, row in df.iterrows():
-            # print(row)
-            p = InfoEnKlachten(                
-                Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
-                Account=row["crm_Info_en_Klachten_Account"],
-                Datum=row["crm_Info_en_Klachten_Datum"],
-                DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
-                Status=row["crm_Info_en_Klachten_Status"],
-                Eigenaar=row["crm_Info_en_Klachten_Eigenaar"]
-            )
-            info_en_klachten_data.append(p)
-            
-            if len(info_en_klachten_data) >= BATCH_SIZE:
-                futures.append(executor.submit(insert_info_en_klachten_data, info_en_klachten_data, session))
-                info_en_klachten_data = []
-                progress_bar.update(BATCH_SIZE)
 
-        if info_en_klachten_data:
-            futures.append(executor.submit(insert_info_en_klachten_data, info_en_klachten_data, session))
+    for _, row in df.iterrows():
+        p = InfoEnKlachten(                
+            Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
+            Account=row["crm_Info_en_Klachten_Account"],
+            Datum=row["crm_Info_en_Klachten_Datum"],
+            DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
+            Status=row["crm_Info_en_Klachten_Status"],
+            Eigenaar=row["crm_Info_en_Klachten_Eigenaar"]
+        )
+        info_en_klachten_data.append(p)
+        
+        if len(info_en_klachten_data) >= BATCH_SIZE:
+            insert_info_en_klachten_data(info_en_klachten_data, session)
+            info_en_klachten_data = []
+            progress_bar.update(BATCH_SIZE)
 
-        concurrent.futures.wait(futures)
+    if info_en_klachten_data:
+        insert_info_en_klachten_data(info_en_klachten_data, session)
+        progress_bar.update(len(info_en_klachten_data))
+

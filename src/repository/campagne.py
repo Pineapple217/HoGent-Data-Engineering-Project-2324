@@ -11,7 +11,7 @@ import numpy as np
 from tqdm import tqdm
 import concurrent.futures
 
-NUM_THREADS = 2
+
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
@@ -62,34 +62,32 @@ def seed_campagne():
     campagne_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
-        futures = []
-        for i, row in df.iterrows():
-            p = Campagne(
-                Campagne=row["crm_Campagne_Campagne"],
-                CampagneNr=row["crm_Campagne_Campagne_Nr"],
-                Einddatum=row["crm_Campagne_Einddatum"],
-                CampagneNaam=row["crm_Campagne_Naam"],
-                NaamInMail=row["crm_Campagne_Naam_in_email"],
-                RedenVanStatus=row["crm_Campagne_Reden_van_status"],
-                Startdatum=row["crm_Campagne_Startdatum"],
-                Status=row["crm_Campagne_Status"],
-                TypeCampagne=row["crm_Campagne_Type_campagne"],
-                URLVoka=row["crm_Campagne_URL_voka_be"],
-                SoortCampagne=row["crm_Campagne_Soort_Campagne"],
-            )
-            
+    for i, row in df.iterrows():
+        p = Campagne(
+            Campagne=row["crm_Campagne_Campagne"],
+            CampagneNr=row["crm_Campagne_Campagne_Nr"],
+            Einddatum=row["crm_Campagne_Einddatum"],
+            CampagneNaam=row["crm_Campagne_Naam"],
+            NaamInMail=row["crm_Campagne_Naam_in_email"],
+            RedenVanStatus=row["crm_Campagne_Reden_van_status"],
+            Startdatum=row["crm_Campagne_Startdatum"],
+            Status=row["crm_Campagne_Status"],
+            TypeCampagne=row["crm_Campagne_Type_campagne"],
+            URLVoka=row["crm_Campagne_URL_voka_be"],
+            SoortCampagne=row["crm_Campagne_Soort_Campagne"],
+        )
+        
 
-            campagne_data.append(p)
+        campagne_data.append(p)
 
-            if len(campagne_data) >= BATCH_SIZE:
-                futures.append(executor.submit(insert_campagne_data, campagne_data, session))
-                campagne_data = []
-                progress_bar.update(BATCH_SIZE)
+        if len(campagne_data) >= BATCH_SIZE:
+            insert_campagne_data(campagne_data, session)
+            campagne_data = []
+            progress_bar.update(BATCH_SIZE)
 
 
-        # Insert any remaining data
-        if campagne_data:
-            futures.append(executor.submit(insert_campagne_data, campagne_data, session))
+    # Insert any remaining data
+    if campagne_data:
+        insert_campagne_data(campagne_data, session)
+        progress_bar.update(len(campagne_data))
 
-        concurrent.futures.wait(futures)
