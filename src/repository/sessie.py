@@ -67,7 +67,7 @@ def seed_sessie():
                 Sessie=row["crm_Sessie_Sessie"],
                 Activiteitstype=row["crm_Sessie_Activiteitstype"],
                 Campagne=row["crm_Sessie_Campagne"],
-                EindDatum_Tijd=row["crm_Sessie_Eind_Datum_Tijd"],
+                EindDatumTijd=row["crm_Sessie_Eind_Datum_Tijd"],
                 Product=row["crm_Sessie_Product"],
                 SessieNr=row["crm_Sessie_Sessie_nr_"],
                 StartDatumTijd=row["crm_Sessie_Start_Datum_Tijd"],

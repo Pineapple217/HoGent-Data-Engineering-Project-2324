@@ -22,7 +22,7 @@ class Inschrijving(Base):
     Inschrijving: Mapped[str] = mapped_column(
         String(50), nullable=False, primary_key=True
     )
-    Aanwezig_Afwezig: Mapped[str] = mapped_column(String(50), nullable=True)
+    AanwezigAfwezig: Mapped[str] = mapped_column(String(50), nullable=True)
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
     Contactfiche: Mapped[str] = mapped_column(String(50), nullable=True)
     DatumInschrijving: Mapped[Date] = mapped_column(Date, nullable=True)
