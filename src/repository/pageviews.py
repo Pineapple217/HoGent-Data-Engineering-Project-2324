@@ -11,7 +11,6 @@ import numpy as np
 from tqdm import tqdm
 
 
-
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
@@ -113,5 +112,3 @@ def seed_pageviews():
     if pageviews_data:
         insert_pageviews_data(pageviews_data, session)
         progress_bar.update(len(pageviews_data))
-
-

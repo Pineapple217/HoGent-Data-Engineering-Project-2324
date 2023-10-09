@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy import String, DateTime, Numeric, Integer, Date
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
@@ -22,15 +23,16 @@ class Campagne(Base):
     __table_args__ = {"extend_existing": True}
     Campagne: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
     CampagneNr: Mapped[str] = mapped_column(String(50), nullable=False)
-    Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
-    CampagneNaam: Mapped[Date] = mapped_column(Date, nullable=True)
-    NaamInMail: Mapped[str] = mapped_column(String(50), nullable=True)
+    Einddatum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
+    CampagneNaam: Mapped[str] = mapped_column(String(150), nullable=True)
+    NaamInMail: Mapped[str] = mapped_column(String(150), nullable=True)
     RedenVanStatus: Mapped[str] = mapped_column(String(50), nullable=True)
-    Startdatum: Mapped[Date] = mapped_column(Date, nullable=True)
+    Startdatum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     Status: Mapped[str] = mapped_column(String(50), nullable=True)
     TypeCampagne: Mapped[str] = mapped_column(String(50), nullable=True)
     URLVoka: Mapped[str] = mapped_column(String(100), nullable=True)
     SoortCampagne: Mapped[str] = mapped_column(String(50), nullable=True)
+
 
 def insert_campagne_data(campagne_data, session):
     session.bulk_save_objects(campagne_data)
@@ -42,7 +44,7 @@ def seed_campagne():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + '/Campagne.csv'
+    csv = DATA_PATH + "/Campagne.csv"
     df = pd.read_csv(
         csv,
         delimiter=",",
@@ -76,7 +78,6 @@ def seed_campagne():
             URLVoka=row["crm_Campagne_URL_voka_be"],
             SoortCampagne=row["crm_Campagne_Soort_Campagne"],
         )
-        
 
         campagne_data.append(p)
 
@@ -85,9 +86,7 @@ def seed_campagne():
             campagne_data = []
             progress_bar.update(BATCH_SIZE)
 
-
     # Insert any remaining data
     if campagne_data:
         insert_campagne_data(campagne_data, session)
         progress_bar.update(len(campagne_data))
-

@@ -3,7 +3,8 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date
+from sqlalchemy import String, DateTime, Numeric, Integer, Date, Float
+from sqlalchemy.dialects.mssql import DATETIME2
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -25,13 +26,20 @@ class Inschrijving(Base):
     AanwezigAfwezig: Mapped[str] = mapped_column(String(50), nullable=True)
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
     Contactfiche: Mapped[str] = mapped_column(String(50), nullable=True)
-    DatumInschrijving: Mapped[Date] = mapped_column(Date, nullable=True)
-    FacturatieBedrag: Mapped[int] = mapped_column(Integer, nullable=True)
+    DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
+    FacturatieBedrag: Mapped[Float] = mapped_column(Float, nullable=True)
 
 
 def insert_inschrijving_data(inschrijving_data, session):
     session.bulk_save_objects(inschrijving_data)
     session.commit()
+
+
+def to_float(x):
+    try:
+        return float(x)
+    except:
+        return float(x.replace(",", ".").replace("'", ""))
 
 
 def seed_inschrijving():
@@ -63,7 +71,7 @@ def seed_inschrijving():
             Bron=row["crm_Inschrijving_Bron"],
             Contactfiche=row["crm_Inschrijving_Contactfiche"],
             DatumInschrijving=row["crm_Inschrijving_Datum_inschrijving"],
-            FacturatieBedrag=row["crm_Inschrijving_Facturatie_Bedrag"],
+            FacturatieBedrag=to_float(row["crm_Inschrijving_Facturatie_Bedrag"]),
         )
 
         inschrijving_data.append(p)
@@ -77,5 +85,3 @@ def seed_inschrijving():
     if inschrijving_data:
         insert_inschrijving_data(inschrijving_data, session)
         progress_bar.update(len(inschrijving_data))
-
-

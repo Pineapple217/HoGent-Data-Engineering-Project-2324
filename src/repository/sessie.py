@@ -3,7 +3,8 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date
+from sqlalchemy import String, Numeric, Integer, Date
+from sqlalchemy.dialects.mssql import DATETIME2
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -21,12 +22,12 @@ class Sessie(Base):
     __tablename__ = "sessie"  # snakecase
     __table_args__ = {"extend_existing": True}
     Sessie: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
-    Activiteitstype: Mapped[str] = mapped_column(String(50), nullable=False)
+    Activiteitstype: Mapped[str] = mapped_column(String(50), nullable=True)
     Campagne: Mapped[str] = mapped_column(String(50), nullable=True)
-    EindDatumTijd: Mapped[Date] = mapped_column(Date, nullable=True)
+    EindDatumTijd: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     Product: Mapped[str] = mapped_column(String(50), nullable=True)
     SessieNr: Mapped[str] = mapped_column(String(50), nullable=True)
-    StartDatumTijd: Mapped[Date] = mapped_column(Date, nullable=True)
+    StartDatumTijd: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     ThemaNaam: Mapped[str] = mapped_column(String(50), nullable=True)
 
 
@@ -85,5 +86,3 @@ def seed_sessie():
         insert_sessie_data(sessie_data, session)
         progress_bar.update(len(sessie_data))
         i
-
-
