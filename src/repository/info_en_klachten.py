@@ -47,18 +47,14 @@ def seed_info_en_klachten():
     logger.info("Reading CSV...")
     # df = pd.read_csv('../Data/csv/Info en klachten.csv', delimiter=",", encoding='latin-1', keep_default_na=True, na_values=[''])
     csv = DATA_PATH + "/Info en klachten.csv"
-    df = pd.read_csv(
-        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""]
-    )
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
     df = df.replace({np.nan: None})
     df = df.replace({"": None})
 
-    df["crm_Info_en_Klachten_Datum"] = pd.to_datetime(
-        df["crm_Info_en_Klachten_Datum"], format="%d-%m-%Y %H:%M:%S"
-    )
-    df["crm_Info_en_Klachten_Datum_afsluiting"] = to_datetime(
-        df["crm_Info_en_Klachten_Datum_afsluiting"], format="%d-%m-%Y %H:%M:%S"
-    )
+    df = df.drop_duplicates(subset=['crm_Info_en_Klachten_Aanvraag']) # duplicaten van primary keys in de csv
+    
+    df["crm_Info_en_Klachten_Datum"] = pd.to_datetime(df["crm_Info_en_Klachten_Datum"], format="%d-%m-%Y %H:%M:%S")
+    df["crm_Info_en_Klachten_Datum_afsluiting"] = to_datetime(df["crm_Info_en_Klachten_Datum_afsluiting"], format="%d-%m-%Y %H:%M:%S")
 
     info_en_klachten_data = []
     logger.info("Seeding inserting rows")
