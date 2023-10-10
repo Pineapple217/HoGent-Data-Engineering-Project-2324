@@ -24,6 +24,9 @@ def get_engine():
 # Import moeten hier door depenesie en anders worden de Classes ook niet ingeladen
 # Voeg and adere seed imports hier onder toe
 from repository.pageviews import seed_pageviews
+from repository.mailing import seed_mailing
+from repository.send_email_clicks import seed_send_email_clicks
+from repository.visits import seed_visits
 from repository.sessie_inschrijving import seed_sessie_inschrijving
 from repository.sessie import seed_sessie
 from repository.inschrijving import seed_inschrijving
@@ -45,6 +48,9 @@ def db_init():
 def db_seed():
     logger.info("Starting seeding...")
     seed_pageviews()
+    seed_mailing()
+    seed_send_email_clicks()
+    seed_visits()
     seed_sessie_inschrijving()
     seed_sessie()
     seed_inschrijving()
