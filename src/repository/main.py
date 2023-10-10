@@ -33,6 +33,7 @@ from repository.inschrijving import seed_inschrijving
 from repository.gebruiker import seed_gebruiker
 from repository.info_en_klachten import seed_info_en_klachten
 from repository.campagne import seed_campagne
+from repository.persoon import seed_persoon
 
 
 Base.metadata.reflect(engine)
@@ -57,3 +58,4 @@ def db_seed():
     seed_gebruiker()
     seed_info_en_klachten()
     seed_campagne()
+    seed_persoon()
