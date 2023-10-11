@@ -35,6 +35,7 @@ from repository.gebruiker import seed_gebruiker
 from repository.info_en_klachten import seed_info_en_klachten
 from repository.campagne import seed_campagne
 from repository.persoon import seed_persoon
+from repository.AfspraakContact import seed_AfspraakContact
 
 
 Base.metadata.reflect(engine)
@@ -49,15 +50,16 @@ def db_init():
 # Voeg hier je seedfunctie toe
 def db_seed():
     logger.info("Starting seeding...")
-    seed_pageviews()
-    seed_mailing()
-    seed_send_email_clicks()
-    seed_web_content()
-    seed_visits()
-    seed_sessie_inschrijving()
-    seed_sessie()
-    seed_inschrijving()
-    seed_gebruiker()
-    seed_info_en_klachten()
-    seed_campagne()
-    seed_persoon()
+    # seed_pageviews()
+    # seed_mailing()
+    # seed_send_email_clicks()
+    # seed_web_content()
+    # seed_visits()
+    # seed_sessie_inschrijving()
+    # seed_sessie()
+    # seed_inschrijving()
+    # seed_gebruiker()
+    # seed_info_en_klachten()
+    # seed_campagne()
+    # seed_persoon()
+    seed_AfspraakContact()
