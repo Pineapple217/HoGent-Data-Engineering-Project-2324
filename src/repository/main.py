@@ -26,6 +26,7 @@ def get_engine():
 from repository.pageviews import seed_pageviews
 from repository.mailing import seed_mailing
 from repository.send_email_clicks import seed_send_email_clicks
+from repository.web_content import seed_web_content
 from repository.visits import seed_visits
 from repository.sessie_inschrijving import seed_sessie_inschrijving
 from repository.sessie import seed_sessie
@@ -51,6 +52,7 @@ def db_seed():
     seed_pageviews()
     seed_mailing()
     seed_send_email_clicks()
+    seed_web_content()
     seed_visits()
     seed_sessie_inschrijving()
     seed_sessie()
