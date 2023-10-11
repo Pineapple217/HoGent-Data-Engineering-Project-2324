@@ -36,6 +36,7 @@ from repository.info_en_klachten import seed_info_en_klachten
 from repository.campagne import seed_campagne
 from repository.persoon import seed_persoon
 from repository.afspraak_contact import seed_AfspraakContact
+from repository.afspraak_account import seed_afspraak_account
 
 
 Base.metadata.reflect(engine)
@@ -63,3 +64,4 @@ def db_seed():
     seed_campagne()
     seed_persoon()
     seed_AfspraakContact()
+    seed_afspraak_account()
