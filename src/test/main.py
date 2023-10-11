@@ -30,7 +30,10 @@ table_names = [
     "Gebruiker",
     "InfoEnKlachten",
     "Campagne",
-    "Persoon"
+    "Persoon",
+    "ActiviteitContact",
+    "AfspraakContact",
+    "AfspraakAccount"
 ]
 
 table_names = Base.metadata.tables.keys()
