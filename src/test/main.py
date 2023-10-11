@@ -20,12 +20,17 @@ Base = declarative_base()
 Base.metadata.reflect(engine)
 table_names = [
     "Pageviews",
+    "Mailing",
+    "SendEmailClicks",
+    "WebContent",
+    "Visits",
     "SessieInschrijving",
     "Sessie",
     "Inschrijving",
     "Gebruiker",
     "InfoEnKlachten",
     "Campagne",
+    "Persoon"
 ]
 
 table_names = Base.metadata.tables.keys()
