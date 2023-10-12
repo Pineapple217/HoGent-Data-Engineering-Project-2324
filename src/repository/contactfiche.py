@@ -13,6 +13,7 @@ from tqdm import tqdm
 
 
 BATCH_SIZE = 10_000
+
 logger = logging.getLogger(__name__)
 
 
