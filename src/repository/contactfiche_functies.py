@@ -15,13 +15,14 @@ BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
+# CSV MOET OPGEKUIST WORDEN, LEGE RIJEN MET , WEG
 
 class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    Contactpersoon: Mapped[str] = mapped_column(String(50), nullable=True)
-    Functie: Mapped[str] = mapped_column(String(50), nullable=True)
+    Contactpersoon: Mapped[str] = mapped_column(String(50))
+    Functie: Mapped[str] = mapped_column(String(50))
 
 
 def insert_contactfiche_functie_data(contactfiche_functie_data, session):
