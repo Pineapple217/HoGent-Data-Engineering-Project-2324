@@ -40,8 +40,7 @@ def seed_contactfiche_functie():
         delimiter=",",
         encoding="utf-8",
         keep_default_na=True,
-        na_values=[""],
-        skiprows=[1, 2506]
+        na_values=[""]
     )
     df = df.dropna(how='all', axis=0)
     df = df.replace({np.nan: None})
