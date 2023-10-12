@@ -36,12 +36,12 @@ from repository.info_en_klachten import seed_info_en_klachten
 from repository.account import seed_account
 from repository.campagne import seed_campagne
 from repository.persoon import seed_persoon
-from repository.afspraak_contact import seed_AfspraakContact
+from repository.afspraak_contact import seed_afspraak_contact
 from repository.afspraak_account import seed_afspraak_account
 from repository.activiteit_contact import seed_activiteit_contact
 from repository.contactfiche_functies import seed_contactfiche_functie
 from repository.contactfiche import seed_contactfiche
-from repository.accountActiviteitscode import seed_accountActiviteitscode
+from repository.account_activiteitscode import seed_account_activiteitscode
 from repository.functie import seed_functie
 from repository.activiteitscode import seed_activiteitscode
 
@@ -71,10 +71,10 @@ def db_seed():
     seed_account()
     seed_campagne()
     seed_persoon()
-    seed_AfspraakContact()
+    seed_afspraak_contact()
     seed_afspraak_account()
     seed_activiteit_contact()
-    seed_accountActiviteitscode()
+    seed_account_activiteitscode()
     seed_activiteitscode()
     seed_contactfiche_functie()
     seed_contactfiche()

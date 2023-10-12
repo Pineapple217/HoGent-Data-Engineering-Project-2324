@@ -30,7 +30,7 @@ def insert_accountActiviteitscode_data(accountActiviteitscode_data, session):
     session.commit()
 
 
-def seed_accountActiviteitscode():
+def seed_account_activiteitscode():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()

@@ -32,7 +32,7 @@ def insert_AfspraakContact_data(AfspraakContact_data, session):
     session.commit()
 
 
-def seed_AfspraakContact():
+def seed_afspraak_contact():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
