@@ -38,6 +38,11 @@ from repository.persoon import seed_persoon
 from repository.afspraak_contact import seed_AfspraakContact
 from repository.afspraak_account import seed_afspraak_account
 from repository.activiteit_contact import seed_activiteit_contact
+from repository.contactficheFuncties import seed_contactFunctie
+from repository.contactfiche import seed_contactfiche
+from repository.accountActiviteitscode import seed_accountActiviteitscode
+from repository.functie import seed_functie
+from repository.activiteitscode import seed_activiteitscode
 
 
 Base.metadata.reflect(engine)
@@ -52,6 +57,7 @@ def db_init():
 # Voeg hier je seedfunctie toe
 def db_seed():
     logger.info("Starting seeding...")
+    """
     seed_pageviews()
     seed_mailing()
     seed_send_email_clicks()
@@ -67,3 +73,9 @@ def db_seed():
     seed_AfspraakContact()
     seed_afspraak_account()
     seed_activiteit_contact()
+    """
+    seed_accountActiviteitscode()
+    seed_activiteitscode()
+    seed_contactFunctie()
+    seed_contactfiche()
+    seed_functie()
