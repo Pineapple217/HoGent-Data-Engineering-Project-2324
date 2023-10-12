@@ -62,7 +62,7 @@ def seed_persoon():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + '/persoon.csv'
+    csv = DATA_PATH + '/Persoon.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
     df = df.replace({np.nan: None})
 

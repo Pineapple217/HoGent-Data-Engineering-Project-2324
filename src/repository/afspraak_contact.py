@@ -37,7 +37,7 @@ def seed_afspraak_contact():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + '/Afspraak_betreft_contact_cleaned.csv'
+    csv = DATA_PATH + '/Afspraak betreft contact_cleaned.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
     df = df.drop_duplicates()
     df = df.replace({np.nan: None})

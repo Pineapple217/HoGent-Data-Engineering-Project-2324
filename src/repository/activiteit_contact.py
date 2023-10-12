@@ -33,7 +33,7 @@ def seed_activiteit_contact():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + '/Activiteit_vereist_contact.csv'
+    csv = DATA_PATH + '/Activiteit vereist contact.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
     df = df.drop_duplicates()
     df = df.replace({np.nan: None})
