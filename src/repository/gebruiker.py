@@ -3,14 +3,12 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Integer, Date
+from sqlalchemy import String
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-
-
 
 BATCH_SIZE = 10_000
 
@@ -19,7 +17,7 @@ logger = logging.getLogger(__name__)
 class Gebruiker(Base):
     __tablename__ = "Gebruiker"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), nullable=False, primary_key=True)
+    Id: Mapped[str] = mapped_column(String(50), primary_key=True, nullable=False)
     BusinessUnitNaam: Mapped[str] = mapped_column(String(50), nullable=True)
 
 def insert_gebruiker_data(gebruiker_data, session):

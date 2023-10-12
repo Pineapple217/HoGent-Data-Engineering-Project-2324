@@ -3,7 +3,7 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Integer, Date
+from sqlalchemy import String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
@@ -11,11 +11,9 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-
-BATCH_SIZE = 1_000
+BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
-
 
 class InfoEnKlachten(Base):
     __tablename__ = "InfoEnKlachten"
@@ -24,8 +22,8 @@ class InfoEnKlachten(Base):
     Account: Mapped[str] = mapped_column(String(50), nullable=True)
     Datum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
-    Status: Mapped[str] = mapped_column(String(15), nullable=False)
-    Eigenaar: Mapped[str] = mapped_column(String(50), nullable=False)
+    Status: Mapped[str] = mapped_column(String(15), nullable=True)
+    Eigenaar: Mapped[str] = mapped_column(String(50), nullable=True)
 
 
 def insert_info_en_klachten_data(info_en_klachten_data, session):
