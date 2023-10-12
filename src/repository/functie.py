@@ -3,14 +3,12 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date, Float
-from sqlalchemy.dialects.mssql import DATETIME2
+from sqlalchemy import String
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
 
 
 BATCH_SIZE = 10
@@ -18,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class Functie(Base):
-    __tablename__ = "Functie"  # snakecase
+    __tablename__ = "Functie"
     __table_args__ = {"extend_existing": True}
-    Functie: Mapped[str] = mapped_column(String(50), nullable=False, primary_key=True)
-    Naam: Mapped[str] = mapped_column(String(75), nullable=True)
+    Functie: Mapped[str] = mapped_column(String(50), primary_key=True)
+    Naam: Mapped[str] = mapped_column(String(75))
 
 
 def insert_functie_data(functie_data, session):
@@ -43,11 +41,10 @@ def seed_functie():
         na_values=[""],
     )
     df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
-    # NaN mag niet in een varchar
     functie_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+    
     for i, row in df.iterrows():
         p = Functie(
             Functie=row["crm_Functie_Functie"],
@@ -61,7 +58,6 @@ def seed_functie():
             functie_data = []
             progress_bar.update(BATCH_SIZE)
 
-    # Insert any remaining data
     if functie_data:
         insert_functie_data(functie_data, session)
         progress_bar.update(len(functie_data))

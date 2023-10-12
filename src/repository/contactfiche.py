@@ -3,14 +3,13 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date, Float
-from sqlalchemy.dialects.mssql import DATETIME2, BIT
+from sqlalchemy import String, Integer
+from sqlalchemy.dialects.mssql import BIT
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
 
 
 BATCH_SIZE = 10_000
@@ -18,17 +17,15 @@ logger = logging.getLogger(__name__)
 
 
 class Contactfiche(Base):
-    __tablename__ = "Contactfiche"  # snakecase
+    __tablename__ = "Contactfiche" 
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(
-        Integer, nullable=False, primary_key=True, autoincrement=True
-    )  # Id aanmaken want primary key is niet te vinden
-    ContactPersoon: Mapped[str] = mapped_column(String(50), nullable=True)
-    Account: Mapped[str] = mapped_column(String(50), nullable=True)
+    Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
+    ContactPersoon: Mapped[str] = mapped_column(String(50))
+    Account: Mapped[str] = mapped_column(String(50))
     FunctieTitel: Mapped[str] = mapped_column(String(255), nullable=True)
-    PersoonId: Mapped[str] = mapped_column(String(50), nullable=True)
-    Status: Mapped[str] = mapped_column(String(50), nullable=True)
-    VokaMedewerker: Mapped[BIT] = mapped_column(BIT, nullable=True)
+    PersoonId: Mapped[str] = mapped_column(String(50))
+    Status: Mapped[str] = mapped_column(String(50))
+    VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
 
 
 def insert_contactfiche_data(contactfiche_data, session):
@@ -50,11 +47,10 @@ def seed_contactfiche():
         na_values=[""],
     )
     df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
-    # NaN mag niet in een varchar
     contactfiche_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+    
     for i, row in df.iterrows():
         p = Contactfiche(
             ContactPersoon=row["crm_Contact_Contactpersoon"],
@@ -72,7 +68,6 @@ def seed_contactfiche():
             contactfiche_data = []
             progress_bar.update(BATCH_SIZE)
 
-    # Insert any remaining data
     if contactfiche_data:
         insert_contactfiche_data(contactfiche_data, session)
         progress_bar.update(len(contactfiche_data))
