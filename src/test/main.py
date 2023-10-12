@@ -29,6 +29,7 @@ table_names = [
     "Inschrijving",
     "Gebruiker",
     "InfoEnKlachten",
+    "Account",
     "Campagne",
     "Persoon",
     "ActiviteitContact",

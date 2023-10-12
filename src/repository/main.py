@@ -33,6 +33,7 @@ from repository.sessie import seed_sessie
 from repository.inschrijving import seed_inschrijving
 from repository.gebruiker import seed_gebruiker
 from repository.info_en_klachten import seed_info_en_klachten
+from repository.account import seed_account
 from repository.campagne import seed_campagne
 from repository.persoon import seed_persoon
 from repository.afspraak_contact import seed_AfspraakContact
@@ -57,7 +58,6 @@ def db_init():
 # Voeg hier je seedfunctie toe
 def db_seed():
     logger.info("Starting seeding...")
-    """
     seed_pageviews()
     seed_mailing()
     seed_send_email_clicks()
@@ -68,12 +68,12 @@ def db_seed():
     seed_inschrijving()
     seed_gebruiker()
     seed_info_en_klachten()
+    seed_account()
     seed_campagne()
     seed_persoon()
     seed_AfspraakContact()
     seed_afspraak_account()
     seed_activiteit_contact()
-    """
     seed_accountActiviteitscode()
     seed_activiteitscode()
     seed_contactFunctie()
