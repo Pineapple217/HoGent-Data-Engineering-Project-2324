@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 class Gebruiker(Base):
     __tablename__ = "Gebruiker"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), primary_key=True, nullable=False)
-    BusinessUnitNaam: Mapped[str] = mapped_column(String(50), nullable=True)
+    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    BusinessUnitNaam: Mapped[str] = mapped_column(String(50))
 
 def insert_gebruiker_data(gebruiker_data, session):
     session.bulk_save_objects(gebruiker_data)
@@ -29,7 +29,6 @@ def seed_gebruiker():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    # df = pd.read_csv('../Data/csv/Gebruikers.csv', delimiter=",", encoding='latin-1', keep_default_na=True, na_values=[''])
     csv = DATA_PATH + '/Gebruikers.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=['']) # utf-8-sig is nodig om rare tekens te vermijden die er wel zijn bij utf-8
     df = df.replace({np.nan: None})
@@ -53,4 +52,3 @@ def seed_gebruiker():
     if gebruiker_data:
         insert_gebruiker_data(gebruiker_data, session)
         progress_bar.update(len(gebruiker_data))
-

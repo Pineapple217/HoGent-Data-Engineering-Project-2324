@@ -17,21 +17,21 @@ logger = logging.getLogger(__name__)
 class Account(Base):
     __tablename__ = "Account"
     __table_args__ = {"extend_existing": True}
-    Account: Mapped[str] = mapped_column(String(50), nullable=False, primary_key=True)
+    Account: Mapped[str] = mapped_column(String(50), primary_key=True)
     AdresGeografischeRegio: Mapped[str] = mapped_column(String(50), nullable=True)
     AdresGeografischeSubregio: Mapped[str] = mapped_column(String(50), nullable=True)
     AdresPlaats: Mapped[str] = mapped_column(String(50), nullable=True)
-    AdresPostcode: Mapped[str] = mapped_column(String(50), nullable=True) # Sommige buitenlandse postcodes hebben letters
+    AdresPostcode: Mapped[str] = mapped_column(String(50), nullable=True) # sommige buitenlandse postcodes bevatten letters
     AdresProvincie: Mapped[str] = mapped_column(String(50), nullable=True)
-    IndustriezoneNaam: Mapped[str] = mapped_column(String(1000), nullable=True) # Erg lange namen zoals 'OV - (9051) The Loop - Poortakkerstraat - Flanders Expo'
-    IsVokaEntiteit: Mapped[str] = mapped_column(String(50), nullable=True)
+    IndustriezoneNaam: Mapped[str] = mapped_column(String(500), nullable=True) # erg lange namen zoals 'OV - (9051) The Loop - Poortakkerstraat - Flanders Expo'
+    IsVokaEntiteit: Mapped[str] = mapped_column(String(50))
     Ondernemingsaard: Mapped[str] = mapped_column(String(50), nullable=True)
     Ondernemingstype: Mapped[str] = mapped_column(String(50), nullable=True)
-    Oprichtingsdatum: Mapped[Date] = mapped_column(Date, nullable=True)
+    Oprichtingsdatum: Mapped[Date] = mapped_column(Date)
     PrimaireActiviteit: Mapped[str] = mapped_column(String(50), nullable=True)
-    RedenVanStatus: Mapped[str] = mapped_column(String(50), nullable=True)
-    Status: Mapped[str] = mapped_column(String(50), nullable=True)
-    VokaNr: Mapped[int] = mapped_column(Integer, nullable=True)
+    RedenVanStatus: Mapped[str] = mapped_column(String(50))
+    Status: Mapped[str] = mapped_column(String(50))
+    VokaNr: Mapped[int] = mapped_column(Integer)
     HoofdNaCeCode: Mapped[str] = mapped_column(String(50), nullable=True)
     AdresLand: Mapped[str] = mapped_column(String(50), nullable=True)
 
@@ -39,13 +39,13 @@ class Account(Base):
 def insert_account_data(account_data, session):
     session.bulk_save_objects(account_data)
     session.commit()
+    
 
 def seed_account():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    # df = pd.read_csv('../Data/csv/Info en klachten.csv', delimiter=",", encoding='latin-1', keep_default_na=True, na_values=[''])
     csv = DATA_PATH + "/Account.csv"
     df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
     df = df.replace({np.nan: None})

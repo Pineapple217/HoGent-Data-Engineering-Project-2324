@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 class InfoEnKlachten(Base):
     __tablename__ = "InfoEnKlachten"
     __table_args__ = {"extend_existing": True}
-    Aanvraag: Mapped[str] = mapped_column(String(50), nullable=False, primary_key=True)
-    Account: Mapped[str] = mapped_column(String(50), nullable=True)
-    Datum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
-    DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
-    Status: Mapped[str] = mapped_column(String(15), nullable=True)
-    Eigenaar: Mapped[str] = mapped_column(String(50), nullable=True)
+    Aanvraag: Mapped[str] = mapped_column(String(50), primary_key=True)
+    Account: Mapped[str] = mapped_column(String(50))
+    Datum: Mapped[DATETIME2] = mapped_column(DATETIME2)
+    DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2)
+    Status: Mapped[str] = mapped_column(String(15))
+    Eigenaar: Mapped[str] = mapped_column(String(50))
 
 
 def insert_info_en_klachten_data(info_en_klachten_data, session):
@@ -43,7 +43,6 @@ def seed_info_en_klachten():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    # df = pd.read_csv('../Data/csv/Info en klachten.csv', delimiter=",", encoding='latin-1', keep_default_na=True, na_values=[''])
     csv = DATA_PATH + "/Info en klachten.csv"
     df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
     df = df.replace({np.nan: None})
