@@ -19,13 +19,10 @@ logger = logging.getLogger(__name__)
 class WebContent(Base):
     __tablename__ = "WebContent"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(
-        primary_key=True
-    )  # Gebruik deze key voor iedere table
+    WebContent                  :Mapped[str] = mapped_column(String(50), primary_key=True)
     Campaign                    :Mapped[str] = mapped_column(String(50), nullable=True)
     CampaignName                :Mapped[str] = mapped_column(String(200), nullable=True)
     Name                        :Mapped[str] = mapped_column(String(200))
-    WebContent                  :Mapped[str] = mapped_column(String(50)) #PK?
     GemaaktDoorNaam             :Mapped[str] = mapped_column(String(50))
     CreatedOn                   :Mapped[DateTime] = mapped_column(DateTime)
     GewijzigdDoorNaam           :Mapped[str] = mapped_column(String(50))

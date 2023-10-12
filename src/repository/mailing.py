@@ -19,13 +19,10 @@ logger = logging.getLogger(__name__)
 class Mailing(Base):
     __tablename__ = "Mailing"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(
-        primary_key=True
-    )  # Gebruik deze key voor iedere table
-    Mailing     :Mapped[str]  = mapped_column(String(50), nullable=True)
+    Mailing     :Mapped[str]  = mapped_column(String(50), primary_key=True)
     Name        :Mapped[str]  = mapped_column(String(200), nullable=True)
-    SentOn      :Mapped[Date] = mapped_column(Date, nullable=True)
-    Onderwerp   :Mapped[str]  = mapped_column(String(200), nullable=True)
+    SentOn      :Mapped[Date] = mapped_column(Date)
+    Onderwerp   :Mapped[str]  = mapped_column(String(200))
 
 
 def insert_mailings_data(pageviews_data, session):

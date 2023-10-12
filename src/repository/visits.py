@@ -19,27 +19,24 @@ logger = logging.getLogger(__name__)
 class Visit(Base):
     __tablename__ = "Visits"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(
-        primary_key=True
-    )  # Gebruik deze key voor iedere table
-    Visit                   :Mapped[str] = mapped_column(String(50), nullable=True) #PK
-    AdobeReader             :Mapped[bool] = mapped_column(Boolean, nullable=True)
-    Bounce                  :Mapped[bool] = mapped_column(Boolean, nullable=True)
+    Visit                   :Mapped[str] = mapped_column(String(50), primary_key=True)
+    AdobeReader             :Mapped[bool] = mapped_column(Boolean)
+    Bounce                  :Mapped[bool] = mapped_column(Boolean)
     Browser                 :Mapped[str] = mapped_column(String(50), nullable=True)
     CampagneCode            :Mapped[int] = mapped_column(Integer, nullable=True)
     Campaign                :Mapped[str] = mapped_column(String(50), nullable=True)
     IPStad                  :Mapped[str] = mapped_column(String(50), nullable=True)
     IPCompany               :Mapped[str] = mapped_column(String(200), nullable=True)
-    Contact                 :Mapped[str] = mapped_column(String(50), nullable=True)
-    ContactNaam             :Mapped[str] = mapped_column(String(200), nullable=True)
-    ContainsSocialProfile   :Mapped[bool] = mapped_column(Boolean, nullable=True)
+    Contact                 :Mapped[str] = mapped_column(String(50))
+    ContactNaam             :Mapped[str] = mapped_column(String(200))
+    ContainsSocialProfile   :Mapped[bool] = mapped_column(Boolean)
     IPLand                  :Mapped[str] = mapped_column(String(50), nullable=True)
     Duration                :Mapped[float] = mapped_column(Float, nullable=True)
     EmailSend               :Mapped[str] = mapped_column(String(50), nullable=True)
     EndedOn                 :Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     EntryPage               :Mapped[str] = mapped_column(String(1000), nullable=True)
     ExitPage                :Mapped[str] = mapped_column(String(1000), nullable=True)
-    FirstVisit              :Mapped[bool] = mapped_column(Boolean, nullable=True)
+    FirstVisit              :Mapped[bool] = mapped_column(Boolean)
     IPAddress               :Mapped[str] = mapped_column(String(50), nullable=True)
     IPOrganization          :Mapped[str] = mapped_column(String(50), nullable=True)
     Keywords                :Mapped[str] = mapped_column(String(200), nullable=True)
@@ -50,13 +47,13 @@ class Visit(Base):
     Referrer                :Mapped[str] = mapped_column(String(1000), nullable=True)
     ReferringHost           :Mapped[str] = mapped_column(String(50), nullable=True)
     Score                   :Mapped[float] = mapped_column(Float, nullable=True)
-    ReferrerType            :Mapped[str] = mapped_column(String(50), nullable=True)
+    ReferrerType            :Mapped[str] = mapped_column(String(50))
     StartedOn               :Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     IPStatus                :Mapped[str] = mapped_column(String(50), nullable=True)
     Time                    :Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     TotalPages              :Mapped[int] = mapped_column(Integer, nullable=True)
-    AangemaaktOp            :Mapped[DateTime] = mapped_column(DateTime, nullable=True)
-    GewijzigdOp             :Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    AangemaaktOp            :Mapped[DateTime] = mapped_column(DateTime)
+    GewijzigdOp             :Mapped[DateTime] = mapped_column(DateTime)
 
 
 def insert_visits_data(pageviews_data, session):

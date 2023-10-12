@@ -19,30 +19,27 @@ logger = logging.getLogger(__name__)
 class Pageview(Base):
     __tablename__ = "Pageviews"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(
-        primary_key=True
-    )  # Gebruik deze key voor iedere table
+    PageView: Mapped[str] = mapped_column(String(200), primary_key=True)
     AnonymousVisitor: Mapped[str] = mapped_column(String(50), nullable=True)
     Browser: Mapped[str] = mapped_column(String(50), nullable=True)
     Campaign: Mapped[str] = mapped_column(String(200), nullable=True)
-    Contact: Mapped[str] = mapped_column(String(200), nullable=True)
+    Contact: Mapped[str] = mapped_column(String(200))
     Duration: Mapped[int] = mapped_column(Integer, nullable=True)
-    OperatingSystem: Mapped[str] = mapped_column(String(50), nullable=True)
-    PageView: Mapped[str] = mapped_column(String(200), nullable=True)
-    ReferrerType: Mapped[str] = mapped_column(String(50), nullable=True)
-    Time: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    OperatingSystem: Mapped[str] = mapped_column(String(50))
+    ReferrerType: Mapped[str] = mapped_column(String(50))
+    Time: Mapped[DateTime] = mapped_column(DateTime)
     PageTitle: Mapped[str] = mapped_column(String(1000), nullable=True)
-    Type: Mapped[str] = mapped_column(String(200), nullable=True)
-    Url: Mapped[str] = mapped_column(String(1000), nullable=True)
-    ViewedOn: Mapped[Date] = mapped_column(Date, nullable=True)
+    Type: Mapped[str] = mapped_column(String(200))
+    Url: Mapped[str] = mapped_column(String(1000))
+    ViewedOn: Mapped[Date] = mapped_column(Date)
     Visit: Mapped[str] = mapped_column(String(200), nullable=True)
-    VisitorKey: Mapped[str] = mapped_column(String(200), nullable=True)
+    VisitorKey: Mapped[str] = mapped_column(String(200))
     WebContent: Mapped[str] = mapped_column(String(200), nullable=True)
-    AangemaaktOp: Mapped[Date] = mapped_column(Date, nullable=True)
-    GewijzigdDoor: Mapped[str] = mapped_column(String(200), nullable=True)
-    GewijzigdOp: Mapped[Date] = mapped_column(Date, nullable=True)
-    Status: Mapped[str] = mapped_column(String(50), nullable=True)
-    RedenVanStatus: Mapped[str] = mapped_column(String(50), nullable=True)
+    AangemaaktOp: Mapped[Date] = mapped_column(Date)
+    GewijzigdDoor: Mapped[str] = mapped_column(String(200))
+    GewijzigdOp: Mapped[Date] = mapped_column(Date)
+    Status: Mapped[str] = mapped_column(String(50))
+    RedenVanStatus: Mapped[str] = mapped_column(String(50))
 
 
 def insert_pageviews_data(pageviews_data, session):
