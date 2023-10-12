@@ -43,6 +43,7 @@ def seed_contactfiche_functie():
         na_values=[""],
         skiprows=[1, 2506]
     )
+    df = df.dropna(how='all', axis=0)
     df = df.replace({np.nan: None})
     contactfiche_functie_data = []
     logger.info("Seeding inserting rows")
