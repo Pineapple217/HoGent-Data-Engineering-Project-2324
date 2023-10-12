@@ -31,13 +31,6 @@ def insert_info_en_klachten_data(info_en_klachten_data, session):
     session.commit()
 
 
-def to_datetime(x, format):
-    try:
-        return pd.to_datetime(x, format=format)
-    except:
-        return None
-
-
 def seed_info_en_klachten():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
@@ -51,7 +44,7 @@ def seed_info_en_klachten():
     df = df.drop_duplicates(subset=['crm_Info_en_Klachten_Aanvraag']) # duplicaten van primary keys in de csv
     
     df["crm_Info_en_Klachten_Datum"] = pd.to_datetime(df["crm_Info_en_Klachten_Datum"], format="%d-%m-%Y %H:%M:%S")
-    df["crm_Info_en_Klachten_Datum_afsluiting"] = to_datetime(df["crm_Info_en_Klachten_Datum_afsluiting"], format="%d-%m-%Y %H:%M:%S")
+    df["crm_Info_en_Klachten_Datum_afsluiting"] = pd.to_datetime(df["crm_Info_en_Klachten_Datum_afsluiting"], format="%d-%m-%Y %H:%M:%S")
 
     info_en_klachten_data = []
     logger.info("Seeding inserting rows")
