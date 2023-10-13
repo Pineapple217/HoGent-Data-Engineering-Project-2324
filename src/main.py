@@ -1,6 +1,6 @@
 import argparse
 import logging
-from repository.main import db_init, db_seed
+from repository.main import db_init, db_seed, db_drop, db_rebuild
 from test.main import db_test
 
 logging.basicConfig(
@@ -25,6 +25,13 @@ def main():
     subparsers.add_parser(
         "db_test", help="Test if the database is working"
     ).set_defaults(func=db_test)
+    subparsers.add_parser(
+        "db_drop", help="Drops all database tables"
+    ).set_defaults(func=db_drop)
+    subparsers.add_parser(
+        "db_rebuild", help="Drops, inits and seeds the database"
+    ).set_defaults(func=db_rebuild)
+
     args = parser.parse_args()
 
     if not hasattr(args, "func"):

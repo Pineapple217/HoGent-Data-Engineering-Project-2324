@@ -49,6 +49,14 @@ from repository.account_financiele_data import seed_account_financiele_data
 
 Base.metadata.reflect(engine)
 
+def db_rebuild():
+    db_drop()
+    db_init()
+    db_seed()
+
+def db_drop():
+    metadata.drop_all(bind=engine)
+    logger.info("Tables dropped")
 
 def db_init():
     logger.info("Creating database and tables...")
