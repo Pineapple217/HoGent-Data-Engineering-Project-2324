@@ -43,6 +43,7 @@ def seed_account_activiteitscode():
         keep_default_na=True,
         na_values=[""],
     )
+    df = df.dropna(how="all", axis=0)
     df = df.replace({np.nan: None})
     # Sommige lege waardes worden als NaN ingelezeno
     # NaN mag niet in een varchar
