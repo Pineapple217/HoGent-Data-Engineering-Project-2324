@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class AccountActiviteitscode(Base):
     __tablename__ = "AccountActiviteitscode"  # snakecase
     __table_args__ = {"extend_existing": True}
-    Account: Mapped[str] = mapped_column(String(50), nullable=False)
+    Account: Mapped[str] = mapped_column(String(50), nullable=True)
     Activiteitscode: Mapped[str] = mapped_column(String(50), nullable=True)
     Id: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
 
