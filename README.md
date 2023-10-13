@@ -22,9 +22,13 @@ Connect met database in Container
 `sudo docker exec -t sqlserver-db /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'P
 assword123*'`
 
-Connecteren met de database gebruik makend van mssql-cli
+Connecteren met de database gebruik makend van mssql-cli (broken)
 
 `mssql-cli -S localhost -U SA -P 'Password123*' -d voka`
+
+Connecteren met de database gebruik makend van sqlcmd
+
+`sqlcmd -S localhost -U SA -P 'Password123*'`
 # Python setup
 
 ```console
