@@ -41,7 +41,8 @@ def seed_account_financiele_data():
     df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
 
     df["crm_FinancieleData_Gewijzigd_op"] = pd.to_datetime(df["crm_FinancieleData_Gewijzigd_op"], format="%d-%m-%Y %H:%M:%S")
-    df = df.replace(',', '.')
+    df['crm_FinancieleData_FTE'] = df['crm_FinancieleData_FTE'].str.replace(',', '.')
+    df['crm_FinancieleData_Toegevoegde_waarde'] = df['crm_FinancieleData_Toegevoegde_waarde'].str.replace(',', '.')
     df['crm_FinancieleData_FTE'] = pd.to_numeric(df['crm_FinancieleData_FTE'],errors='coerce')
     df['crm_FinancieleData_Toegevoegde_waarde'] = pd.to_numeric(df['crm_FinancieleData_Toegevoegde_waarde'],errors='coerce')
     df['crm_FinancieleData_Aantal_maanden'] = pd.to_numeric(df['crm_FinancieleData_Aantal_maanden'],errors='coerce')
