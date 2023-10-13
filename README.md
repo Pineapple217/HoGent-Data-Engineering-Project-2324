@@ -18,6 +18,7 @@ Connecteren met SQL server:
 ![SSMS](img/SSMS.png)
 
 Connect met database in Container
+
 `sudo docker exec -t sqlserver-db /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'P
 assword123*'`
 # Python setup
