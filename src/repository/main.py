@@ -12,7 +12,8 @@ DB_URL = os.getenv("DB_URL")
 DATA_PATH = os.getenv("DATA_PATH")
 logger.info("Connecting to database...")  # IDK why dit niet logged
 engine = create_engine(DB_URL)
-conn = engine.connect()
+connection_properties = {"user": "SA", "password": "Password123*"}
+conn = engine.connect(connection_properties)
 metadata = MetaData()
 logger.info("Connected")
 
@@ -49,14 +50,17 @@ from repository.account_financiele_data import seed_account_financiele_data
 
 Base.metadata.reflect(engine)
 
+
 def db_rebuild():
     db_drop()
     db_init()
     db_seed()
 
+
 def db_drop():
     metadata.drop_all(bind=engine)
     logger.info("Tables dropped")
+
 
 def db_init():
     logger.info("Creating database and tables...")
