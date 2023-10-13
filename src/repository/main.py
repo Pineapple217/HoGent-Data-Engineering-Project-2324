@@ -12,8 +12,7 @@ DB_URL = os.getenv("DB_URL")
 DATA_PATH = os.getenv("DATA_PATH")
 logger.info("Connecting to database...")  # IDK why dit niet logged
 engine = create_engine(DB_URL)
-connection_properties = {"user": "SA", "password": "Password123*"}
-conn = engine.connect(connection_properties)
+conn = engine.connect()
 metadata = MetaData()
 logger.info("Connected")
 
