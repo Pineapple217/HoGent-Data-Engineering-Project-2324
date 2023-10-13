@@ -44,6 +44,7 @@ from repository.contactfiche import seed_contactfiche
 from repository.account_activiteitscode import seed_account_activiteitscode
 from repository.functie import seed_functie
 from repository.activiteitscode import seed_activiteitscode
+from repository.account_financiele_data import seed_account_financiele_data
 
 
 Base.metadata.reflect(engine)
@@ -75,6 +76,7 @@ def db_seed():
     seed_afspraak_account()
     seed_activiteit_contact()
     seed_account_activiteitscode()
+    seed_account_financiele_data()
     seed_activiteitscode()
     seed_contactfiche_functie()
     seed_contactfiche()

@@ -38,23 +38,19 @@ def seed_account_financiele_data():
     session = Session()
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Account financiële data.csv"
-    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], 
-                     # decimal= ",", quotechar = '"', doublequote = True, dtype={"crm_FinancieleData_Toegevoegde_waarde": "Float64", "crm_FinancieleData_FTE": "Float64"}
-                     )
-    df = df.replace({np.nan: None})
-    df = df.replace({"": None})
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
 
     df["crm_FinancieleData_Gewijzigd_op"] = pd.to_datetime(df["crm_FinancieleData_Gewijzigd_op"], format="%d-%m-%Y %H:%M:%S")
-    
-    # df['crm_FinancieleData_Toegevoegde_waarde'] = df['crm_FinancieleData_Toegevoegde_waarde'].str.replace(',', '.')
-    # df['crm_FinancieleData_Toegevoegde_waarde'] = df['crm_FinancieleData_Toegevoegde_waarde'].astype(float)
+    df = df.replace(',', '.')
+    df['crm_FinancieleData_FTE'] = pd.to_numeric(df['crm_FinancieleData_FTE'],errors='coerce')
+    df['crm_FinancieleData_Toegevoegde_waarde'] = pd.to_numeric(df['crm_FinancieleData_Toegevoegde_waarde'],errors='coerce')
+    df['crm_FinancieleData_Aantal_maanden'] = pd.to_numeric(df['crm_FinancieleData_Aantal_maanden'],errors='coerce')
+    df = df.replace({np.nan: None})
     
     account_financiele_data_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     
-    print(df.head(30))
-
     for _, row in df.iterrows():
         p = AccountFinancieleData(
             OndernemingID=row["crm_FinancieleData_OndernemingID"],
