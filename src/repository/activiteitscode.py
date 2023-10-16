@@ -3,7 +3,7 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String
+from sqlalchemy import String, Boolean
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -20,7 +20,7 @@ class Activiteitscode(Base):
     __table_args__ = {"extend_existing": True}
     Activiteitscode: Mapped[str] = mapped_column(String(50), primary_key=True)
     Naam: Mapped[str] = mapped_column(String(50))
-    Status: Mapped[str] = mapped_column(String(20))
+    Status: Mapped[bool] = mapped_column(Boolean)
 
 
 def insert_activiteitscode_data(activiteitscode_data, session):
@@ -41,6 +41,8 @@ def seed_activiteitscode():
         keep_default_na=True,
         na_values=[""],
     )
+
+    df['crm_ActiviteitsCode_Status'] = df['crm_ActiviteitsCode_Status'].replace({'Actief': True, 'Inactief': False})
     df = df.replace({np.nan: None})
     activiteitscode_data = []
     logger.info("Seeding inserting rows")
