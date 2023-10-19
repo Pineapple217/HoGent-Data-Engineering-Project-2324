@@ -2,14 +2,18 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Integer, Date, Boolean, Float
+from sqlalchemy.orm import mapped_column, relationship
+from sqlalchemy import String, DateTime, Integer, Boolean, Float, ForeignKey
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
+from typing import Optional, TYPE_CHECKING
+
 from tqdm import tqdm
 
+if TYPE_CHECKING:
+    from .mailing import Mailing
 
 BATCH_SIZE = 10_000
 
@@ -32,7 +36,6 @@ class Visit(Base):
     ContainsSocialProfile   :Mapped[bool] = mapped_column(Boolean)
     IPLand                  :Mapped[str] = mapped_column(String(50), nullable=True)
     Duration                :Mapped[float] = mapped_column(Float, nullable=True)
-    EmailSend               :Mapped[str] = mapped_column(String(50), nullable=True)
     EndedOn                 :Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     EntryPage               :Mapped[str] = mapped_column(String(1000), nullable=True)
     ExitPage                :Mapped[str] = mapped_column(String(1000), nullable=True)
@@ -54,6 +57,9 @@ class Visit(Base):
     TotalPages              :Mapped[int] = mapped_column(Integer, nullable=True)
     AangemaaktOp            :Mapped[DateTime] = mapped_column(DateTime)
     GewijzigdOp             :Mapped[DateTime] = mapped_column(DateTime)
+
+    EmailSendId             :Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.Mailing"), nullable=True)
+    EmailSend               :Mapped[Optional["Mailing"]] = relationship(back_populates="Visits")
 
 
 def insert_visits_data(pageviews_data, session):
@@ -95,10 +101,19 @@ def seed_visits():
     df = df.replace({np.nan: None})
     # Sommige lege waardes worden als NaN ingelezeno
     # NaN mag niet in een varchar
+
+    csv_fk = DATA_PATH + "/CDI mailing.csv"
+    df_fk = pd.read_csv(
+        csv_fk, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""]
+    )
+    df_fk = df_fk.replace({np.nan: None})
+    valid_mailings = df_fk['crm_CDI_Mailing_Mailing'].tolist()
+
     visits_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
+        email_id = row['crm_CDI_Visit_Email_Send']
         p = Visit(
             Visit                   =  row['crm_CDI_Visit_Visit'],
             AdobeReader             =  row['crm_CDI_Visit_Adobe_Reader'],
@@ -113,7 +128,7 @@ def seed_visits():
             ContainsSocialProfile   =  row['crm_CDI_Visit_containssocialprofile'],
             IPLand                  =  row['crm_CDI_Visit_IP_Land'],
             Duration                =  row['crm_CDI_Visit_Duration'],
-            EmailSend               =  row['crm_CDI_Visit_Email_Send'],
+            EmailSendId             =  email_id,
             EndedOn                 =  row['crm_CDI_Visit_Ended_On'],
             EntryPage               =  row['crm_CDI_Visit_Entry_Page'],
             ExitPage                =  row['crm_CDI_Visit_Exit_Page'],
@@ -136,6 +151,8 @@ def seed_visits():
             AangemaaktOp            =  row['crm_CDI_Visit_Aangemaakt_op'],
             GewijzigdOp             =  row['crm_CDI_Visit_Gewijzigd_op'],
         )
+        if email_id not in valid_mailings:
+            p.EmailSendId = None
         visits_data.append(p)
 
         if len(visits_data) >= BATCH_SIZE:

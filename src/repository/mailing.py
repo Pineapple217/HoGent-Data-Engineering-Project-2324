@@ -9,8 +9,11 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
 
-from .send_email_clicks import SendEmailClicks
+if TYPE_CHECKING:
+    from .send_email_clicks import SendEmailClicks
+    from .visits import Visit
 
 BATCH_SIZE = 10_000
 
@@ -25,6 +28,7 @@ class Mailing(Base):
     SentOn      :Mapped[Date] = mapped_column(Date)
     Onderwerp   :Mapped[str]  = mapped_column(String(200))
     SendClicks  :Mapped["SendEmailClicks"] = relationship(back_populates="EmailVersturen")
+    Visits      :Mapped["Visit"] = relationship(back_populates="EmailSend")
 
 
 def insert_mailings_data(pageviews_data, session):
