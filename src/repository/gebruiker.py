@@ -23,7 +23,7 @@ class Gebruiker(Base):
     Id: Mapped[str] = mapped_column(String(50), primary_key=True)
     BusinessUnitNaam: Mapped[str] = mapped_column(String(50))
     
-    children: Mapped[List["InfoEnKlachten"]] = relationship(back_populates="parent")
+    Info: Mapped[List["InfoEnKlachten"]] = relationship(back_populates="Eigenaar")
 
 def insert_gebruiker_data(gebruiker_data, session):
     session.bulk_save_objects(gebruiker_data)

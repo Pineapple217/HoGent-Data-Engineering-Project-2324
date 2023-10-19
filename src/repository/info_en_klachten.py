@@ -8,7 +8,7 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .gebruiker import Gebruiker
@@ -25,9 +25,8 @@ class InfoEnKlachten(Base):
     Datum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2)
     Status: Mapped[str] = mapped_column(String(15))
-    Eigenaar: Mapped[str] = mapped_column(String(50), ForeignKey("Gebruiker.Id"), nullable=True)
-    
-    parent: Mapped["Gebruiker"] = relationship(back_populates="children")
+    EigenaarId: Mapped[Optional[str]] = mapped_column(ForeignKey("Gebruiker.Id"), nullable=True)
+    Eigenaar: Mapped[Optional["Gebruiker"]] = relationship(back_populates="Info")
 
 
 def insert_info_en_klachten_data(info_en_klachten_data, session):
@@ -59,17 +58,17 @@ def seed_info_en_klachten():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
 
     for _, row in df.iterrows():
-        eigenaar=row["crm_Info_en_Klachten_Eigenaar"]
+        eigenaar_id=row["crm_Info_en_Klachten_Eigenaar"]
         p = InfoEnKlachten(
             Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
             Account=row["crm_Info_en_Klachten_Account"],
             Datum=row["crm_Info_en_Klachten_Datum"],
             DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
             Status=row["crm_Info_en_Klachten_Status"],
-            Eigenaar=eigenaar,
+            EigenaarId=eigenaar_id,
         )
-        if eigenaar not in valid_gebruikers:
-            p.Eigenaar=None 
+        if eigenaar_id not in valid_gebruikers:
+            p.EigenaarId=None 
         info_en_klachten_data.append(p)
 
         if len(info_en_klachten_data) >= BATCH_SIZE:
