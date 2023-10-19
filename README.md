@@ -34,7 +34,19 @@ Link de lokale poort 1438 met poort 1433 op de VM door middel van een ssh tunnel
 ```
 ssh -p 40095 -L 1438:localhost:1433 vicuser@vichogent.be
 ```
+Open daarna PowerBI en selecteer 'Import data from SQL Server'.
 
+![PowerBI1](img/PowerBI1.PNG)
+
+maak lokaal connectie met poort 1438 om te connecteren met de database op de VM.
+
+![PowerBI2](img/PowerBI2.PNG)
+
+Geef bij 'Database' de gebruikersnaam en het wachtwoord op en connecteer.
+
+![PowerBI3](img/PowerBI3.PNG)
+
+je kan een melding krijgen over een connectie die niet encrypted is.
 # Python setup
 
 ```console
