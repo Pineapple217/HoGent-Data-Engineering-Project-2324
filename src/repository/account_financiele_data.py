@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 class AccountFinancieleData(Base):
     __tablename__ = "AccountFinancieleData"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, nullable=False) # zelf toegevoegd, tabel heeft geen primary key
-    OndernemingID: Mapped[str] = mapped_column(String(50), nullable=True)
-    Boekjaar: Mapped[int] = mapped_column(Integer, nullable=True)
+    Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
+    OndernemingID: Mapped[str] = mapped_column(String(50))
+    Boekjaar: Mapped[int] = mapped_column(Integer)
     AantalMaanden: Mapped[int] = mapped_column(Integer, nullable=True)
     ToegevoegdeWaarde: Mapped[FLOAT] = mapped_column(FLOAT, nullable=True)
     FTE: Mapped[FLOAT] = mapped_column(FLOAT, nullable=True)
-    GewijzigdOp: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
+    GewijzigdOp: Mapped[DATETIME2] = mapped_column(DATETIME2)
     
     
 def insert_account_financiele_data_data(account_financiele_data_data, session):
