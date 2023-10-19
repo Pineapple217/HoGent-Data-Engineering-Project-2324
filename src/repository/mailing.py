@@ -2,14 +2,15 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Integer, Date
+from sqlalchemy.orm import mapped_column, relationship
+from sqlalchemy import String, Date
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
+from .send_email_clicks import SendEmailClicks
 
 BATCH_SIZE = 10_000
 
@@ -23,6 +24,7 @@ class Mailing(Base):
     Name        :Mapped[str]  = mapped_column(String(200), nullable=True)
     SentOn      :Mapped[Date] = mapped_column(Date)
     Onderwerp   :Mapped[str]  = mapped_column(String(200))
+    SendClicks  :Mapped["SendEmailClicks"] = relationship(back_populates="EmailVersturen")
 
 
 def insert_mailings_data(pageviews_data, session):
