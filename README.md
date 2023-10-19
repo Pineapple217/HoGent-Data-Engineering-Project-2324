@@ -19,8 +19,7 @@ Connecteren met SQL server:
 
 Connect met database in Container
 
-`sudo docker exec -t sqlserver-db /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'P
-assword123*'`
+`sudo docker exec -t sqlserver-db /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123*'`
 
 Connecteren met de database gebruik makend van mssql-cli (broken)
 
