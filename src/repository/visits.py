@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 if TYPE_CHECKING:
     from .mailing import Mailing
+    from .pageviews import Pageview
 
 BATCH_SIZE = 10_000
 
@@ -60,6 +61,8 @@ class Visit(Base):
 
     EmailSendId             :Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.Mailing"), nullable=True)
     EmailSend               :Mapped[Optional["Mailing"]] = relationship(back_populates="Visits")
+
+    Pageviews               :Mapped["Pageview"] = relationship(back_populates="Visit")
 
 
 def insert_visits_data(pageviews_data, session):
