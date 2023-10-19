@@ -28,6 +28,13 @@ Connecteren met de database gebruik makend van mssql-cli (broken)
 Connecteren met de database gebruik makend van sqlcmd
 
 `sqlcmd -S localhost -U SA -P 'Password123*'`
+
+# PowerBI
+Link de lokale poort 1438 met poort 1433 op de VM door middel van een ssh tunnel
+```
+ssh -p 40095 -L 1438:localhost:1433 vicuser@vichogent.be
+```
+
 # Python setup
 
 ```console
