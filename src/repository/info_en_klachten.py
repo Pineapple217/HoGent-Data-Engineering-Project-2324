@@ -60,25 +60,16 @@ def seed_info_en_klachten():
 
     for _, row in df.iterrows():
         eigenaar=row["crm_Info_en_Klachten_Eigenaar"]
-        if eigenaar in valid_gebruikers:
-            p = InfoEnKlachten(
-                Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
-                Account=row["crm_Info_en_Klachten_Account"],
-                Datum=row["crm_Info_en_Klachten_Datum"],
-                DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
-                Status=row["crm_Info_en_Klachten_Status"],
-                Eigenaar=eigenaar,
-            )
-        else:
-                p = InfoEnKlachten(
-                Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
-                Account=row["crm_Info_en_Klachten_Account"],
-                Datum=row["crm_Info_en_Klachten_Datum"],
-                DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
-                Status=row["crm_Info_en_Klachten_Status"],
-                Eigenaar=None,
-            )
-            
+        p = InfoEnKlachten(
+            Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
+            Account=row["crm_Info_en_Klachten_Account"],
+            Datum=row["crm_Info_en_Klachten_Datum"],
+            DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
+            Status=row["crm_Info_en_Klachten_Status"],
+            Eigenaar=eigenaar,
+        )
+        if eigenaar not in valid_gebruikers:
+            p.Eigenaar=None 
         info_en_klachten_data.append(p)
 
         if len(info_en_klachten_data) >= BATCH_SIZE:
