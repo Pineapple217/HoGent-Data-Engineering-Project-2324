@@ -1,14 +1,17 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String
-from sqlalchemy.orm import sessionmaker
+from typing import List
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .info_en_klachten import InfoEnKlachten
 
 BATCH_SIZE = 10_000
 
@@ -19,6 +22,8 @@ class Gebruiker(Base):
     __table_args__ = {"extend_existing": True}
     Id: Mapped[str] = mapped_column(String(50), primary_key=True)
     BusinessUnitNaam: Mapped[str] = mapped_column(String(50))
+    
+    children: Mapped[List["InfoEnKlachten"]] = relationship(back_populates="parent")
 
 def insert_gebruiker_data(gebruiker_data, session):
     session.bulk_save_objects(gebruiker_data)

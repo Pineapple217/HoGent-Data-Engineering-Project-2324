@@ -23,7 +23,7 @@ class Account(Base):
     AdresPlaats: Mapped[str] = mapped_column(String(50), nullable=True)
     AdresPostcode: Mapped[str] = mapped_column(String(50), nullable=True) # sommige buitenlandse postcodes bevatten letters
     AdresProvincie: Mapped[str] = mapped_column(String(50), nullable=True)
-    IndustriezoneNaam: Mapped[str] = mapped_column(String(500), nullable=True) # erg lange namen zoals 'OV - (9051) The Loop - Poortakkerstraat - Flanders Expo'
+    IndustriezoneNaam: Mapped[str] = mapped_column(String(250), nullable=True) # erg lange namen zoals 'OV - (9051) The Loop - Poortakkerstraat - Flanders Expo'
     IsVokaEntiteit: Mapped[str] = mapped_column(String(50))
     Ondernemingsaard: Mapped[str] = mapped_column(String(50), nullable=True)
     Ondernemingstype: Mapped[str] = mapped_column(String(50), nullable=True)

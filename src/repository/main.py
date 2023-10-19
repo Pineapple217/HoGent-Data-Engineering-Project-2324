@@ -70,6 +70,7 @@ def db_init():
 # Voeg hier je seedfunctie toe
 def db_seed():
     logger.info("Starting seeding...")
+   
     """
     seed_pageviews()
     seed_mailing()
@@ -79,18 +80,20 @@ def db_seed():
     seed_sessie_inschrijving()
     seed_sessie()
     seed_inschrijving()
+    """
     seed_gebruiker()
     seed_info_en_klachten()
-    seed_account()
+    # seed_account()
+    # seed_account_financiele_data()
+    """
     seed_campagne()
     seed_persoon()
     seed_afspraak_contact()
     seed_afspraak_account()
     seed_activiteit_contact()
-    """
     seed_account_activiteitscode()
-    seed_account_financiele_data()
     seed_activiteitscode()
     seed_contactfiche_functie()
     seed_contactfiche()
     seed_functie()
+    """
