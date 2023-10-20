@@ -1,15 +1,12 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Integer, Date
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy import String, Date
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-
 
 BATCH_SIZE = 10_000
 
@@ -18,12 +15,12 @@ logger = logging.getLogger(__name__)
 class AfspraakContact(Base):
     __tablename__ = "AfspraakContact"
     __table_args__ = {"extend_existing": True}
-    AfspraakID: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
+    AfspraakID: Mapped[str] = mapped_column(String(255), primary_key=True)
     Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
-    ContactID: Mapped[str] = mapped_column(String(255), nullable=True)
-    Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
+    ContactID: Mapped[str] = mapped_column(String(255))
+    Einddatum: Mapped[Date] = mapped_column(Date)
     KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
 
