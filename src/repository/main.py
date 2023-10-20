@@ -1,7 +1,7 @@
 import logging
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import Table, create_engine, MetaData, text
 
 from repository.base import Base
 
@@ -14,12 +14,52 @@ logger.info("Connecting to database...")  # IDK why dit niet logged
 engine = create_engine(DB_URL)
 conn = engine.connect()
 metadata = MetaData()
+metadata.bind = engine
 logger.info("Connected")
 
 
 def get_engine():
     return engine
 
+def drop_fk():
+    query = text(f"""
+        DECLARE @sql nvarchar(max) = N'';
+
+        ;WITH x AS 
+        (
+        SELECT DISTINCT obj = 
+            QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + '.' 
+            + QUOTENAME(OBJECT_NAME(parent_object_id)) 
+        FROM sys.foreign_keys
+        )
+        SELECT @sql += N'ALTER TABLE ' + obj + N' NOCHECK CONSTRAINT ALL;
+        ' FROM x;
+
+        EXEC sys.sp_executesql @sql;
+    """)
+    
+    conn.execute(query)
+    conn.commit()
+
+def enable_fk():
+    query = text(f"""
+        DECLARE @sql nvarchar(max) = N'';
+
+        ;WITH x AS 
+        (
+        SELECT DISTINCT obj = 
+            QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + '.' 
+            + QUOTENAME(OBJECT_NAME(parent_object_id)) 
+        FROM sys.foreign_keys
+        )
+        SELECT @sql += N'ALTER TABLE ' + obj + N' WITH CHECK CHECK CONSTRAINT ALL;
+        ' FROM x;
+
+        EXEC sys.sp_executesql @sql;
+    """)
+    
+    conn.execute(query)
+    conn.commit()
 
 # Import moeten hier door dependencies, anders worden de classes niet ingeladen
 # Voeg andere seed imports hier onder toe
@@ -70,11 +110,13 @@ def db_init():
 # Voeg hier je seedfunctie toe
 def db_seed():
     logger.info("Starting seeding...")
+    drop_fk()
    
     seed_mailing()
     seed_send_email_clicks()
     seed_web_content()
     seed_visits()
+    seed_campagne()
     seed_pageviews()
     seed_sessie_inschrijving()
     seed_sessie()
@@ -83,7 +125,6 @@ def db_seed():
     seed_info_en_klachten()
     seed_account()
     seed_account_financiele_data()
-    seed_campagne()
     seed_persoon()
     seed_afspraak_contact()
     seed_afspraak_account()
@@ -93,3 +134,5 @@ def db_seed():
     seed_contactfiche_functie()
     seed_contactfiche()
     seed_functie()
+
+    enable_fk()

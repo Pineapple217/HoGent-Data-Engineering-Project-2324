@@ -3,7 +3,7 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
-from sqlalchemy import String, DateTime, Integer, Boolean, Float, ForeignKey
+from sqlalchemy import String, DateTime, Integer, Boolean, Float, ForeignKey, text
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -77,7 +77,7 @@ def seed_visits():
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/CDI visits.csv"
     df = pd.read_csv(
-        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""]
+        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], low_memory=False
     )
     df['crm_CDI_Visit_Adobe_Reader'] = df['crm_CDI_Visit_Adobe_Reader'].replace({'Ja': True, 'Nee': False})
     df['crm_CDI_Visit_Bounce'] = df['crm_CDI_Visit_Bounce'].replace({'Ja': True, 'Nee': False})
@@ -102,21 +102,11 @@ def seed_visits():
         df['crm_CDI_Visit_Time'], format="%m-%d-%Y %H:%M:%S (%Z)"
     )
     df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
-    # NaN mag niet in een varchar
-
-    csv_fk = DATA_PATH + "/CDI mailing.csv"
-    df_fk = pd.read_csv(
-        csv_fk, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""]
-    )
-    df_fk = df_fk.replace({np.nan: None})
-    valid_mailings = df_fk['crm_CDI_Mailing_Mailing'].tolist()
 
     visits_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
-        email_id = row['crm_CDI_Visit_Email_Send']
         p = Visit(
             Visit                   =  row['crm_CDI_Visit_Visit'],
             AdobeReader             =  row['crm_CDI_Visit_Adobe_Reader'],
@@ -131,7 +121,7 @@ def seed_visits():
             ContainsSocialProfile   =  row['crm_CDI_Visit_containssocialprofile'],
             IPLand                  =  row['crm_CDI_Visit_IP_Land'],
             Duration                =  row['crm_CDI_Visit_Duration'],
-            EmailSendId             =  email_id,
+            EmailSendId             =  row['crm_CDI_Visit_Email_Send'],
             EndedOn                 =  row['crm_CDI_Visit_Ended_On'],
             EntryPage               =  row['crm_CDI_Visit_Entry_Page'],
             ExitPage                =  row['crm_CDI_Visit_Exit_Page'],
@@ -154,8 +144,6 @@ def seed_visits():
             AangemaaktOp            =  row['crm_CDI_Visit_Aangemaakt_op'],
             GewijzigdOp             =  row['crm_CDI_Visit_Gewijzigd_op'],
         )
-        if email_id not in valid_mailings:
-            p.EmailSendId = None
         visits_data.append(p)
 
         if len(visits_data) >= BATCH_SIZE:
@@ -167,3 +155,12 @@ def seed_visits():
     if visits_data:
         insert_visits_data(visits_data, session)
         progress_bar.update(len(visits_data))
+
+    session.execute(text("""
+        UPDATE Visits
+        SET Visits.EmailSendId = NULL
+        WHERE Visits.EmailSendId
+        NOT IN
+        (SELECT Mailing FROM Mailing);
+    """))
+    session.commit()

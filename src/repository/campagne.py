@@ -1,13 +1,17 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
+from typing import TYPE_CHECKING
 from tqdm import tqdm
+
+if TYPE_CHECKING:
+    from .pageviews import Pageview
 
 BATCH_SIZE = 10_000
 
@@ -27,6 +31,8 @@ class Campagne(Base):
     TypeCampagne: Mapped[str] = mapped_column(String(50))
     URLVoka: Mapped[str] = mapped_column(String(150), nullable=True)
     SoortCampagne: Mapped[str] = mapped_column(String(50))
+
+    Pageviews :Mapped["Pageview"] = relationship(back_populates="Campagne")
 
 
 def insert_campagne_data(campagne_data, session):
@@ -59,7 +65,7 @@ def seed_campagne():
     campagne_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         p = Campagne(
             Campagne=row["crm_Campagne_Campagne"],
             CampagneNr=row["crm_Campagne_Campagne_Nr"],
