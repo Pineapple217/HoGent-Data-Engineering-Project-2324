@@ -19,9 +19,11 @@ def main():
     subparsers.add_parser("db_init", help="Create database and tables").set_defaults(
         func=db_init
     )
-    subparsers.add_parser(
+    x = subparsers.add_parser(
         "db_seed", help="Fills all tables of the database"
-    ).set_defaults(func=db_seed)
+    )
+    x.add_argument('--table', help='testest')
+    x.set_defaults(func=db_seed)
     subparsers.add_parser(
         "db_test", help="Test if the database is working"
     ).set_defaults(func=db_test)
