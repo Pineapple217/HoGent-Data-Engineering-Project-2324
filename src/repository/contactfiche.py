@@ -1,21 +1,17 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
 from sqlalchemy import String, Integer
 from sqlalchemy.dialects.mssql import BIT
-from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
-
 
 class Contactfiche(Base):
     __tablename__ = "Contactfiche" 
@@ -61,7 +57,6 @@ def seed_contactfiche():
             Status=row["crm_Contact_Status"],
             VokaMedewerker=row["crm_Contact_Voka_medewerker"],
         )
-
         contactfiche_data.append(p)
 
         if len(contactfiche_data) >= BATCH_SIZE:

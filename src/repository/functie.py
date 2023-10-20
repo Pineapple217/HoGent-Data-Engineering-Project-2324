@@ -1,19 +1,16 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
 from sqlalchemy import String
-from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-
 BATCH_SIZE = 10
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 class Functie(Base):
     __tablename__ = "Functie"

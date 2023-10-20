@@ -1,35 +1,29 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date, Float
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy import String, Float
 from sqlalchemy.dialects.mssql import DATETIME2
-from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
-
 
 BATCH_SIZE = 10_000
+
 logger = logging.getLogger(__name__)
 
-
 class Inschrijving(Base):
-    __tablename__ = "Inschrijving"  # snakecase
+    __tablename__ = "Inschrijving"
     __table_args__ = {"extend_existing": True}
-    Inschrijving: Mapped[str] = mapped_column(
-        String(50), nullable=False, primary_key=True
-    )
-    AanwezigAfwezig: Mapped[str] = mapped_column(String(50), nullable=True)
+    Inschrijving: Mapped[str] = mapped_column(String(50), primary_key=True)
+    AanwezigAfwezig: Mapped[str] = mapped_column(String(50))
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
     Contactfiche: Mapped[str] = mapped_column(String(50), nullable=True)
-    DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
-    FacturatieBedrag: Mapped[Float] = mapped_column(Float, nullable=True)
-    Campagne: Mapped[str] = mapped_column(String(50), nullable=True)
-    CampagneNaam: Mapped[str] = mapped_column(String(200), nullable=True)
+    DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2)
+    FacturatieBedrag: Mapped[Float] = mapped_column(Float)
+    Campagne: Mapped[str] = mapped_column(String(50))
+    CampagneNaam: Mapped[str] = mapped_column(String(200))
 
 
 def insert_inschrijving_data(inschrijving_data, session):

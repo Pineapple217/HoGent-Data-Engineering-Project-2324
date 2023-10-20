@@ -1,37 +1,32 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy import String
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
-
 
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
-
 class Campagne(Base):
     __tablename__ = "Campagne"  # snakecase
     __table_args__ = {"extend_existing": True}
-    Campagne: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
+    Campagne: Mapped[str] = mapped_column(String(50), primary_key=True)
     CampagneNr: Mapped[str] = mapped_column(String(50), nullable=True)
-    Einddatum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
-    CampagneNaam: Mapped[str] = mapped_column(String(200), nullable=True)
-    NaamInMail: Mapped[str] = mapped_column(String(200), nullable=True)
-    RedenVanStatus: Mapped[str] = mapped_column(String(50), nullable=True)
-    Startdatum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
-    Status: Mapped[str] = mapped_column(String(50), nullable=True)
-    TypeCampagne: Mapped[str] = mapped_column(String(50), nullable=True)
+    Einddatum: Mapped[DATETIME2] = mapped_column(DATETIME2)
+    CampagneNaam: Mapped[str] = mapped_column(String(200))
+    NaamInMail: Mapped[str] = mapped_column(String(200))
+    RedenVanStatus: Mapped[str] = mapped_column(String(50))
+    Startdatum: Mapped[DATETIME2] = mapped_column(DATETIME2)
+    Status: Mapped[str] = mapped_column(String(50))
+    TypeCampagne: Mapped[str] = mapped_column(String(50))
     URLVoka: Mapped[str] = mapped_column(String(150), nullable=True)
-    SoortCampagne: Mapped[str] = mapped_column(String(50), nullable=True)
+    SoortCampagne: Mapped[str] = mapped_column(String(50))
 
 
 def insert_campagne_data(campagne_data, session):
@@ -53,14 +48,14 @@ def seed_campagne():
         na_values=[""],
     )
     df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
-    # NaN mag niet in een varchar
+    
     df["crm_Campagne_Einddatum"] = pd.to_datetime(
         df["crm_Campagne_Einddatum"], format="%d-%m-%Y %H:%M:%S"
     )
     df["crm_Campagne_Startdatum"] = pd.to_datetime(
         df["crm_Campagne_Startdatum"], format="%d-%m-%Y %H:%M:%S"
     )
+    
     campagne_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
@@ -78,7 +73,6 @@ def seed_campagne():
             URLVoka=row["crm_Campagne_URL_voka_be"],
             SoortCampagne=row["crm_Campagne_Soort_Campagne"],
         )
-
         campagne_data.append(p)
 
         if len(campagne_data) >= BATCH_SIZE:
@@ -86,7 +80,6 @@ def seed_campagne():
             campagne_data = []
             progress_bar.update(BATCH_SIZE)
 
-    # Insert any remaining data
     if campagne_data:
         insert_campagne_data(campagne_data, session)
         progress_bar.update(len(campagne_data))

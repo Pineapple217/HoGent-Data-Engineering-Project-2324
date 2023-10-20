@@ -1,21 +1,16 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
 from sqlalchemy import String, Integer
-from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
-
-# CSV MOET OPGEKUIST WORDEN, LEGE RIJEN MET , WEG
 
 class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
