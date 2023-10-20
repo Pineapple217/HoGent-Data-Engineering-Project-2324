@@ -1,26 +1,22 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Integer, Date, UniqueConstraint
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy import String
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
-
 class ActiviteitContact(Base):
     __tablename__ = "ActiviteitContact"
     __table_args__ = {'extend_existing': True}
-    ActiviteitID: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
-    VereistContactID: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
+    ActiviteitID: Mapped[str] = mapped_column(String(255), primary_key=True)
+    VereistContactID: Mapped[str] = mapped_column(String(255), primary_key=True)
 
 
 def insert_ActiviteitContact_data(ActiviteitContact_data, session):

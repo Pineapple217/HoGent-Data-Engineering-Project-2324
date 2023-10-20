@@ -21,8 +21,8 @@ def get_engine():
     return engine
 
 
-# Import moeten hier door depenesie en anders worden de Classes ook niet ingeladen
-# Voeg and adere seed imports hier onder toe
+# Import moeten hier door dependencies, anders worden de classes niet ingeladen
+# Voeg andere seed imports hier onder toe
 from repository.pageviews import seed_pageviews
 from repository.mailing import seed_mailing
 from repository.send_email_clicks import seed_send_email_clicks
