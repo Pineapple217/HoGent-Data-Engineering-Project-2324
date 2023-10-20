@@ -22,15 +22,15 @@ class Campagne(Base):
     __tablename__ = "Campagne"  # snakecase
     __table_args__ = {"extend_existing": True}
     Campagne: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
-    CampagneNr: Mapped[str] = mapped_column(String(50), nullable=False)
+    CampagneNr: Mapped[str] = mapped_column(String(50), nullable=True)
     Einddatum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
-    CampagneNaam: Mapped[str] = mapped_column(String(150), nullable=True)
-    NaamInMail: Mapped[str] = mapped_column(String(150), nullable=True)
+    CampagneNaam: Mapped[str] = mapped_column(String(200), nullable=True)
+    NaamInMail: Mapped[str] = mapped_column(String(200), nullable=True)
     RedenVanStatus: Mapped[str] = mapped_column(String(50), nullable=True)
     Startdatum: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     Status: Mapped[str] = mapped_column(String(50), nullable=True)
     TypeCampagne: Mapped[str] = mapped_column(String(50), nullable=True)
-    URLVoka: Mapped[str] = mapped_column(String(100), nullable=True)
+    URLVoka: Mapped[str] = mapped_column(String(150), nullable=True)
     SoortCampagne: Mapped[str] = mapped_column(String(50), nullable=True)
 
 
@@ -44,7 +44,7 @@ def seed_campagne():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + "/Campagne.csv"
+    csv = DATA_PATH + "/Campagnes.csv"
     df = pd.read_csv(
         csv,
         delimiter=",",

@@ -28,6 +28,8 @@ class Inschrijving(Base):
     Contactfiche: Mapped[str] = mapped_column(String(50), nullable=True)
     DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     FacturatieBedrag: Mapped[Float] = mapped_column(Float, nullable=True)
+    Campagne: Mapped[str] = mapped_column(String(50), nullable=True)
+    CampagneNaam: Mapped[str] = mapped_column(String(200), nullable=True)
 
 
 def insert_inschrijving_data(inschrijving_data, session):
@@ -47,7 +49,7 @@ def seed_inschrijving():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + "/Inschrijving.csv"
+    csv = DATA_PATH + "/Inschrijvingen.csv"
     df = pd.read_csv(
         csv,
         delimiter=",",
@@ -72,6 +74,8 @@ def seed_inschrijving():
             Contactfiche=row["crm_Inschrijving_Contactfiche"],
             DatumInschrijving=row["crm_Inschrijving_Datum_inschrijving"],
             FacturatieBedrag=to_float(row["crm_Inschrijving_Facturatie_Bedrag"]),
+            Campagne=row["crm_Inschrijving_Campagne"],
+            CampagneNaam=row["crm_Inschrijving_Campagne_Naam_"],
         )
 
         inschrijving_data.append(p)
