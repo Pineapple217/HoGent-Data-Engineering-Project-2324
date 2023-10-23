@@ -16,8 +16,9 @@ logger = logging.getLogger(__name__)
 class Contactfiche(Base):
     __tablename__ = "Contactfiche" 
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
-    ContactPersoon: Mapped[str] = mapped_column(String(50))
+    #Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
+    #edit: ContactPersoon is PK, want hiernaar wordt gerefereerd uit andere tables. Is ook uniek in de hele datafile. Kan wel interessant zijn voor DWH
+    ContactPersoon: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
     Account: Mapped[str] = mapped_column(String(50))
     FunctieTitel: Mapped[str] = mapped_column(String(255), nullable=True)
     PersoonId: Mapped[str] = mapped_column(String(50))
