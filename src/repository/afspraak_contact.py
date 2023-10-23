@@ -1,12 +1,16 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
-from sqlalchemy import String, Date
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, Date, ForeignKey, text
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .contactfiche import Contactfiche
 
 BATCH_SIZE = 10_000
 
@@ -19,9 +23,10 @@ class AfspraakContact(Base):
     Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
-    ContactID: Mapped[str] = mapped_column(String(255))
+    ContactID: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKAfspraakContact")
     Einddatum: Mapped[Date] = mapped_column(Date)
-    KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
+    KeyPhrases: Mapped[str] = mapped_column(String(3000)    , nullable=True)
     
 
 def insert_AfspraakContact_data(AfspraakContact_data, session):
@@ -41,6 +46,7 @@ def seed_afspraak_contact():
     df["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"] = pd.to_datetime(
         df["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"], format="%d-%m-%Y"
     )
+    
     AfspraakContact_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
@@ -66,6 +72,15 @@ def seed_afspraak_contact():
         insert_AfspraakContact_data(AfspraakContact_data, session)
         progress_bar.update(len(AfspraakContact_data))
 
-        
-        
+    
+    session.execute(text("""
+        UPDATE AfspraakContact
+        SET AfspraakContact.ContactID = NULL
+        WHERE AfspraakContact.ContactID
+        NOT IN
+        (SELECT ContactPersoon FROM Contactfiche)
+    """))
+    session.commit()
+
+    
 
