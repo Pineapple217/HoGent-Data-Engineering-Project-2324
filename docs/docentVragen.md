@@ -44,3 +44,29 @@ best checken
 - epic 7: is LLM, niet te veel op focussen
 - 'huggingface' kan interessant zijn
 - Data cleaning: lib 'Open Refine'
+
+# Sprint 2 week 4
+
+## Vraag 1: Layout DWH
+
+## Antwoord vraag 1: 
+
+## Vraag 2: Hoe snelheid optrekken?
+- schaalbaarheid
+- bottleneck door batch inserts
+
+## Antwoord vraag 2:
+- doen via sql server in plaats van sqlalchemy
+- checken in pandas
+- iterrows is ZEER TRAAG 
+  * operatie op grote df = aparte methode met df.apply
+  * lambda functie gebruiken en factoriseren
+- verwijderen waar FK niet overeenkomt
+  * DELETE FROM TAB1 WHERE TAB1.FK_FIELD NOT IN (SELECT PK_FIELD FROM TAB2)
+  * altijd het snelste, geoptimaliseerd door DB
+- bulk insert en rechtstreeks csv meegeven, dan sql querty
+- list comprehensions zijn niet traag, vectoriseer
+- Check de stackoverflow [hier]("https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas
+")
+- werk gelijktijdig door ook al te beginnen aan de recommender system
+
