@@ -1,12 +1,18 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
-from sqlalchemy import String, DateTime, Integer, Date
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, DateTime, Integer, Date, ForeignKey
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .account import Account
+    from .visits import Visit
+
 
 BATCH_SIZE = 10_000
 
@@ -21,7 +27,8 @@ class AfspraakAccount(Base):
     #Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
     #Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
-    AccountID: Mapped[str] = mapped_column(String(255), nullable=True)
+    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account'), nullable=True)
+    account: Mapped["Account"] = relationship("Account", backref="afspraken")
     #KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
 
