@@ -78,7 +78,7 @@ from repository.campagne import seed_campagne
 from repository.persoon import seed_persoon
 from repository.afspraak_contact import seed_afspraak_contact
 from repository.afspraak_account import seed_afspraak_account
-from repository.activiteit_contact import seed_activiteit_contact
+from repository.afspraak_vereist_contact import seed_afspraak_vereist_contact
 from repository.contactfiche_functies import seed_contactfiche_functie
 from repository.contactfiche import seed_contactfiche
 from repository.account_activiteitscode import seed_account_activiteitscode
@@ -128,10 +128,9 @@ def db_seed():
     seed_gebruiker()
     seed_info_en_klachten()
     seed_account_financiele_data()
-    seed_persoon()
     seed_afspraak_contact()
     seed_afspraak_account()
-    seed_activiteit_contact()
+    seed_afspraak_vereist_contact()
     seed_account_activiteitscode()
     seed_contactfiche_functie()
     

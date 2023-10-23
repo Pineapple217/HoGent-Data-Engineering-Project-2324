@@ -1,0 +1,69 @@
+from .base import Base
+
+import logging
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, Date, ForeignKey, text
+from repository.main import get_engine, DATA_PATH
+import pandas as pd
+import numpy as np
+from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .contactfiche import Contactfiche
+BATCH_SIZE = 10_000
+
+logger = logging.getLogger(__name__)
+
+class AfspraakVereistContact(Base):
+    __tablename__ = "AfspraakVereistContact"
+    __table_args__ = {'extend_existing': True}
+    AfspraakID: Mapped[str] = mapped_column(String(255), primary_key=True)
+    VereistContactID: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactPersoon'), primary_key=True)
+    contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContact")
+    
+    
+
+def insert_AfspraakVereistContact_data(AfspraakVereistContact_data, session):
+    session.bulk_save_objects(AfspraakVereistContact_data)
+    session.commit()
+
+
+def seed_afspraak_vereist_contact():
+    engine = get_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    logger.info("Reading CSV...")
+    csv = DATA_PATH + '/Activiteit vereist contact.csv'
+    df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
+    df = df.drop_duplicates()
+    df = df.replace({np.nan: None})
+    
+    AfspraakVereistContact_data = []
+    logger.info("Seeding inserting rows")
+    progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+    for _, row in df.iterrows():
+        avc = AfspraakVereistContact(
+            AfspraakID=row["crm_ActiviteitVereistContact_ActivityId"],
+            VereistContactID=row["crm_ActiviteitVereistContact_ReqAttendee"],
+        )
+
+        AfspraakVereistContact_data.append(avc)
+        
+        if len(AfspraakVereistContact_data) >= BATCH_SIZE:
+            insert_AfspraakVereistContact_data(AfspraakVereistContact_data, session)
+            AfspraakVereistContact_data = []
+            progress_bar.update(BATCH_SIZE)
+
+    if AfspraakVereistContact_data:
+        insert_AfspraakVereistContact_data(AfspraakVereistContact_data, session)
+        progress_bar.update(len(AfspraakVereistContact_data))
+
+    session.execute(text("""
+        UPDATE AfspraakVereistContact
+        SET AfspraakVereistContact.ContactID = NULL
+        WHERE AfspraakVereistContact.ContactID
+        NOT IN
+        (SELECT ContactPersoon FROM Contactfiche)
+    """))
+    session.commit()
