@@ -66,7 +66,6 @@ best checken
   * altijd het snelste, geoptimaliseerd door DB
 - bulk insert en rechtstreeks csv meegeven, dan sql querty
 - list comprehensions zijn niet traag, vectoriseer
-- Check de stackoverflow [hier]("https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas
-")
+- Check de stackoverflow [hier](https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas)
 - werk gelijktijdig door ook al te beginnen aan de recommender system
 
