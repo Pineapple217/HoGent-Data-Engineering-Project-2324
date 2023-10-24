@@ -76,9 +76,10 @@ def seed_visits():
     session = Session()
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/CDI visits.csv"
-    df = pd.read_csv(
-        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], low_memory=False
+    chunks = pd.read_csv(
+        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=10_000
     )
+    df = pd.concat(chunks)
     df['crm_CDI_Visit_Adobe_Reader'] = df['crm_CDI_Visit_Adobe_Reader'].replace({'Ja': True, 'Nee': False})
     df['crm_CDI_Visit_Bounce'] = df['crm_CDI_Visit_Bounce'].replace({'Ja': True, 'Nee': False})
     df['crm_CDI_Visit_containssocialprofile'] = df['crm_CDI_Visit_containssocialprofile'].replace({'Ja': True, 'Nee': False})

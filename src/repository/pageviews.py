@@ -61,9 +61,10 @@ def seed_pageviews():
     session = Session()
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/cdi_pageviews.csv"
-    df = pd.read_csv(
-        csv, delimiter=";", encoding="latin-1", keep_default_na=True, na_values=[""], low_memory=False
+    chunks = pd.read_csv(
+        csv, delimiter=";", encoding="latin-1", keep_default_na=True, na_values=[""], chunksize=50_000
     )
+    df = pd.concat(chunks) 
     df = df.replace({np.nan: None})
     # Sommige lege waardes worden als NaN ingelezeno
     # NaN mag niet in een varchar
