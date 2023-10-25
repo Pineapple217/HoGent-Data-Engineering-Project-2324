@@ -1,12 +1,18 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
-from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, ForeignKey, text
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .account import Account
+    from .activiteitscode import Activiteitscode
+
 
 BATCH_SIZE = 1_000
 
@@ -16,8 +22,10 @@ class AccountActiviteitscode(Base):
     __tablename__ = "AccountActiviteitscode"
     __table_args__ = {"extend_existing": True}
     Id: Mapped[str] = mapped_column(String(50), primary_key=True)
-    Account: Mapped[str] = mapped_column(String(50))
-    Activiteitscode: Mapped[str] = mapped_column(String(50))
+    Account: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account', use_alter=True))
+    accountFK: Mapped["Account"] = relationship("Account", backref="FKAccountActiviteitscode")
+    Activiteitscode: Mapped[str] = mapped_column(String(50), ForeignKey('Activiteitscode.Activiteitscode', use_alter=True))
+    activiteitFK: Mapped["Activiteitscode"] = relationship("Activiteitscode", backref="FKActiviteitscodeAccount")
 
 
 def insert_accountActiviteitscode_data(accountActiviteitscode_data, session):
@@ -60,3 +68,17 @@ def seed_account_activiteitscode():
     if accountActiviteitscode_data:
         insert_accountActiviteitscode_data(accountActiviteitscode_data, session)
         progress_bar.update(len(accountActiviteitscode_data))
+
+    session.execute(text("""
+        DELETE FROM AccountActiviteitscode
+        WHERE Account NOT IN 
+            (SELECT Account FROM Account);
+    """)) #delete, want niet bruikbaar met null
+    session.commit()
+
+    session.execute(text("""
+        DELETE FROM AccountActiviteitscode
+        WHERE Activiteitscode NOT IN 
+            (SELECT Activiteitscode FROM Activiteitscode);
+    """)) #delete, want niet bruikbaar met null
+    session.commit()
