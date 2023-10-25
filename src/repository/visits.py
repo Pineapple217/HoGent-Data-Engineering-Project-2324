@@ -15,6 +15,7 @@ from tqdm import tqdm
 if TYPE_CHECKING:
     from .mailing import Mailing
     from .pageviews import Pageview
+    from .contactfiche import Contactfiche
 
 BATCH_SIZE = 10_000
 
@@ -32,7 +33,8 @@ class Visit(Base):
     Campaign                :Mapped[str] = mapped_column(String(50), nullable=True)
     IPStad                  :Mapped[str] = mapped_column(String(50), nullable=True)
     IPCompany               :Mapped[str] = mapped_column(String(200), nullable=True)
-    Contact                 :Mapped[str] = mapped_column(String(50))
+    Contact                 :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    contactFK               :Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKVisitsContact") 
     ContactNaam             :Mapped[str] = mapped_column(String(200))
     ContainsSocialProfile   :Mapped[bool] = mapped_column(Boolean)
     IPLand                  :Mapped[str] = mapped_column(String(50), nullable=True)
@@ -163,5 +165,14 @@ def seed_visits():
         WHERE Visits.EmailSendId
         NOT IN
         (SELECT Mailing FROM Mailing);
+    """))
+    session.commit()
+
+    session.execute(text("""
+        UPDATE Visits
+        SET Visits.Contact = NULL
+        WHERE Visits.Contact
+        NOT IN
+        (SELECT ContactPersoon FROM Contactfiche)
     """))
     session.commit()
