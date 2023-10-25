@@ -2,7 +2,7 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, text
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from .gebruiker import Gebruiker
     
 BATCH_SIZE = 10_000
+CHUNK_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,10 @@ class InfoEnKlachten(Base):
     Datum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2)
     Status: Mapped[str] = mapped_column(String(15))
-    EigenaarId: Mapped[Optional[str]] = mapped_column(ForeignKey("Gebruiker.Id"), nullable=True)
-    Eigenaar: Mapped[Optional["Gebruiker"]] = relationship(back_populates="Info")
+    
+    # FK
+    EigenaarId: Mapped[Optional[str]] = mapped_column(ForeignKey("Gebruiker.Id", use_alter=True), nullable=True)
+    Eigenaar: Mapped["Gebruiker"] = relationship(back_populates="InfoEnKlachten")
 
 
 def insert_info_en_klachten_data(info_en_klachten_data, session):
@@ -38,14 +41,12 @@ def seed_info_en_klachten():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Info en klachten.csv"
+    chunks = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=CHUNK_SIZE)
+    df = pd.concat(chunks) 
     
-    csv_Gebruiker = DATA_PATH + '/Gebruikers.csv'
-    gebruiker_df = pd.read_csv(csv_Gebruiker, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
-    valid_gebruikers = gebruiker_df["crm_Gebruikers_CRM_User_ID"].tolist()
-    
-    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
     df = df.replace({np.nan: None})
     df = df.replace({"": None})
     df = df.drop_duplicates(subset=['crm_Info_en_Klachten_Aanvraag']) # duplicaten van primary keys in de csv
@@ -58,17 +59,14 @@ def seed_info_en_klachten():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
 
     for _, row in df.iterrows():
-        eigenaar_id=row["crm_Info_en_Klachten_Eigenaar"]
         p = InfoEnKlachten(
             Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
             Account=row["crm_Info_en_Klachten_Account"],
             Datum=row["crm_Info_en_Klachten_Datum"],
             DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
             Status=row["crm_Info_en_Klachten_Status"],
-            EigenaarId=eigenaar_id,
+            EigenaarId=row["crm_Info_en_Klachten_Eigenaar"],
         )
-        if eigenaar_id not in valid_gebruikers:
-            p.EigenaarId=None 
         info_en_klachten_data.append(p)
 
         if len(info_en_klachten_data) >= BATCH_SIZE:
@@ -76,7 +74,15 @@ def seed_info_en_klachten():
             info_en_klachten_data = []
             progress_bar.update(BATCH_SIZE)
         
-
     if info_en_klachten_data:
         insert_info_en_klachten_data(info_en_klachten_data, session)
         progress_bar.update(len(info_en_klachten_data))
+    
+        session.execute(text("""
+        UPDATE InfoEnKlachten
+        SET InfoEnKlachten.EigenaarId = NULL
+        WHERE InfoEnKlachten.EigenaarId
+        NOT IN
+        (SELECT Id FROM Gebruiker)
+    """))
+    session.commit()
