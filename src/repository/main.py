@@ -78,6 +78,7 @@ from repository.campagne import seed_campagne
 from repository.persoon import seed_persoon
 from repository.afspraak_contact import seed_afspraak_contact
 from repository.afspraak_account import seed_afspraak_account
+from repository.afspraak_alle import seed_afspraak_alle
 from repository.afspraak_vereist_contact import seed_afspraak_vereist_contact
 from repository.contactfiche_functies import seed_contactfiche_functie
 from repository.contactfiche import seed_contactfiche
@@ -115,6 +116,7 @@ def db_seed():
     #ordening obv hoeveel FK verwijzen naar hun PK
     seed_account()                #3
     seed_contactfiche()           #3
+    seed_afspraak_alle()          #3
     seed_mailing()                #2
     seed_functie()                #1
     seed_activiteitscode()        #1
@@ -122,11 +124,11 @@ def db_seed():
     seed_sessie()                 #1
     seed_campagne()               #1
     seed_visits()                 #1
+    seed_gebruiker()              #1
     seed_send_email_clicks()      
     seed_web_content()
     seed_pageviews()
     seed_sessie_inschrijving()   
-    seed_gebruiker()
     seed_info_en_klachten() # moet na gebruiker
     seed_account_financiele_data()
     seed_afspraak_contact()
