@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .gebruiker import Gebruiker
+    from .account import Account
     
 BATCH_SIZE = 10_000
 CHUNK_SIZE = 10_000
@@ -22,7 +23,8 @@ class InfoEnKlachten(Base):
     __tablename__ = "InfoEnKlachten"
     __table_args__ = {"extend_existing": True}
     Aanvraag: Mapped[str] = mapped_column(String(50), primary_key=True)
-    Account: Mapped[str] = mapped_column(String(50))
+    Account: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account', use_alter=True), nullable=True)
+    accountFK: Mapped["Account"] = relationship("Account", backref="FKInfoEnKlachtenAccount")
     Datum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2)
     Status: Mapped[str] = mapped_column(String(15))
@@ -78,11 +80,20 @@ def seed_info_en_klachten():
         insert_info_en_klachten_data(info_en_klachten_data, session)
         progress_bar.update(len(info_en_klachten_data))
     
-        session.execute(text("""
+    session.execute(text("""
         UPDATE InfoEnKlachten
         SET InfoEnKlachten.EigenaarId = NULL
         WHERE InfoEnKlachten.EigenaarId
         NOT IN
         (SELECT Id FROM Gebruiker)
+    """))
+    session.commit()
+
+    session.execute(text("""
+        UPDATE InfoEnKlachten
+        SET InfoEnKlachten.Account = NULL
+        WHERE InfoEnKlachten.Account
+        NOT IN
+        (SELECT Account FROM Account)
     """))
     session.commit()
