@@ -29,7 +29,7 @@ class Inschrijving(Base):
     DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2)
     FacturatieBedrag: Mapped[Float] = mapped_column(Float)
     Campagne: Mapped[str] = mapped_column(String(50), ForeignKey("Campagne.Campagne", use_alter=True), nullable=True)
-    Campagne: Mapped["Campagne"] = relationship("Campagne", back_populates="FKInschrijvingCampagne")
+    campagneFK: Mapped["Campagne"] = relationship("Campagne", backref="FKInschrijvingCampagne")
     CampagneNaam: Mapped[str] = mapped_column(String(200))
 
 
@@ -102,8 +102,8 @@ def seed_inschrijving():
     
     session.execute(text("""
         UPDATE Inschrijving
-        SET Inschrijving.Contact = NULL
-        WHERE Inschrijving.Contact
+        SET Inschrijving.Campagne = NULL
+        WHERE Inschrijving.Campagne
         NOT IN
         (SELECT Campagne FROM Campagne)
     """))
