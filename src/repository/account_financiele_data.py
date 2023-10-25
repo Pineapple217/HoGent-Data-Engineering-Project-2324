@@ -1,13 +1,17 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
-from sqlalchemy import String, Integer, FLOAT
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, Integer, FLOAT, ForeignKey, text
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .account import Account
 
 BATCH_SIZE = 10_000
 
@@ -17,7 +21,8 @@ class AccountFinancieleData(Base):
     __tablename__ = "AccountFinancieleData"
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
-    OndernemingID: Mapped[str] = mapped_column(String(50))
+    OndernemingID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account', use_alter=True), nullable=True)
+    account: Mapped["Account"] = relationship("Account", backref="FKAccountFin")
     Boekjaar: Mapped[int] = mapped_column(Integer)
     AantalMaanden: Mapped[int] = mapped_column(Integer, nullable=True)
     ToegevoegdeWaarde: Mapped[FLOAT] = mapped_column(FLOAT, nullable=True)
@@ -69,3 +74,13 @@ def seed_account_financiele_data():
     if account_financiele_data_data:
         insert_account_financiele_data_data(account_financiele_data_data, session)
         progress_bar.update(len(account_financiele_data_data))
+
+    
+    session.execute(text("""
+        UPDATE AccountFinancieleData
+        SET AccountFinancieleData.OndernemingID = NULL
+        WHERE AccountFinancieleData.OndernemingID
+        NOT IN
+        (SELECT Account FROM Account)
+    """))
+    session.commit()
