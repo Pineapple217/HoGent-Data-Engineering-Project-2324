@@ -116,7 +116,7 @@ def db_seed():
     #ordening obv hoeveel FK verwijzen naar hun PK
     seed_account()                #3
     seed_contactfiche()           #3
-    seed_afspraak_alle()          #3
+    seed_afspraak_contact()       #2
     seed_mailing()                #2
     seed_functie()                #1
     seed_activiteitscode()        #1
@@ -131,7 +131,6 @@ def db_seed():
     seed_sessie_inschrijving()   
     seed_info_en_klachten() # moet na gebruiker
     seed_account_financiele_data()
-    seed_afspraak_contact()
     seed_afspraak_account()
     seed_afspraak_vereist_contact()
     seed_account_activiteitscode()

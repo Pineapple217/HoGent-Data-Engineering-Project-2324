@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 class AfspraakContact(Base):
     __tablename__ = "AfspraakContact"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
-    AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakAlle.AfspraakID'))
-    afspraak: Mapped["AfspraakAlle"] = relationship("AfspraakAlle", backref="AfspraakContact")
+    AfspraakID: Mapped[str] = mapped_column(String(255), primary_key=True)
     Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
@@ -74,16 +72,6 @@ def seed_afspraak_contact():
     if AfspraakContact_data:
         insert_AfspraakContact_data(AfspraakContact_data, session)
         progress_bar.update(len(AfspraakContact_data))
-
-    
-    session.execute(text("""
-        UPDATE AfspraakContact
-        SET AfspraakContact.AfspraakID = NULL
-        WHERE AfspraakContact.AfspraakID
-        NOT IN
-        (SELECT AfspraakID FROM AfspraakAlle)
-    """))
-    session.commit()
 
     session.execute(text("""
         UPDATE AfspraakContact

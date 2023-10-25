@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .contactfiche import Contactfiche
-    from .afspraak_alle import AfspraakAlle
+    from .afspraak_contact import AfspraakContact
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
@@ -20,8 +20,8 @@ class AfspraakVereistContact(Base):
     __tablename__ = "AfspraakVereistContact"
     __table_args__ = {'extend_existing': True}
     Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
-    AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakAlle.AfspraakID'))
-    afspraak: Mapped["AfspraakAlle"] = relationship("AfspraakAlle", backref="AfspraakVereistContact")
+    AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakID'))
+    afspraak: Mapped["AfspraakContact"] = relationship("AfspraakContact", backref="AfspraakVereistContact")
     VereistContactID: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactPersoon'), primary_key=True)
     contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContact")
     
@@ -72,6 +72,6 @@ def seed_afspraak_vereist_contact():
     session.execute(text("""
         DELETE FROM AfspraakVereistContact
         WHERE AfspraakID NOT IN 
-            (SELECT AfspraakID FROM AfspraakAlle);
+            (SELECT AfspraakID FROM AfspraakContact);
     """)) #delete, want niet bruikbaar met null
     session.commit()
