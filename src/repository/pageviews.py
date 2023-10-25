@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .visits import Visit
     from .campagne import Campagne
+    from .contactfiche import Contactfiche
 
 
 BATCH_SIZE = 10_000
@@ -27,7 +28,8 @@ class Pageview(Base):
     PageView: Mapped[str] = mapped_column(String(200), primary_key=True)
     AnonymousVisitor: Mapped[str] = mapped_column(String(50), nullable=True)
     Browser: Mapped[str] = mapped_column(String(50), nullable=True)
-    Contact: Mapped[str] = mapped_column(String(200))
+    Contact: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKPageviewsContact")
     Duration: Mapped[int] = mapped_column(Integer, nullable=True)
     OperatingSystem: Mapped[str] = mapped_column(String(50))
     ReferrerType: Mapped[str] = mapped_column(String(50))
@@ -135,5 +137,14 @@ def seed_pageviews():
         WHERE Pageviews.CampagneId
         NOT IN
         (SELECT Campagne FROM Campagne)
+    """))
+    session.commit()
+
+    session.execute(text("""
+        UPDATE Pageviews
+        SET PageViews.Contact = NULL
+        WHERE Pageviews.Contact
+        NOT IN
+        (SELECT ContactPersoon FROM Contactfiche)
     """))
     session.commit()
