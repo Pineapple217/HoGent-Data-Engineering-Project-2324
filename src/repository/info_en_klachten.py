@@ -41,44 +41,40 @@ def seed_info_en_klachten():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
-    
+
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Info en klachten.csv"
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     chunks = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=CHUNK_SIZE)
-    df = pd.concat(chunks) 
-    
-    df = df.replace({np.nan: None})
-    df = df.replace({"": None})
-    df = df.drop_duplicates(subset=['crm_Info_en_Klachten_Aanvraag']) # duplicaten van primary keys in de csv
-    
-    df["crm_Info_en_Klachten_Datum"] = pd.to_datetime(df["crm_Info_en_Klachten_Datum"], format="%d-%m-%Y %H:%M:%S")
-    df["crm_Info_en_Klachten_Datum_afsluiting"] = pd.to_datetime(df["crm_Info_en_Klachten_Datum_afsluiting"], format="%d-%m-%Y %H:%M:%S")
 
     info_en_klachten_data = []
-    logger.info("Seeding inserting rows")
-    progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+    date_format = "%d-%m-%Y %H:%M:%S"
 
-    for _, row in df.iterrows():
-        p = InfoEnKlachten(
+    def create_info_en_klachten(chunk):
+        chunk = chunk.replace({np.nan: None, "": None})
+        chunk = chunk.drop_duplicates(subset=['crm_Info_en_Klachten_Aanvraag'])
+        
+        chunk["crm_Info_en_Klachten_Datum"] = pd.to_datetime(chunk["crm_Info_en_Klachten_Datum"], format=date_format)
+        chunk["crm_Info_en_Klachten_Datum_afsluiting"] = pd.to_datetime(chunk["crm_Info_en_Klachten_Datum_afsluiting"], format=date_format)
+        
+        chunk_data = chunk.apply(lambda row: InfoEnKlachten(
             Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
             Account=row["crm_Info_en_Klachten_Account"],
             Datum=row["crm_Info_en_Klachten_Datum"],
             DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
             Status=row["crm_Info_en_Klachten_Status"],
-            EigenaarId=row["crm_Info_en_Klachten_Eigenaar"],
-        )
-        info_en_klachten_data.append(p)
+            EigenaarId=row["crm_Info_en_Klachten_Eigenaar"]
+        ), axis=1).tolist()
+        info_en_klachten_data.extend(chunk_data)
+        progress_bar.update(len(chunk_data))
 
-        if len(info_en_klachten_data) >= BATCH_SIZE:
-            insert_info_en_klachten_data(info_en_klachten_data, session)
-            info_en_klachten_data = []
-            progress_bar.update(BATCH_SIZE)
-        
-    if info_en_klachten_data:
+    for chunk in chunks:
+        info_en_klachten_data.clear()
+        create_info_en_klachten(chunk)
         insert_info_en_klachten_data(info_en_klachten_data, session)
-        progress_bar.update(len(info_en_klachten_data))
-    
-        session.execute(text("""
+
+    session.execute(text("""
         UPDATE InfoEnKlachten
         SET InfoEnKlachten.EigenaarId = NULL
         WHERE InfoEnKlachten.EigenaarId

@@ -111,28 +111,7 @@ def db_init():
 def db_seed():
     logger.info("Starting seeding...")
     drop_fk()
-    
-    #ordening obv hoeveel FK verwijzen naar hun PK
-    seed_account()                #3
-    seed_contactfiche()           #3
-    seed_mailing()                #2
-    seed_functie()                #1
-    seed_activiteitscode()        #1
-    seed_inschrijving()           #1
-    seed_sessie()                 #1
-    seed_campagne()               #1
-    seed_visits()                 #1
-    seed_send_email_clicks()      
-    seed_web_content()
-    seed_pageviews()
-    seed_sessie_inschrijving()   
-    seed_gebruiker()
+
     seed_info_en_klachten() # moet na gebruiker
-    seed_account_financiele_data()
-    seed_afspraak_contact()
-    seed_afspraak_account()
-    seed_afspraak_vereist_contact()
-    seed_account_activiteitscode()
-    seed_contactfiche_functie()
     
     enable_fk()
