@@ -2,14 +2,18 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Numeric, Integer, Date
+from sqlalchemy.orm import mapped_column, relationship
+from sqlalchemy import String, ForeignKey, text
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from .sessie import Sessie
+    from .inschrijving import Inschrijving
 
 
 BATCH_SIZE = 10_000
@@ -22,8 +26,20 @@ class SessieInschrijving(Base):
     SessieInschrijving: Mapped[str] = mapped_column(
         String(50), nullable=True, primary_key=True
     )
-    Sessie: Mapped[str] = mapped_column(String(50), nullable=True)
-    Inschrijving: Mapped[str] = mapped_column(String(50), nullable=True)
+
+    # FK
+    SessieId: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("Sessie.Sessie", use_alter=True), nullable=True
+    )
+    Sessie: Mapped["Sessie"] = relationship(back_populates="SessieInschrijving")
+
+    InschrijvingId: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("Inschrijving.Inschrijving", use_alter=True), nullable=True
+    )
+    Inschrijving: Mapped["Inschrijving"] = relationship(
+        back_populates="SessieInschrijving"
+    )
+
 
 def insert_sessie_inschrijving_data(sessie_inschrijving_data, session):
     session.bulk_save_objects(sessie_inschrijving_data)
@@ -35,7 +51,7 @@ def seed_sessie_inschrijving():
     Session = sessionmaker(bind=engine)
     session = Session()
     logger.info("Reading CSV...")
-    csv = DATA_PATH + '/Sessie inschrijving.csv'
+    csv = DATA_PATH + "/Sessie inschrijving.csv"
     df = pd.read_csv(
         csv,
         delimiter=",",
@@ -44,7 +60,7 @@ def seed_sessie_inschrijving():
         na_values=[""],
     )
     # csv bevat veel lege rijen, dit drop alle rijen die volledig leeg zijn
-    df = df.dropna(how='all', axis=0)
+    df = df.dropna(how="all", axis=0)
     df = df.replace({np.nan: None})
     # Sommige lege waardes worden als NaN ingelezeno
     # NaN mag niet in een varchar
@@ -56,8 +72,8 @@ def seed_sessie_inschrijving():
     for i, row in df.iterrows():
         p = SessieInschrijving(
             SessieInschrijving=row["crm_SessieInschrijving_SessieInschrijving"],
-            Sessie=row["crm_SessieInschrijving_Sessie"],
-            Inschrijving=row["crm_SessieInschrijving_Inschrijving"],
+            SessieId=row["crm_SessieInschrijving_Sessie"],
+            InschrijvingId=row["crm_SessieInschrijving_Inschrijving"],
         )
         sessie_inschrijving_data.append(p)
 
@@ -71,4 +87,28 @@ def seed_sessie_inschrijving():
         insert_sessie_inschrijving_data(sessie_inschrijving_data, session)
         progress_bar.update(len(sessie_inschrijving_data))
 
+    session.execute(
+        text(
+            """
+        UPDATE SessieInschrijving
+        SET SessieInschrijving.SessieId = NULL
+        WHERE SessieInschrijving.SessieId
+        NOT IN
+        (SELECT Sessie FROM Sessie)
+    """
+        )
+    )
+    session.commit()
 
+    session.execute(
+        text(
+            """
+        UPDATE SessieInschrijving
+        SET SessieInschrijving.InschrijvingId = NULL
+        WHERE SessieInschrijving.InschrijvingId
+        NOT IN
+        (SELECT Inschrijving FROM Inschrijving)
+    """
+        )
+    )
+    session.commit()

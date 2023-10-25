@@ -2,16 +2,18 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, Numeric, Integer, Date
+from sqlalchemy.orm import mapped_column, relationship
+from sqlalchemy import String, ForeignKey, text
 from sqlalchemy.dialects.mssql import DATETIME2
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import concurrent.futures
+from typing import TYPE_CHECKING, Optional
 
+if TYPE_CHECKING:
+    from .campagne import Campagne
 
 BATCH_SIZE = 10_000
 
@@ -23,12 +25,16 @@ class Sessie(Base):
     __table_args__ = {"extend_existing": True}
     Sessie: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
     Activiteitstype: Mapped[str] = mapped_column(String(50), nullable=True)
-    Campagne: Mapped[str] = mapped_column(String(50), nullable=True)
     EindDatumTijd: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     Product: Mapped[str] = mapped_column(String(50), nullable=True)
     SessieNr: Mapped[str] = mapped_column(String(50), nullable=True)
     StartDatumTijd: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     ThemaNaam: Mapped[str] = mapped_column(String(50), nullable=True)
+
+    CampagneId: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("Campagne.Campagne", use_alter=True), nullable=True
+    )
+    Campagne: Mapped["Campagne"] = relationship(back_populates="Sessie")
 
 
 def insert_sessie_data(sessie_data, session):
@@ -66,7 +72,7 @@ def seed_sessie():
         p = Sessie(
             Sessie=row["crm_Sessie_Sessie"],
             Activiteitstype=row["crm_Sessie_Activiteitstype"],
-            Campagne=row["crm_Sessie_Campagne"],
+            CampagneId=row["crm_Sessie_Campagne"],
             EindDatumTijd=row["crm_Sessie_Eind_Datum_Tijd"],
             Product=row["crm_Sessie_Product"],
             SessieNr=row["crm_Sessie_Sessie_nr_"],
@@ -85,4 +91,16 @@ def seed_sessie():
     if sessie_data:
         insert_sessie_data(sessie_data, session)
         progress_bar.update(len(sessie_data))
-        i
+
+    session.execute(
+        text(
+            """
+        UPDATE Sessie
+        SET Sessie.CampagneId = NULL
+        WHERE Sessie.CampagneId
+        NOT IN
+        (SELECT Campagne FROM Campagne)
+    """
+        )
+    )
+    session.commit()

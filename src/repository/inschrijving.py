@@ -1,17 +1,23 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
-from sqlalchemy import String, Float
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, Float, ForeignKey, text
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from .contactfiche import Contactfiche
+
 
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
+
 
 class Inschrijving(Base):
     __tablename__ = "Inschrijving"
@@ -19,11 +25,20 @@ class Inschrijving(Base):
     Inschrijving: Mapped[str] = mapped_column(String(50), primary_key=True)
     AanwezigAfwezig: Mapped[str] = mapped_column(String(50))
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
-    Contactfiche: Mapped[str] = mapped_column(String(50), nullable=True)
     DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2)
     FacturatieBedrag: Mapped[Float] = mapped_column(Float)
-    Campagne: Mapped[str] = mapped_column(String(50))
     CampagneNaam: Mapped[str] = mapped_column(String(200))
+
+    # FK
+    ContactficheId: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("Contactfiche.ContactPersoon", use_alter=True), nullable=True
+    )
+    Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Inschrijving")
+
+    CampagneId: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("Campagne.Campagne", use_alter=True), nullable=True
+    )
+    Campagne: Mapped["Campagne"] = relationship(back_populates="Inschrijving")
 
 
 def insert_inschrijving_data(inschrijving_data, session):
@@ -65,10 +80,10 @@ def seed_inschrijving():
             Inschrijving=row["crm_Inschrijving_Inschrijving"],
             AanwezigAfwezig=row["crm_Inschrijving_Aanwezig_Afwezig"],
             Bron=row["crm_Inschrijving_Bron"],
-            Contactfiche=row["crm_Inschrijving_Contactfiche"],
+            ContactficheId=row["crm_Inschrijving_Contactfiche"],
             DatumInschrijving=row["crm_Inschrijving_Datum_inschrijving"],
             FacturatieBedrag=to_float(row["crm_Inschrijving_Facturatie_Bedrag"]),
-            Campagne=row["crm_Inschrijving_Campagne"],
+            CampagneId=row["crm_Inschrijving_Campagne"],
             CampagneNaam=row["crm_Inschrijving_Campagne_Naam_"],
         )
 
@@ -83,3 +98,29 @@ def seed_inschrijving():
     if inschrijving_data:
         insert_inschrijving_data(inschrijving_data, session)
         progress_bar.update(len(inschrijving_data))
+
+    session.execute(
+        text(
+            """
+        UPDATE Inschrijving
+        SET Inschrijving.ContactficheId = NULL
+        WHERE Inschrijving.ContactficheId
+        NOT IN
+        (SELECT ContactPersoon FROM Contactfiche)
+    """
+        )
+    )
+    session.commit()
+
+    session.execute(
+        text(
+            """
+        UPDATE Inschrijving
+        SET Inschrijving.CampagneId = NULL
+        WHERE Inschrijving.CampagneId
+        NOT IN
+        (SELECT Campagne FROM Campagne)
+    """
+        )
+    )
+    session.commit()
