@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .contactfiche import Contactfiche
-    from .afspraak_alle import AfspraakAlle
 
 BATCH_SIZE = 10_000
 

@@ -3,7 +3,7 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy import String, Integer, ForeignKey, text
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .mailing import Mailing
+    from .contactfiche import Contactfiche
 
 
 BATCH_SIZE = 10_000
@@ -27,7 +28,8 @@ class SendEmailClicks(Base):
     __table_args__ = {"extend_existing": True}
     SentEmail       :Mapped[str] = mapped_column(String(50), primary_key=True)
     Clicks          :Mapped[int] = mapped_column(Integer)
-    Contact         :Mapped[str] = mapped_column(String(50))
+    Contact         :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKSentEmailClicksContact")
     EmailVersturenId:Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.Mailing"), nullable=True)
     EmailVersturen  :Mapped[Optional["Mailing"]] = relationship(back_populates="SendClicks")
     
@@ -82,3 +84,12 @@ def seed_send_email_clicks():
     if send_email_clicks_data:
         insert_send_email_clicks_data(send_email_clicks_data, session)
         progress_bar.update(len(send_email_clicks_data))
+
+    session.execute(text("""
+        UPDATE SendEmailClicks
+        SET SendEmailClicks.Contact = NULL
+        WHERE SendEmailClicks.Contact
+        NOT IN
+        (SELECT ContactPersoon FROM Contactfiche)
+    """))
+    session.commit()
