@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class AfspraakAccount(Base):
     __tablename__ = "AfspraakAccount"
     __table_args__ = {"extend_existing": True}
+    Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
     AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakID'))
     afspraak: Mapped["AfspraakContact"] = relationship("AfspraakContact", backref="AfspraakAccount")
     #Thema: Mapped[str] = mapped_column(String(255), nullable=True)
