@@ -63,5 +63,5 @@ def seed_afspraak_vereist_contact():
         DELETE FROM AfspraakVereistContact
         WHERE VereistContactID NOT IN 
             (SELECT ContactPersoon FROM Contactfiche);
-    """)) #delete, want kan niet null zijn
+    """)) #delete, want niet bruikbaar met null
     session.commit()
