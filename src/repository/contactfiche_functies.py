@@ -1,12 +1,17 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
-from sqlalchemy import String, Integer
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, Integer, ForeignKey, text
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .contactfiche import Contactfiche
+    from .functie import Functie
 
 BATCH_SIZE = 10_000
 
@@ -16,9 +21,10 @@ class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    Contactpersoon: Mapped[str] = mapped_column(String(50))
-    Functie: Mapped[str] = mapped_column(String(50))
-
+    Contactpersoon: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContactficheFunctieContact")
+    Functie: Mapped[str] = mapped_column(String(50), ForeignKey('Functie.Functie', use_alter=True), nullable=True)
+    functieFK: Mapped["Functie"] = relationship("Functie", backref="ContactficheFunctie")
 
 def insert_contactfiche_functie_data(contactfiche_functie_data, session):
     session.bulk_save_objects(contactfiche_functie_data)
@@ -58,3 +64,18 @@ def seed_contactfiche_functie():
     if contactfiche_functie_data:
         insert_contactfiche_functie_data(contactfiche_functie_data, session)
         progress_bar.update(len(contactfiche_functie_data))
+
+    
+    session.execute(text("""
+        DELETE FROM ContactficheFunctie
+        WHERE Contactpersoon NOT IN 
+            (SELECT ContactPersoon FROM Contactfiche);
+    """)) #delete, want niet bruikbaar met null
+    session.commit()
+
+    session.execute(text("""
+        DELETE FROM ContactficheFunctie
+        WHERE Functie NOT IN 
+            (SELECT Functie FROM Functie);
+    """)) #delete, want niet bruikbaar met null
+    session.commit()
