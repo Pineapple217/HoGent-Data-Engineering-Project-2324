@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .account import Account
+    from .afspraak_alle import AfspraakAlle
 
 
 BATCH_SIZE = 10_000
@@ -21,13 +22,15 @@ logger = logging.getLogger(__name__)
 class AfspraakAccount(Base):
     __tablename__ = "AfspraakAccount"
     __table_args__ = {"extend_existing": True}
-    AfspraakID: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
+    Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, PK kan geen FK zijn
+    AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakAlle.AfspraakID'))
+    afspraak: Mapped["AfspraakAlle"] = relationship("AfspraakAlle", backref="AfspraakAccount")
     #Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
     #Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
-    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account'), nullable=True)
-    account: Mapped["Account"] = relationship("Account", backref="afspraken")
+    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account'))
+    account: Mapped["Account"] = relationship("Account", backref="AccountAfspraak")
     #KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
 
@@ -75,12 +78,17 @@ def seed_afspraak_account():
 
         
     session.execute(text("""
-        UPDATE AfspraakAccount
-        SET AfspraakAccount.AccountID = NULL
-        WHERE AfspraakAccount.AccountID
-        NOT IN
-        (SELECT Account FROM Account)
-    """))
+        DELETE FROM AfspraakAccount
+        WHERE AfspraakID NOT IN 
+            (SELECT AfspraakID FROM AfspraakAlle);
+    """)) #delete, want niet bruikbaar met null
+    session.commit()
+
+    session.execute(text("""
+        DELETE FROM AfspraakAccount
+        WHERE AccountID NOT IN 
+            (SELECT Account FROM Account);
+    """)) #delete, want niet bruikbaar met null
     session.commit()
 
 

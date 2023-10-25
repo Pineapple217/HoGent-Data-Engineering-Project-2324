@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class AfspraakVereistContact(Base):
     __tablename__ = "AfspraakVereistContact"
     __table_args__ = {'extend_existing': True}
+    Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
     AfspraakID: Mapped[str] = mapped_column(String(255), primary_key=True)
     VereistContactID: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactPersoon'), primary_key=True)
     contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContact")
