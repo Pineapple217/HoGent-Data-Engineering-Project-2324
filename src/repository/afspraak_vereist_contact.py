@@ -60,10 +60,8 @@ def seed_afspraak_vereist_contact():
         progress_bar.update(len(AfspraakVereistContact_data))
 
     session.execute(text("""
-        UPDATE AfspraakVereistContact
-        SET AfspraakVereistContact.ContactID = NULL
-        WHERE AfspraakVereistContact.ContactID
-        NOT IN
-        (SELECT ContactPersoon FROM Contactfiche)
-    """))
+        DELETE FROM AfspraakVereistContact
+        WHERE VereistContactID NOT IN 
+            (SELECT ContactPersoon FROM Contactfiche);
+    """)) #delete, want kan niet null zijn
     session.commit()
