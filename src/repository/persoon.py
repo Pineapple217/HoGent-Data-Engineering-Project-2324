@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class Persoon(Base):
     __tablename__ = "Persoon"
     __table_args__ = {"extend_existing": True}
-    CRMPersoon: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
+    PersoonId: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
     CRMPersoonsnr: Mapped[str] = mapped_column(Integer, nullable=True)
     RedenVanStatus: Mapped[str] = mapped_column(String(100), nullable=True)
     WebLogin: Mapped[str] = mapped_column(String(100), nullable=True)
@@ -74,7 +74,7 @@ def seed_persoon():
     futures = []
     for _, row in df.iterrows():
         p = Persoon(
-            CRMPersoon=row["crm_Persoon_persoon"],
+            PersoonId=row["crm_Persoon_persoon"],
             CRMPersoonsnr=row["crm_Persoon_Persoonsnr_"],
             RedenVanStatus=actief_inactief_mapping.get(row["crm_Persoon_Reden_van_status"]),
             WebLogin=row["crm_Persoon_Web_Login"],
