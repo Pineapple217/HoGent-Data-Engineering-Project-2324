@@ -1,29 +1,38 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Integer
 from sqlalchemy.dialects.mssql import BIT
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .inschrijving import Inschrijving
 
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
+
 class Contactfiche(Base):
-    __tablename__ = "Contactfiche" 
+    __tablename__ = "Contactfiche"
     __table_args__ = {"extend_existing": True}
-    #Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
-    #edit: ContactPersoon is PK, want hiernaar wordt gerefereerd uit andere tables. Is ook uniek in de hele datafile. Kan wel interessant zijn voor DWH
-    ContactPersoon: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
+    # Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
+    # edit: ContactPersoon is PK, want hiernaar wordt gerefereerd uit andere tables. Is ook uniek in de hele datafile. Kan wel interessant zijn voor DWH
+    ContactPersoon: Mapped[str] = mapped_column(
+        String(255), nullable=False, primary_key=True
+    )
     Account: Mapped[str] = mapped_column(String(50))
     FunctieTitel: Mapped[str] = mapped_column(String(255), nullable=True)
     PersoonId: Mapped[str] = mapped_column(String(50))
     Status: Mapped[str] = mapped_column(String(50))
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
+
+    Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Contactfiche")
 
 
 def insert_contactfiche_data(contactfiche_data, session):
@@ -48,7 +57,7 @@ def seed_contactfiche():
     contactfiche_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    
+
     for i, row in df.iterrows():
         p = Contactfiche(
             ContactPersoon=row["crm_Contact_Contactpersoon"],

@@ -26,6 +26,8 @@ class SessieInschrijving(Base):
     SessieInschrijving: Mapped[str] = mapped_column(
         String(50), nullable=True, primary_key=True
     )
+    Sessie: Mapped[str] = mapped_column(String(50), nullable=True)
+    Inschrijving: Mapped[str] = mapped_column(String(50), nullable=True)
 
     # FK
     SessieId: Mapped[Optional[str]] = mapped_column(

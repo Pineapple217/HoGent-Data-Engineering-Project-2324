@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .campagne import Campagne
+    from .sessie_inschrijving import SessieInschrijving
 
 BATCH_SIZE = 10_000
 
@@ -35,6 +36,10 @@ class Sessie(Base):
         ForeignKey("Campagne.Campagne", use_alter=True), nullable=True
     )
     Campagne: Mapped["Campagne"] = relationship(back_populates="Sessie")
+
+    SessieInschrijving: Mapped["SessieInschrijving"] = relationship(
+        back_populates="Sessie"
+    )
 
 
 def insert_sessie_data(sessie_data, session):
