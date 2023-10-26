@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from .account import Account
     
 BATCH_SIZE = 10_000
-CHUNK_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +22,6 @@ class InfoEnKlachten(Base):
     __tablename__ = "InfoEnKlachten"
     __table_args__ = {"extend_existing": True}
     Aanvraag: Mapped[str] = mapped_column(String(50), primary_key=True)
-    Account: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account', use_alter=True), nullable=True)
-    accountFK: Mapped["Account"] = relationship("Account", backref="FKInfoEnKlachtenAccount")
     Datum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2)
     Status: Mapped[str] = mapped_column(String(15))
@@ -32,6 +29,9 @@ class InfoEnKlachten(Base):
     # FK
     EigenaarId: Mapped[Optional[str]] = mapped_column(ForeignKey("Gebruiker.Id", use_alter=True), nullable=True)
     Eigenaar: Mapped["Gebruiker"] = relationship(back_populates="InfoEnKlachten")
+    
+    AccountId: Mapped[Optional[str]] = mapped_column(ForeignKey("Account.Account", use_alter=True), nullable=True)
+    Account: Mapped["Account"] = relationship(back_populates="InfoEnKlachten")
 
 
 def insert_info_en_klachten_data(info_en_klachten_data, session):
@@ -46,8 +46,7 @@ def seed_info_en_klachten():
     
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Info en klachten.csv"
-    chunks = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=CHUNK_SIZE)
-    df = pd.concat(chunks) 
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
     
     df = df.replace({np.nan: None})
     df = df.replace({"": None})
@@ -63,7 +62,7 @@ def seed_info_en_klachten():
     for _, row in df.iterrows():
         p = InfoEnKlachten(
             Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
-            Account=row["crm_Info_en_Klachten_Account"],
+            AccountId=row["crm_Info_en_Klachten_Account"],
             Datum=row["crm_Info_en_Klachten_Datum"],
             DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
             Status=row["crm_Info_en_Klachten_Status"],
@@ -91,8 +90,8 @@ def seed_info_en_klachten():
 
     session.execute(text("""
         UPDATE InfoEnKlachten
-        SET InfoEnKlachten.Account = NULL
-        WHERE InfoEnKlachten.Account
+        SET InfoEnKlachten.AccountId = NULL
+        WHERE InfoEnKlachten.AccountId
         NOT IN
         (SELECT Account FROM Account)
     """))

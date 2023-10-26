@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from .info_en_klachten import InfoEnKlachten
 
 BATCH_SIZE = 10_000
-CHUNK_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +24,12 @@ class Gebruiker(Base):
     
     # FK
     InfoEnKlachten: Mapped["InfoEnKlachten"] = relationship(back_populates="Eigenaar")
+    
 
 def insert_gebruiker_data(gebruiker_data, session):
     session.bulk_save_objects(gebruiker_data)
     session.commit()
+    
 
 def seed_gebruiker():
     engine = get_engine()
@@ -37,8 +38,7 @@ def seed_gebruiker():
     
     logger.info("Reading CSV...")
     csv = DATA_PATH + '/Gebruikers.csv'
-    chunks = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''], chunksize=CHUNK_SIZE) # utf-8-sig is nodig om rare tekens te vermijden die er wel zijn bij utf-8
-    df = pd.concat(chunks)
+    df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=['']) # utf-8-sig is nodig om rare tekens te vermijden die er wel zijn bij utf-8
     
     df = df.replace({np.nan: None})
     

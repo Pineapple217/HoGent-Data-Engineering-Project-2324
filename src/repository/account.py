@@ -1,7 +1,7 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Integer, Date
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -32,6 +32,9 @@ class Account(Base):
     VokaNr: Mapped[int] = mapped_column(Integer)
     HoofdNaCeCode: Mapped[str] = mapped_column(String(50), nullable=True)
     AdresLand: Mapped[str] = mapped_column(String(50), nullable=True)
+    
+    # FK
+    InfoEnKlachten: Mapped["InfoEnKlachten"] = relationship(back_populates="Account")
 
 
 def insert_account_data(account_data, session):
@@ -43,9 +46,11 @@ def seed_account():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Account.csv"
     df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
     df = df.replace({np.nan: None})
     df = df.replace({"": None})
     

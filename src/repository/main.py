@@ -128,7 +128,7 @@ def db_seed():
     seed_web_content()
     seed_pageviews()
     seed_sessie_inschrijving()   
-    seed_info_en_klachten() # moet na gebruiker
+    seed_info_en_klachten()
     seed_account_financiele_data()
     seed_afspraak_account()
     seed_afspraak_vereist_contact()
