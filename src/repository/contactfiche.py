@@ -29,10 +29,10 @@ class Contactfiche(Base):
     Status: Mapped[str] = mapped_column(String(50))
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
 
-    AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'))
+    AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'), nullable=True)
     Account: Mapped["Account"] = relationship("Account", backref="ContactficheAccount")
 
-    PersoonId: Mapped[str] = mapped_column(String(100), ForeignKey('Persoon.PersoonId'))
+    PersoonId: Mapped[str] = mapped_column(String(100), ForeignKey('Persoon.PersoonId'), nullable=True)
     Account: Mapped["Persoon"] = relationship("Persoon", backref="ContactfichePersoon")
 
     Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Contactfiche")
