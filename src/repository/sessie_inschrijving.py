@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class SessieInschrijving(Base):
     __tablename__ = "SessieInschrijving"  # snakecase
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(
+    SessieInschrijvingId: Mapped[str] = mapped_column(
         String(50), nullable=True, primary_key=True
     )
     Sessie: Mapped[str] = mapped_column(String(50), nullable=True)
@@ -30,11 +30,11 @@ class SessieInschrijving(Base):
 
     # FK
     SessieId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Sessie.Id", use_alter=True), nullable=True
+        ForeignKey("Sessie.SessieId", use_alter=True), nullable=True
     )
     Sessie: Mapped["Sessie"] = relationship(back_populates="SessieInschrijving")
     InschrijvingId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Inschrijving.Id", use_alter=True), nullable=True
+        ForeignKey("Inschrijving.InschrijvingId", use_alter=True), nullable=True
     )
     Inschrijving: Mapped["Inschrijving"] = relationship(
         back_populates="SessieInschrijving"
@@ -71,7 +71,7 @@ def seed_sessie_inschrijving():
 
     for i, row in df.iterrows():
         p = SessieInschrijving(
-            Id=row["crm_SessieInschrijving_SessieInschrijving"],
+            SessieInschrijvingId=row["crm_SessieInschrijving_SessieInschrijving"],
             SessieId=row["crm_SessieInschrijving_Sessie"],
             InschrijvingId=row["crm_SessieInschrijving_Inschrijving"],
         )
@@ -94,7 +94,7 @@ def seed_sessie_inschrijving():
         SET SessieInschrijving.SessieId = NULL
         WHERE SessieInschrijving.SessieId
         NOT IN
-        (SELECT Id FROM Sessie)
+        (SELECT SessieId FROM Sessie)
     """
         )
     )
@@ -106,7 +106,7 @@ def seed_sessie_inschrijving():
         SET SessieInschrijving.InschrijvingId = NULL
         WHERE SessieInschrijving.InschrijvingId
         NOT IN
-        (SELECT Id FROM Inschrijving)
+        (SELECT InschrijvingId FROM Inschrijving)
     """
         )
     )

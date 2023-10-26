@@ -49,7 +49,7 @@ class Pageview(Base):
     VisitId: Mapped[Optional[str]] = mapped_column(ForeignKey("Visits.Visit", use_alter=True), nullable=True)
     Visit: Mapped["Visit"] = relationship(back_populates="Pageviews")
 
-    CampagneId: Mapped[Optional[str]] = mapped_column(ForeignKey("Campagne.Id", use_alter=True), nullable=True)
+    CampagneId: Mapped[Optional[str]] = mapped_column(ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True)
     Campagne: Mapped["Campagne"] = relationship(back_populates="Pageviews")
 
 def insert_pageviews_data(pageviews_data, session):

@@ -8,7 +8,7 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .contactfiche import Contactfiche
@@ -23,26 +23,21 @@ logger = logging.getLogger(__name__)
 class Inschrijving(Base):
     __tablename__ = "Inschrijving"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    InschrijvingId: Mapped[str] = mapped_column(String(50), primary_key=True)
     AanwezigAfwezig: Mapped[str] = mapped_column(String(50))
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
-    Contact: Mapped[str] = mapped_column(
-        String(255),
-        ForeignKey("Contactfiche.ContactPersoon", use_alter=True),
-        nullable=True,
-    )
-    contactFK: Mapped["Contactfiche"] = relationship(
-        "Contactfiche", backref="FKInschrijvingContact"
-    )
     DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2)
     FacturatieBedrag: Mapped[Float] = mapped_column(Float)
-    CampagneId: Mapped[str] = mapped_column(
-        String(50), ForeignKey("Campagne.Id", use_alter=True), nullable=True
-    )
-    campagneFK: Mapped["Campagne"] = relationship(
-        "Campagne", backref="FKInschrijvingCampagne"
-    )
     CampagneNaam: Mapped[str] = mapped_column(String(200))
+    # FK
+    ContactficheId: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("Contactfiche.ContactPersoon", use_alter=True), nullable=True
+    )
+    Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Inschrijving")
+    CampagneId: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True
+    )
+    Campagne: Mapped["Campagne"] = relationship(back_populates="Inschrijving")
 
     SessieInschrijving: Mapped["SessieInschrijving"] = relationship(
         back_populates="Inschrijving"
@@ -85,10 +80,10 @@ def seed_inschrijving():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for i, row in df.iterrows():
         p = Inschrijving(
-            Id=row["crm_Inschrijving_Inschrijving"],
+            InschrijvingId=row["crm_Inschrijving_Inschrijving"],
             AanwezigAfwezig=row["crm_Inschrijving_Aanwezig_Afwezig"],
             Bron=row["crm_Inschrijving_Bron"],
-            Contact=row["crm_Inschrijving_Contactfiche"],
+            ContactficheId=row["crm_Inschrijving_Contactfiche"],
             DatumInschrijving=row["crm_Inschrijving_Datum_inschrijving"],
             FacturatieBedrag=to_float(row["crm_Inschrijving_Facturatie_Bedrag"]),
             CampagneId=row["crm_Inschrijving_Campagne"],
@@ -111,10 +106,10 @@ def seed_inschrijving():
         text(
             """
         UPDATE Inschrijving
-        SET Inschrijving.Contact = NULL
-        WHERE Inschrijving.Contact
+        SET Inschrijving.ContactficheId = NULL
+        WHERE Inschrijving.ContactficheId
         NOT IN 
-        (SELECT Id FROM Contactfiche)
+        (SELECT ContactPersoon FROM Contactfiche)
     """
         )
     )  # delete, want niet bruikbaar met null
@@ -124,10 +119,10 @@ def seed_inschrijving():
         text(
             """
         UPDATE Inschrijving
-        SET Inschrijving.Campagne = NULL
-        WHERE Inschrijving.Campagne
+        SET Inschrijving.CampagneId = NULL
+        WHERE Inschrijving.CampagneId
         NOT IN
-        (SELECT Id FROM Campagne)
+        (SELECT CampagneId FROM Campagne)
     """
         )
     )

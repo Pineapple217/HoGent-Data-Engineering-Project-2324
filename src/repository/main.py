@@ -119,8 +119,8 @@ def db_seed():
     # seed_mailing()                #2
     # seed_functie()                #1
     # seed_activiteitscode()        #1
-    seed_inschrijving()           #1
-    seed_sessie()                 #1
+    # seed_inschrijving()           #1
+    # seed_sessie()                 #1
     seed_campagne()               #1
     # seed_visits()                 #1
     # seed_gebruiker()              #1

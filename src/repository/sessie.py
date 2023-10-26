@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class Sessie(Base):
     __tablename__ = "Sessie"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
+    SessieId: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
     Activiteitstype: Mapped[str] = mapped_column(String(50), nullable=True)
     EindDatumTijd: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     Product: Mapped[str] = mapped_column(String(50), nullable=True)
@@ -33,7 +33,7 @@ class Sessie(Base):
     ThemaNaam: Mapped[str] = mapped_column(String(50), nullable=True)
 
     CampagneId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Campagne.Id", use_alter=True), nullable=True
+        ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True
     )
     Campagne: Mapped["Campagne"] = relationship(back_populates="Sessie")
 
@@ -75,7 +75,7 @@ def seed_sessie():
 
     for i, row in df.iterrows():
         p = Sessie(
-            Id=row["crm_Sessie_Sessie"],
+            SessieId=row["crm_Sessie_Sessie"],
             Activiteitstype=row["crm_Sessie_Activiteitstype"],
             CampagneId=row["crm_Sessie_Campagne"],
             EindDatumTijd=row["crm_Sessie_Eind_Datum_Tijd"],
@@ -104,7 +104,7 @@ def seed_sessie():
         SET Sessie.CampagneId = NULL
         WHERE Sessie.CampagneId
         NOT IN
-        (SELECT Id FROM Campagne)
+        (SELECT CampagneId FROM Campagne)
     """
         )
     )

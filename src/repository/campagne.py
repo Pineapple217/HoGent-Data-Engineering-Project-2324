@@ -13,6 +13,7 @@ from tqdm import tqdm
 if TYPE_CHECKING:
     from .pageviews import Pageview
     from .sessie import Sessie
+    from .inschrijving import Inschrijving
 
 BATCH_SIZE = 10_000
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 class Campagne(Base):
     __tablename__ = "Campagne"  # snakecase
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    CampagneId: Mapped[str] = mapped_column(String(50), primary_key=True)
     CampagneNr: Mapped[str] = mapped_column(String(50), nullable=True)
     Einddatum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     CampagneNaam: Mapped[str] = mapped_column(String(200))
@@ -37,6 +38,8 @@ class Campagne(Base):
     Pageviews: Mapped["Pageview"] = relationship(back_populates="Campagne")
 
     Sessie: Mapped["Sessie"] = relationship(back_populates="Campagne")
+
+    Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Campagne")
 
 
 def insert_campagne_data(campagne_data, session):
@@ -71,7 +74,7 @@ def seed_campagne():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         p = Campagne(
-            Id=row["crm_Campagne_Campagne"],
+            CampagneId=row["crm_Campagne_Campagne"],
             CampagneNr=row["crm_Campagne_Campagne_Nr"],
             Einddatum=row["crm_Campagne_Einddatum"],
             CampagneNaam=row["crm_Campagne_Naam"],
