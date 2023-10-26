@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class AccountFinancieleData(Base):
     __tablename__ = "AccountFinancieleData"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
+    AccountFinancieleDataId: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
     Boekjaar: Mapped[int] = mapped_column(Integer)
     AantalMaanden: Mapped[int] = mapped_column(Integer, nullable=True)
     ToegevoegdeWaarde: Mapped[FLOAT] = mapped_column(FLOAT, nullable=True)
@@ -28,7 +28,7 @@ class AccountFinancieleData(Base):
     GewijzigdOp: Mapped[DATETIME2] = mapped_column(DATETIME2)
     
     # FK
-    OndernemingId: Mapped[Optional[str]] = mapped_column(ForeignKey("Account.Id", use_alter=True), nullable=True)
+    OndernemingId: Mapped[Optional[str]] = mapped_column(ForeignKey("Account.AccountId", use_alter=True), nullable=True)
     Onderneming: Mapped["Account"] = relationship(back_populates="AccountFinancieleData")
     
     
@@ -84,6 +84,6 @@ def seed_account_financiele_data():
         SET AccountFinancieleData.OndernemingId = NULL
         WHERE AccountFinancieleData.OndernemingId
         NOT IN
-        (SELECT Id FROM Account)
+        (SELECT AccountId FROM Account)
     """))
     session.commit()
