@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class Inschrijving(Base):
     __tablename__ = "Inschrijving"
     __table_args__ = {"extend_existing": True}
-    Inschrijving: Mapped[str] = mapped_column(String(50), primary_key=True)
+    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
     AanwezigAfwezig: Mapped[str] = mapped_column(String(50))
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
     Contact: Mapped[str] = mapped_column(
@@ -36,8 +36,8 @@ class Inschrijving(Base):
     )
     DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2)
     FacturatieBedrag: Mapped[Float] = mapped_column(Float)
-    Campagne: Mapped[str] = mapped_column(
-        String(50), ForeignKey("Campagne.Campagne", use_alter=True), nullable=True
+    CampagneId: Mapped[str] = mapped_column(
+        String(50), ForeignKey("Campagne.Id", use_alter=True), nullable=True
     )
     campagneFK: Mapped["Campagne"] = relationship(
         "Campagne", backref="FKInschrijvingCampagne"
@@ -85,13 +85,13 @@ def seed_inschrijving():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for i, row in df.iterrows():
         p = Inschrijving(
-            Inschrijving=row["crm_Inschrijving_Inschrijving"],
+            Id=row["crm_Inschrijving_Inschrijving"],
             AanwezigAfwezig=row["crm_Inschrijving_Aanwezig_Afwezig"],
             Bron=row["crm_Inschrijving_Bron"],
             Contact=row["crm_Inschrijving_Contactfiche"],
             DatumInschrijving=row["crm_Inschrijving_Datum_inschrijving"],
             FacturatieBedrag=to_float(row["crm_Inschrijving_Facturatie_Bedrag"]),
-            Campagne=row["crm_Inschrijving_Campagne"],
+            CampagneId=row["crm_Inschrijving_Campagne"],
             CampagneNaam=row["crm_Inschrijving_Campagne_Naam_"],
         )
 
@@ -114,7 +114,7 @@ def seed_inschrijving():
         SET Inschrijving.Contact = NULL
         WHERE Inschrijving.Contact
         NOT IN 
-        (SELECT ContactPersoon FROM Contactfiche)
+        (SELECT Id FROM Contactfiche)
     """
         )
     )  # delete, want niet bruikbaar met null
@@ -127,7 +127,7 @@ def seed_inschrijving():
         SET Inschrijving.Campagne = NULL
         WHERE Inschrijving.Campagne
         NOT IN
-        (SELECT Campagne FROM Campagne)
+        (SELECT Id FROM Campagne)
     """
         )
     )

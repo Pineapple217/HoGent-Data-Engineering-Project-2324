@@ -28,7 +28,7 @@ class Contactfiche(Base):
     Status: Mapped[str] = mapped_column(String(50))
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
 
-    AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'))
+    AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Id'))
     Account: Mapped["Account"] = relationship("Account", backref="ContactficheAccount")
 
     PersoonId: Mapped[str] = mapped_column(String(100), ForeignKey('Persoon.PersoonId'))
@@ -83,7 +83,7 @@ def seed_contactfiche():
         SET Contactfiche.AccountId = NULL
         WHERE Contactfiche.AccountId
         NOT IN
-        (SELECT AccountId FROM Account)
+        (SELECT Id FROM Account)
     """))
     session.commit()
 

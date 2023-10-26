@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class Campagne(Base):
     __tablename__ = "Campagne"  # snakecase
     __table_args__ = {"extend_existing": True}
-    Campagne: Mapped[str] = mapped_column(String(50), primary_key=True)
+    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
     CampagneNr: Mapped[str] = mapped_column(String(50), nullable=True)
     Einddatum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     CampagneNaam: Mapped[str] = mapped_column(String(200))
@@ -71,7 +71,7 @@ def seed_campagne():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         p = Campagne(
-            Campagne=row["crm_Campagne_Campagne"],
+            Id=row["crm_Campagne_Campagne"],
             CampagneNr=row["crm_Campagne_Campagne_Nr"],
             Einddatum=row["crm_Campagne_Einddatum"],
             CampagneNaam=row["crm_Campagne_Naam"],
