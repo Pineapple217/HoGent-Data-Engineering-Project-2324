@@ -12,10 +12,12 @@ from tqdm import tqdm
 
 if TYPE_CHECKING:
     from .pageviews import Pageview
+    from .sessie import Sessie
 
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
+
 
 class Campagne(Base):
     __tablename__ = "Campagne"  # snakecase
@@ -32,7 +34,9 @@ class Campagne(Base):
     URLVoka: Mapped[str] = mapped_column(String(150), nullable=True)
     SoortCampagne: Mapped[str] = mapped_column(String(50))
 
-    Pageviews :Mapped["Pageview"] = relationship(back_populates="Campagne")
+    Pageviews: Mapped["Pageview"] = relationship(back_populates="Campagne")
+
+    Sessie: Mapped["Sessie"] = relationship(back_populates="Campagne")
 
 
 def insert_campagne_data(campagne_data, session):
@@ -54,14 +58,14 @@ def seed_campagne():
         na_values=[""],
     )
     df = df.replace({np.nan: None})
-    
+
     df["crm_Campagne_Einddatum"] = pd.to_datetime(
         df["crm_Campagne_Einddatum"], format="%d-%m-%Y %H:%M:%S"
     )
     df["crm_Campagne_Startdatum"] = pd.to_datetime(
         df["crm_Campagne_Startdatum"], format="%d-%m-%Y %H:%M:%S"
     )
-    
+
     campagne_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)

@@ -13,10 +13,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .contactfiche import Contactfiche
     from .campagne import Campagne
+    from .sessie_inschrijving import SessieInschrijving
 
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
+
 
 class Inschrijving(Base):
     __tablename__ = "Inschrijving"
@@ -24,13 +26,27 @@ class Inschrijving(Base):
     Inschrijving: Mapped[str] = mapped_column(String(50), primary_key=True)
     AanwezigAfwezig: Mapped[str] = mapped_column(String(50))
     Bron: Mapped[str] = mapped_column(String(20), nullable=True)
-    Contact: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
-    contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKInschrijvingContact")
+    Contact: Mapped[str] = mapped_column(
+        String(255),
+        ForeignKey("Contactfiche.ContactPersoon", use_alter=True),
+        nullable=True,
+    )
+    contactFK: Mapped["Contactfiche"] = relationship(
+        "Contactfiche", backref="FKInschrijvingContact"
+    )
     DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2)
     FacturatieBedrag: Mapped[Float] = mapped_column(Float)
-    Campagne: Mapped[str] = mapped_column(String(50), ForeignKey("Campagne.Campagne", use_alter=True), nullable=True)
-    campagneFK: Mapped["Campagne"] = relationship("Campagne", backref="FKInschrijvingCampagne")
+    Campagne: Mapped[str] = mapped_column(
+        String(50), ForeignKey("Campagne.Campagne", use_alter=True), nullable=True
+    )
+    campagneFK: Mapped["Campagne"] = relationship(
+        "Campagne", backref="FKInschrijvingCampagne"
+    )
     CampagneNaam: Mapped[str] = mapped_column(String(200))
+
+    SessieInschrijving: Mapped["SessieInschrijving"] = relationship(
+        back_populates="Inschrijving"
+    )
 
 
 def insert_inschrijving_data(inschrijving_data, session):
@@ -91,20 +107,28 @@ def seed_inschrijving():
         insert_inschrijving_data(inschrijving_data, session)
         progress_bar.update(len(inschrijving_data))
 
-    session.execute(text("""
+    session.execute(
+        text(
+            """
         UPDATE Inschrijving
         SET Inschrijving.Contact = NULL
         WHERE Inschrijving.Contact
         NOT IN 
         (SELECT ContactPersoon FROM Contactfiche)
-    """)) #delete, want niet bruikbaar met null
+    """
+        )
+    )  # delete, want niet bruikbaar met null
     session.commit()
-    
-    session.execute(text("""
+
+    session.execute(
+        text(
+            """
         UPDATE Inschrijving
         SET Inschrijving.Campagne = NULL
         WHERE Inschrijving.Campagne
         NOT IN
         (SELECT Campagne FROM Campagne)
-    """))
+    """
+        )
+    )
     session.commit()
