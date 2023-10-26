@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class InfoEnKlachten(Base):
     __tablename__ = "InfoEnKlachten"
     __table_args__ = {"extend_existing": True}
-    Aanvraag: Mapped[str] = mapped_column(String(50), primary_key=True)
+    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
     Datum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2)
     Status: Mapped[str] = mapped_column(String(15))
@@ -30,7 +30,7 @@ class InfoEnKlachten(Base):
     EigenaarId: Mapped[Optional[str]] = mapped_column(ForeignKey("Gebruiker.Id", use_alter=True), nullable=True)
     Eigenaar: Mapped["Gebruiker"] = relationship(back_populates="InfoEnKlachten")
     
-    AccountId: Mapped[Optional[str]] = mapped_column(ForeignKey("Account.Account", use_alter=True), nullable=True)
+    AccountId: Mapped[Optional[str]] = mapped_column(ForeignKey("Account.Id", use_alter=True), nullable=True)
     Account: Mapped["Account"] = relationship(back_populates="InfoEnKlachten")
 
 
@@ -61,7 +61,7 @@ def seed_info_en_klachten():
 
     for _, row in df.iterrows():
         p = InfoEnKlachten(
-            Aanvraag=row["crm_Info_en_Klachten_Aanvraag"],
+            Id=row["crm_Info_en_Klachten_Aanvraag"],
             AccountId=row["crm_Info_en_Klachten_Account"],
             Datum=row["crm_Info_en_Klachten_Datum"],
             DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
@@ -93,6 +93,6 @@ def seed_info_en_klachten():
         SET InfoEnKlachten.AccountId = NULL
         WHERE InfoEnKlachten.AccountId
         NOT IN
-        (SELECT Account FROM Account)
+        (SELECT Id FROM Account)
     """))
     session.commit()

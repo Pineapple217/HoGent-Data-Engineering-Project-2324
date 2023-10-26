@@ -2,7 +2,7 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
-from sqlalchemy import String, DateTime, Integer, Date, ForeignKey, text
+from sqlalchemy import String, ForeignKey, text
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
@@ -29,7 +29,7 @@ class AfspraakAccount(Base):
     #Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
     #Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
-    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account'))
+    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Id'))
     account: Mapped["Account"] = relationship("Account", backref="AccountAfspraak")
     #KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
@@ -87,7 +87,7 @@ def seed_afspraak_account():
     session.execute(text("""
         DELETE FROM AfspraakAccount
         WHERE AccountID NOT IN 
-            (SELECT Account FROM Account);
+            (SELECT Id FROM Account);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 

@@ -22,7 +22,7 @@ class AccountActiviteitscode(Base):
     __tablename__ = "AccountActiviteitscode"
     __table_args__ = {"extend_existing": True}
     Id: Mapped[str] = mapped_column(String(50), primary_key=True)
-    Account: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Account', use_alter=True))
+    Account: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Id', use_alter=True))
     accountFK: Mapped["Account"] = relationship("Account", backref="FKAccountActiviteitscode")
     Activiteitscode: Mapped[str] = mapped_column(String(50), ForeignKey('Activiteitscode.Activiteitscode', use_alter=True))
     activiteitFK: Mapped["Activiteitscode"] = relationship("Activiteitscode", backref="FKActiviteitscodeAccount")
@@ -72,7 +72,7 @@ def seed_account_activiteitscode():
     session.execute(text("""
         DELETE FROM AccountActiviteitscode
         WHERE Account NOT IN 
-            (SELECT Account FROM Account);
+            (SELECT Id FROM Account);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 

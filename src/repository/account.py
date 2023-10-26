@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Account(Base):
     __tablename__ = "Account"
     __table_args__ = {"extend_existing": True}
-    Account: Mapped[str] = mapped_column(String(50), primary_key=True)
+    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
     AdresGeografischeRegio: Mapped[str] = mapped_column(String(50), nullable=True)
     AdresGeografischeSubregio: Mapped[str] = mapped_column(String(50), nullable=True)
     AdresPlaats: Mapped[str] = mapped_column(String(50), nullable=True)
@@ -35,6 +35,8 @@ class Account(Base):
     
     # FK
     InfoEnKlachten: Mapped["InfoEnKlachten"] = relationship(back_populates="Account")
+    
+    AccountFinancieleData: Mapped["AccountFinancieleData"] = relationship(back_populates="Onderneming")
 
 
 def insert_account_data(account_data, session):
@@ -62,7 +64,7 @@ def seed_account():
 
     for _, row in df.iterrows():
         p = Account(
-                Account=row["crm_Account_Account"],
+                Id=row["crm_Account_Account"],
                 AdresGeografischeRegio=row["crm_Account_Adres_Geografische_regio"],
                 AdresGeografischeSubregio=row["crm_Account_Adres_Geografische_subregio"],
                 AdresPlaats=row["crm_Account_Adres_Plaats"],
