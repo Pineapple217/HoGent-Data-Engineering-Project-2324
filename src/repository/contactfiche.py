@@ -1,14 +1,19 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
-from sqlalchemy import String, Integer
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
+from sqlalchemy import String, Integer, ForeignKey, text
 from sqlalchemy.dialects.mssql import BIT
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from .account import Account
+    from .persoon import Persoon
+    
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
@@ -19,11 +24,15 @@ class Contactfiche(Base):
     #Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
     #edit: ContactPersoon is PK, want hiernaar wordt gerefereerd uit andere tables. Is ook uniek in de hele datafile. Kan wel interessant zijn voor DWH
     ContactPersoon: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
-    Account: Mapped[str] = mapped_column(String(50))
     FunctieTitel: Mapped[str] = mapped_column(String(255), nullable=True)
-    PersoonId: Mapped[str] = mapped_column(String(50))
     Status: Mapped[str] = mapped_column(String(50))
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
+
+    AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'))
+    Account: Mapped["Account"] = relationship("Account", backref="ContactficheAccount")
+
+    PersoonId: Mapped[str] = mapped_column(String(100), ForeignKey('Persoon.PersoonId'))
+    Account: Mapped["Persoon"] = relationship("Persoon", backref="ContactfichePersoon")
 
 
 def insert_contactfiche_data(contactfiche_data, session):
@@ -52,7 +61,7 @@ def seed_contactfiche():
     for i, row in df.iterrows():
         p = Contactfiche(
             ContactPersoon=row["crm_Contact_Contactpersoon"],
-            Account=row["crm_Contact_Account"],
+            AccountId=row["crm_Contact_Account"],
             FunctieTitel=row["crm_Contact_Functietitel"],
             PersoonId=row["crm_Contact_Persoon_ID"],
             Status=row["crm_Contact_Status"],
@@ -68,3 +77,21 @@ def seed_contactfiche():
     if contactfiche_data:
         insert_contactfiche_data(contactfiche_data, session)
         progress_bar.update(len(contactfiche_data))
+
+    session.execute(text("""
+        UPDATE Contactfiche
+        SET Contactfiche.AccountId = NULL
+        WHERE Contactfiche.AccountId
+        NOT IN
+        (SELECT AccountId FROM Account)
+    """))
+    session.commit()
+
+    session.execute(text("""
+        UPDATE Contactfiche
+        SET Contactfiche.PersoonId = NULL
+        WHERE Contactfiche.PersoonId
+        NOT IN
+        (SELECT PersoonId FROM Persoon)
+    """))
+    session.commit()
