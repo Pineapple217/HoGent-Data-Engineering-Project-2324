@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class Gebruiker(Base):
     __tablename__ = "Gebruiker"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    GebruikerId: Mapped[str] = mapped_column(String(50), primary_key=True)
     BusinessUnitNaam: Mapped[str] = mapped_column(String(50))
     
     # FK
@@ -49,7 +49,7 @@ def seed_gebruiker():
     for _, row in df.iterrows():
         # print(row)
         p = Gebruiker(
-            Id=row["crm_Gebruikers_CRM_User_ID"],
+            GebruikerId=row["crm_Gebruikers_CRM_User_ID"],
             BusinessUnitNaam=row["crm_Gebruikers_Business_Unit_Naam_"]
         )
         gebruiker_data.append(p)

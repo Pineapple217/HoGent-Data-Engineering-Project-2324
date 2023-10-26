@@ -29,7 +29,7 @@ class AfspraakAccount(Base):
     #Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
     #Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
-    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.Id'))
+    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'))
     account: Mapped["Account"] = relationship("Account", backref="AccountAfspraak")
     #KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
@@ -87,7 +87,7 @@ def seed_afspraak_account():
     session.execute(text("""
         DELETE FROM AfspraakAccount
         WHERE AccountID NOT IN 
-            (SELECT Id FROM Account);
+            (SELECT AccountId FROM Account);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 

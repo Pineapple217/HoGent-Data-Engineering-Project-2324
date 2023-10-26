@@ -21,16 +21,16 @@ logger = logging.getLogger(__name__)
 class InfoEnKlachten(Base):
     __tablename__ = "InfoEnKlachten"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    AanvraagId: Mapped[str] = mapped_column(String(50), primary_key=True)
     Datum: Mapped[DATETIME2] = mapped_column(DATETIME2)
     DatumAfsluiting: Mapped[DATETIME2] = mapped_column(DATETIME2)
     Status: Mapped[str] = mapped_column(String(15))
     
     # FK
-    EigenaarId: Mapped[Optional[str]] = mapped_column(ForeignKey("Gebruiker.Id", use_alter=True), nullable=True)
+    EigenaarId: Mapped[Optional[str]] = mapped_column(ForeignKey("Gebruiker.GebruikerId", use_alter=True), nullable=True)
     Eigenaar: Mapped["Gebruiker"] = relationship(back_populates="InfoEnKlachten")
     
-    AccountId: Mapped[Optional[str]] = mapped_column(ForeignKey("Account.Id", use_alter=True), nullable=True)
+    AccountId: Mapped[Optional[str]] = mapped_column(ForeignKey("Account.AccountId", use_alter=True), nullable=True)
     Account: Mapped["Account"] = relationship(back_populates="InfoEnKlachten")
 
 
@@ -61,7 +61,7 @@ def seed_info_en_klachten():
 
     for _, row in df.iterrows():
         p = InfoEnKlachten(
-            Id=row["crm_Info_en_Klachten_Aanvraag"],
+            AanvraagId=row["crm_Info_en_Klachten_Aanvraag"],
             AccountId=row["crm_Info_en_Klachten_Account"],
             Datum=row["crm_Info_en_Klachten_Datum"],
             DatumAfsluiting=row["crm_Info_en_Klachten_Datum_afsluiting"],
@@ -84,7 +84,7 @@ def seed_info_en_klachten():
         SET InfoEnKlachten.EigenaarId = NULL
         WHERE InfoEnKlachten.EigenaarId
         NOT IN
-        (SELECT Id FROM Gebruiker)
+        (SELECT GebruikerId FROM Gebruiker)
     """))
     session.commit()
 
@@ -93,6 +93,6 @@ def seed_info_en_klachten():
         SET InfoEnKlachten.AccountId = NULL
         WHERE InfoEnKlachten.AccountId
         NOT IN
-        (SELECT Id FROM Account)
+        (SELECT AccountId FROM Account)
     """))
     session.commit()
