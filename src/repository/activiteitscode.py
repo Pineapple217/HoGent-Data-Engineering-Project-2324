@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class Activiteitscode(Base):
     __tablename__ = "Activiteitscode"  
     __table_args__ = {"extend_existing": True}
-    ActiviteitscodeId: Mapped[str] = mapped_column(String(50), primary_key=True)
+    ActiviteitsId: Mapped[str] = mapped_column(String(50), primary_key=True)
     Naam: Mapped[str] = mapped_column(String(50))
     Status: Mapped[bool] = mapped_column(Boolean)
 
@@ -54,7 +54,7 @@ def seed_activiteitscode():
     
     for i, row in df.iterrows():
         p = Activiteitscode(
-            ActiviteitscodeId=row["crm_ActiviteitsCode_Activiteitscode"],
+            ActiviteitsId=row["crm_ActiviteitsCode_Activiteitscode"],
             Naam=row["crm_ActiviteitsCode_Naam"],
             Status=row["crm_ActiviteitsCode_Status"],
         )
