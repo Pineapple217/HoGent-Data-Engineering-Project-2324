@@ -45,7 +45,7 @@ class Pageview(Base):
     RedenVanStatus: Mapped[str] = mapped_column(String(50))
 
     ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
-    contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKPageviewsContact")
+    Contact: Mapped["Contactfiche"] = relationship(back_populates='Pageviews')
 
     VisitId: Mapped[Optional[str]] = mapped_column(ForeignKey("Visits.VisitId", use_alter=True), nullable=True)
     Visit: Mapped["Visit"] = relationship(back_populates="Pageviews")

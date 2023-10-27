@@ -23,10 +23,10 @@ class AfspraakVereistContact(Base):
     Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
 
     AfspraakId: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakId'))
-    Afspraak: Mapped["AfspraakContact"] = relationship(back_populates="AfspraakContact")
+    Afspraak: Mapped["AfspraakContact"] = relationship(back_populates="AfspraakVereistContact")
 
     VereistContactId: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactpersoonId'), primary_key=True)
-    Contact: Mapped["Contactfiche"] = relationship(back_populates="Contactfiche")
+    Contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakVereistContact")
     
     
 

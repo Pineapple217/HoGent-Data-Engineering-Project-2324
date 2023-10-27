@@ -24,16 +24,16 @@ class AfspraakAccount(Base):
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
     AfspraakId: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakId'))
-    afspraak: Mapped["AfspraakContact"] = relationship(back_populates="AfspraakAccount")
+    Afspraak: Mapped["AfspraakContact"] = relationship(back_populates="AfspraakAccount")
     #Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
     #Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
     AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'))
-    account: Mapped["Account"] = relationship(back_populates="AfspraakAccount")
+    Account: Mapped["Account"] = relationship(back_populates="AfspraakAccount")
     #KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
-
+    
 def insert_AfspraakAccount_data(AfspraakAccount_data, session):
     session.bulk_save_objects(AfspraakAccount_data)
     session.commit()
@@ -68,8 +68,8 @@ def seed_afspraak_account():
         AfspraakAccount_data.append(aa)
         
         if len(AfspraakAccount_data) >= BATCH_SIZE:
-            insert_AfspraakAccount_data(AfspraakContact_data, session)
-            AfspraakContact_data = []
+            insert_AfspraakAccount_data(AfspraakAccount_data, session)
+            AfspraakAccount_data = []
             progress_bar.update(BATCH_SIZE)
 
     if AfspraakAccount_data:

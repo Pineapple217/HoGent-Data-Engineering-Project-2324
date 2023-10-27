@@ -16,6 +16,9 @@ if TYPE_CHECKING:
     from .inschrijving import Inschrijving
     from .send_email_clicks import SendEmailClicks
     from .afspraak_contact import AfspraakContact
+    from .afspraak_vereist_contact import AfspraakVereistContact
+    from .pageviews import Pageview
+    from .visits import Visit
     
 BATCH_SIZE = 10_000
 
@@ -31,8 +34,9 @@ class Contactfiche(Base):
     Status: Mapped[str] = mapped_column(String(50))
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
 
+    #FK
     AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'), nullable=True)
-    Account: Mapped["Account"] = relationship(back_populates="Account")
+    Account: Mapped["Account"] = relationship(back_populates="Contactfiche")
 
     PersoonId: Mapped[str] = mapped_column(String(100), ForeignKey('Persoon.PersoonId'), nullable=True)
     Persoon: Mapped["Persoon"] = relationship(back_populates="Contactfiche")
@@ -40,6 +44,10 @@ class Contactfiche(Base):
     Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Contactfiche")
     SendEmailClicks      :Mapped["SendEmailClicks"] = relationship(back_populates="Contact")
     AfspraakContact: Mapped["AfspraakContact"] = relationship(back_populates="Contact")
+    AfspraakVereistContact: Mapped["AfspraakVereistContact"] = relationship(back_populates="Contact")
+    Pageviews: Mapped["Pageview"] = relationship(back_populates="Contact")
+    Visit: Mapped["Visit"] = relationship(back_populates="Contact")
+    
 
 
 def insert_contactfiche_data(contactfiche_data, session):

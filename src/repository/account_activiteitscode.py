@@ -24,7 +24,7 @@ class AccountActiviteitscode(Base):
     AccountActiviteitscodeId: Mapped[str] = mapped_column(String(50), primary_key=True)
 
     AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId', use_alter=True))
-    Account: Mapped["Account"] = relationship(back_populates="Account")
+    Account: Mapped["Account"] = relationship(back_populates="AccountActiviteitscode")
 
     ActiviteitsId: Mapped[str] = mapped_column(String(50), ForeignKey('Activiteitscode.ActiviteitsId', use_alter=True))
     Activiteit: Mapped["Activiteitscode"] = relationship(back_populates="ActiviteitsId")

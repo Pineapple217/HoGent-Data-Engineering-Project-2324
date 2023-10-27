@@ -33,8 +33,6 @@ class Visit(Base):
     Campaign                :Mapped[str] = mapped_column(String(50), nullable=True)
     IPStad                  :Mapped[str] = mapped_column(String(50), nullable=True)
     IPCompany               :Mapped[str] = mapped_column(String(200), nullable=True)
-    Contact                 :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
-    contactFK               :Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKVisitsContact") 
     ContactNaam             :Mapped[str] = mapped_column(String(200))
     ContainsSocialProfile   :Mapped[bool] = mapped_column(Boolean)
     IPLand                  :Mapped[str] = mapped_column(String(50), nullable=True)
@@ -63,6 +61,9 @@ class Visit(Base):
 
     EmailSendId             :Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.MailingId"), nullable=True)
     EmailSend               :Mapped[Optional["Mailing"]] = relationship(back_populates="Visits")
+
+    ContactId                :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
+    Contact                  :Mapped["Contactfiche"] = relationship(back_populates="Visit") 
 
     Pageviews               :Mapped["Pageview"] = relationship(back_populates="Visit")
 
@@ -119,7 +120,7 @@ def seed_visits():
             Campaign                =  row['crm_CDI_Visit_Campaign'],
             IPStad                  =  row['crm_CDI_Visit_IP_Stad'],
             IPCompany               =  row['crm_CDI_Visit_IP_Company'],
-            Contact                 =  row['crm_CDI_Visit_Contact'],
+            ContactId                 =  row['crm_CDI_Visit_Contact'],
             ContactNaam             =  row['crm_CDI_Visit_Contact_Naam_'],
             ContainsSocialProfile   =  row['crm_CDI_Visit_containssocialprofile'],
             IPLand                  =  row['crm_CDI_Visit_IP_Land'],

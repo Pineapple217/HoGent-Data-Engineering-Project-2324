@@ -9,6 +9,10 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from .contactfiche import Contactfiche
 
 
 BATCH_SIZE = 10_000

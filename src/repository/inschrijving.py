@@ -30,18 +30,12 @@ class Inschrijving(Base):
     FacturatieBedrag: Mapped[Float] = mapped_column(Float)
     CampagneNaam: Mapped[str] = mapped_column(String(200))
     # FK
-    ContactficheId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Contactfiche.ContactpersoonId", use_alter=True), nullable=True
-    )
+    ContactficheId: Mapped[Optional[str]] = mapped_column(ForeignKey("Contactfiche.ContactpersoonId", use_alter=True), nullable=True)
     Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Inschrijving")
-    CampagneId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True
-    )
+    CampagneId: Mapped[Optional[str]] = mapped_column(ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True)
     Campagne: Mapped["Campagne"] = relationship(back_populates="Inschrijving")
 
-    SessieInschrijving: Mapped["SessieInschrijving"] = relationship(
-        back_populates="Inschrijving"
-    )
+    SessieInschrijving: Mapped["SessieInschrijving"] = relationship(back_populates="Inschrijving")
 
 
 def insert_inschrijving_data(inschrijving_data, session):

@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from .contactfiche import Contactfiche
     from .info_en_klachten import InfoEnKlachten
     from .account_financiele_data import AccountFinancieleData
+    from .afspraak_account import AfspraakAccount
+    from .account_activiteitscode import AccountActiviteitscode
 
 BATCH_SIZE = 10_000
 
@@ -43,6 +45,8 @@ class Account(Base):
     InfoEnKlachten: Mapped["InfoEnKlachten"] = relationship(back_populates="Account")
     Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Account")
     AccountFinancieleData: Mapped["AccountFinancieleData"] = relationship(back_populates="Onderneming")
+    AfspraakAccount: Mapped["AfspraakAccount"] = relationship(back_populates="Account")
+    AccountActiviteitscode: Mapped["AccountActiviteitscode"] = relationship(back_populates="Account")
 
 
 def insert_account_data(account_data, session):
