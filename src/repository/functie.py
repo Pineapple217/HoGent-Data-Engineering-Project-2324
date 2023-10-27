@@ -1,7 +1,7 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -15,8 +15,11 @@ logger = logging.getLogger(__name__)
 class Functie(Base):
     __tablename__ = "Functie"
     __table_args__ = {"extend_existing": True}
-    Functie: Mapped[str] = mapped_column(String(50), primary_key=True)
+    FunctieId: Mapped[str] = mapped_column(String(50), primary_key=True)
     Naam: Mapped[str] = mapped_column(String(75))
+    
+    # FK
+    ContactficheFunctie: Mapped["ContactficheFunctie"] = relationship(back_populates="Functie")
 
 
 def insert_functie_data(functie_data, session):
@@ -44,10 +47,9 @@ def seed_functie():
     
     for i, row in df.iterrows():
         p = Functie(
-            Functie=row["crm_Functie_Functie"],
+            FunctieId=row["crm_Functie_Functie"],
             Naam=row["crm_Functie_Naam"],
         )
-
         functie_data.append(p)
 
         if len(functie_data) >= BATCH_SIZE:

@@ -9,9 +9,6 @@ import numpy as np
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from .info_en_klachten import InfoEnKlachten
-
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
