@@ -64,7 +64,7 @@ def seed_web_content():
             Campaign                    = row['crm_CDI_WebContent_Campaign'],
             CampaignName                = row['crm_CDI_WebContent_Campaign_Name'],
             Name                        = row['crm_CDI_WebContent_Name'],
-            WebContent                  = row['crm_CDI_WebContent_Web_Content'],
+            WebContentId                  = row['crm_CDI_WebContent_Web_Content'],
             GemaaktDoorNaam             = row['crm_CDI_WebContent_Gemaakt_door_Naam_'],
             CreatedOn                   = row['crm_CDI_WebContent_Created_On'],
             GewijzigdDoorNaam           = row['crm_CDI_WebContent_Gewijzigd_door_Naam_'],
