@@ -57,8 +57,8 @@ def seed_account_activiteitscode():
     for i, row in df.iterrows():
         p = AccountActiviteitscode(
             AccountId=row["crm_Account_ActiviteitsCode_Account"],
-            Activiteitscode=row["crm_Account_ActiviteitsCode_Activiteitscode"],
-            Id=row["crm_Account_ActiviteitsCode_inf_account_inf_activiteitscodeId"],
+            ActiviteitsId=row["crm_Account_ActiviteitsCode_Activiteitscode"],
+            AccountActiviteitscodeId=row["crm_Account_ActiviteitsCode_inf_account_inf_activiteitscodeId"],
         )
         accountActiviteitscode_data.append(p)
 
@@ -73,14 +73,14 @@ def seed_account_activiteitscode():
 
     session.execute(text("""
         DELETE FROM AccountActiviteitscode
-        WHERE Account NOT IN 
+        WHERE AccountId NOT IN 
             (SELECT AccountId FROM Account);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 
     session.execute(text("""
         DELETE FROM AccountActiviteitscode
-        WHERE Activiteitscode NOT IN 
-            (SELECT Activiteitscode FROM Activiteitscode);
+        WHERE ActiviteitsId NOT IN 
+            (SELECT ActiviteitsId FROM Activiteitscode);
     """)) #delete, want niet bruikbaar met null
     session.commit()
