@@ -1,12 +1,16 @@
 from .base import Base
 
 import logging
-from sqlalchemy.orm import Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Boolean
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from account_activiteitscode import AccountActiviteitscode
 
 BATCH_SIZE = 10
 
@@ -15,9 +19,11 @@ logger = logging.getLogger(__name__)
 class Activiteitscode(Base):
     __tablename__ = "Activiteitscode"  
     __table_args__ = {"extend_existing": True}
-    Activiteitscode: Mapped[str] = mapped_column(String(50), primary_key=True)
+    ActiviteitsId: Mapped[str] = mapped_column(String(50), primary_key=True)
     Naam: Mapped[str] = mapped_column(String(50))
     Status: Mapped[bool] = mapped_column(Boolean)
+
+    Pageviews   :Mapped["AccountActiviteitscode"] = relationship(back_populates="Activiteit")
 
 
 def insert_activiteitscode_data(activiteitscode_data, session):
@@ -47,7 +53,7 @@ def seed_activiteitscode():
     
     for i, row in df.iterrows():
         p = Activiteitscode(
-            Activiteitscode=row["crm_ActiviteitsCode_Activiteitscode"],
+            ActiviteitscodeId=row["crm_ActiviteitsCode_Activiteitscode"],
             Naam=row["crm_ActiviteitsCode_Naam"],
             Status=row["crm_ActiviteitsCode_Status"],
         )

@@ -21,11 +21,13 @@ logger = logging.getLogger(__name__)
 class AccountActiviteitscode(Base):
     __tablename__ = "AccountActiviteitscode"
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[str] = mapped_column(String(50), primary_key=True)
-    Account: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId', use_alter=True))
-    accountFK: Mapped["Account"] = relationship("Account", backref="FKAccountActiviteitscode")
-    Activiteitscode: Mapped[str] = mapped_column(String(50), ForeignKey('Activiteitscode.Activiteitscode', use_alter=True))
-    activiteitFK: Mapped["Activiteitscode"] = relationship("Activiteitscode", backref="FKActiviteitscodeAccount")
+    AccountActiviteitscodeId: Mapped[str] = mapped_column(String(50), primary_key=True)
+
+    AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId', use_alter=True))
+    Account: Mapped["Account"] = relationship(back_populates="Account")
+
+    ActiviteitsId: Mapped[str] = mapped_column(String(50), ForeignKey('Activiteitscode.ActiviteitsId', use_alter=True))
+    Activiteit: Mapped["Activiteitscode"] = relationship(back_populates="ActiviteitsId")
 
 
 def insert_accountActiviteitscode_data(accountActiviteitscode_data, session):
@@ -54,7 +56,7 @@ def seed_account_activiteitscode():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for i, row in df.iterrows():
         p = AccountActiviteitscode(
-            Account=row["crm_Account_ActiviteitsCode_Account"],
+            AccountId=row["crm_Account_ActiviteitsCode_Account"],
             Activiteitscode=row["crm_Account_ActiviteitsCode_Activiteitscode"],
             Id=row["crm_Account_ActiviteitsCode_inf_account_inf_activiteitscodeId"],
         )
