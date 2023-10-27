@@ -26,7 +26,7 @@ class Contactfiche(Base):
     __table_args__ = {"extend_existing": True}
     #Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
     #edit: ContactPersoon is PK, want hiernaar wordt gerefereerd uit andere tables. Is ook uniek in de hele datafile. Kan wel interessant zijn voor DWH
-    ContactPersoonId: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
+    ContactpersoonId: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
     FunctieTitel: Mapped[str] = mapped_column(String(255), nullable=True)
     Status: Mapped[str] = mapped_column(String(50))
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)

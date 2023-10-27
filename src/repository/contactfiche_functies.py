@@ -21,7 +21,7 @@ class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    ContactpersoonId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
+    ContactpersoonId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
     contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContactficheFunctieContact")
     
     # FK

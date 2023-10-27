@@ -29,7 +29,7 @@ class SendEmailClicks(Base):
     SentEmailId       :Mapped[str] = mapped_column(String(50), primary_key=True)
     Clicks          :Mapped[int] = mapped_column(Integer)
 
-    ContactId         :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
+    ContactId         :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
     Contact: Mapped["Contactfiche"] = relationship(back_populates="SendEmailClicks")
     EmailVersturenId:Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.MailingId"), nullable=True)
     EmailVersturen  :Mapped[Optional["Mailing"]] = relationship(back_populates="SendClicks")

@@ -33,7 +33,7 @@ class Visit(Base):
     Campaign                :Mapped[str] = mapped_column(String(50), nullable=True)
     IPStad                  :Mapped[str] = mapped_column(String(50), nullable=True)
     IPCompany               :Mapped[str] = mapped_column(String(200), nullable=True)
-    Contact                 :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
+    Contact                 :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
     contactFK               :Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKVisitsContact") 
     ContactNaam             :Mapped[str] = mapped_column(String(200))
     ContainsSocialProfile   :Mapped[bool] = mapped_column(Boolean)

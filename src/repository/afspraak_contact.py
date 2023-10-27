@@ -27,7 +27,7 @@ class AfspraakContact(Base):
     Einddatum: Mapped[Date] = mapped_column(Date)
     KeyPhrases: Mapped[str] = mapped_column(String(3000)    , nullable=True)
     
-    ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
+    ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
     Contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakContact")
 
     AfspraakContact: Mapped["AfspraakVereistContact"] = relationship(back_populates="Afspraak")
