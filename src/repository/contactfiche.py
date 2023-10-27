@@ -35,11 +35,11 @@ class Contactfiche(Base):
     Account: Mapped["Account"] = relationship(back_populates="Account")
 
     PersoonId: Mapped[str] = mapped_column(String(100), ForeignKey('Persoon.PersoonId'), nullable=True)
-    Account: Mapped["Persoon"] = relationship(back_populates="Persoon")
+    Persoon: Mapped["Persoon"] = relationship(back_populates="Contactfiche")
 
     Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Contactfiche")
-    SendEmailClicks      :Mapped["SendEmailClicks"] = relationship(back_populates="Contactfiche")
-    AfspraakContact: Mapped["AfspraakContact"] = relationship(back_populates="Contactfiche")
+    SendEmailClicks      :Mapped["SendEmailClicks"] = relationship(back_populates="Contact")
+    AfspraakContact: Mapped["AfspraakContact"] = relationship(back_populates="Contact")
 
 
 def insert_contactfiche_data(contactfiche_data, session):
