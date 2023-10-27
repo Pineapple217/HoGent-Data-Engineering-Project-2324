@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .contactfiche import Contactfiche
     from .afspraak_contact import AfspraakContact
+
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
@@ -21,11 +22,11 @@ class AfspraakVereistContact(Base):
     __table_args__ = {'extend_existing': True}
     Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
 
-    AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakId'))
-    afspraak: Mapped["AfspraakContact"] = relationship("AfspraakContact", backref="AfspraakVereistContact")
+    AfspraakId: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakId'))
+    Afspraak: Mapped["AfspraakContact"] = relationship("AfspraakContact", backref="AfspraakVereistContact")
 
-    VereistContactID: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactPersoonId'), primary_key=True)
-    contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContact")
+    VereistContactId: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactPersoonId'), primary_key=True)
+    Contact: Mapped["Contactfiche"] = relationship(back_populates="Contactfiche")
     
     
 
@@ -49,8 +50,8 @@ def seed_afspraak_vereist_contact():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         avc = AfspraakVereistContact(
-            AfspraakID=row["crm_ActiviteitVereistContact_ActivityId"],
-            VereistContactID=row["crm_ActiviteitVereistContact_ReqAttendee"],
+            AfspraakId=row["crm_ActiviteitVereistContact_ActivityId"],
+            VereistContactId=row["crm_ActiviteitVereistContact_ReqAttendee"],
         )
 
         AfspraakVereistContact_data.append(avc)
@@ -66,14 +67,14 @@ def seed_afspraak_vereist_contact():
 
     session.execute(text("""
         DELETE FROM AfspraakVereistContact
-        WHERE VereistContactID NOT IN 
+        WHERE VereistContactId NOT IN 
             (SELECT ContactPersoonId FROM Contactfiche);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 
     session.execute(text("""
         DELETE FROM AfspraakVereistContact
-        WHERE VereistContactID NOT IN 
-            (SELECT AfspraakID FROM AfspraakContact);
+        WHERE VereistContactId NOT IN 
+            (SELECT AfspraakId FROM AfspraakContact);
     """)) #delete, want niet bruikbaar met null
     session.commit()

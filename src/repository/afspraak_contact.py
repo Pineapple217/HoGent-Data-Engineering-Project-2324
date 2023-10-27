@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .contactfiche import Contactfiche
+    from .afspraak_vereist_contact import AfspraakVereistContact
 
 BATCH_SIZE = 10_000
 
@@ -28,6 +29,8 @@ class AfspraakContact(Base):
     
     ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
     Contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakContact")
+
+    AfspraakContact: Mapped["AfspraakVereistContact"] = relationship(back_populates="Afspraak")
 
 def insert_AfspraakContact_data(AfspraakContact_data, session):
     session.bulk_save_objects(AfspraakContact_data)
