@@ -19,15 +19,15 @@ logger = logging.getLogger(__name__)
 class AfspraakContact(Base):
     __tablename__ = "AfspraakContact"
     __table_args__ = {"extend_existing": True}
-    AfspraakID: Mapped[str] = mapped_column(String(255), primary_key=True)
+    AfspraakId: Mapped[str] = mapped_column(String(255), primary_key=True)
     Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
-    ContactID: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
-    contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKAfspraakContact")
     Einddatum: Mapped[Date] = mapped_column(Date)
     KeyPhrases: Mapped[str] = mapped_column(String(3000)    , nullable=True)
     
+    ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
+    contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakContact")
 
 def insert_AfspraakContact_data(AfspraakContact_data, session):
     session.bulk_save_objects(AfspraakContact_data)
@@ -52,11 +52,11 @@ def seed_afspraak_contact():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         ac = AfspraakContact(
-            AfspraakID=row["crm_Afspraak_BETREFT_CONTACTFICHE_Afspraak"],
+            AfspraakId=row["crm_Afspraak_BETREFT_CONTACTFICHE_Afspraak"],
             Thema=row["crm_Afspraak_BETREFT_CONTACTFICHE_Thema"],
             Subthema=row["crm_Afspraak_BETREFT_CONTACTFICHE_Subthema"],
             Onderwerp=row["crm_Afspraak_BETREFT_CONTACTFICHE_Onderwerp"],
-            ContactID=row["crm_Afspraak_BETREFT_CONTACTFICHE_Betreft_id"],
+            ContactId=row["crm_Afspraak_BETREFT_CONTACTFICHE_Betreft_id"],
             Einddatum=row["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"],
             KeyPhrases=row["crm_Afspraak_BETREFT_CONTACTFICHE_KeyPhrases"]
         )
@@ -74,8 +74,8 @@ def seed_afspraak_contact():
 
     session.execute(text("""
         UPDATE AfspraakContact
-        SET AfspraakContact.ContactID = NULL
-        WHERE AfspraakContact.ContactID
+        SET AfspraakContact.ContactId = NULL
+        WHERE AfspraakContact.ContactId
         NOT IN
         (SELECT ContactPersoonId FROM Contactfiche)
     """))
