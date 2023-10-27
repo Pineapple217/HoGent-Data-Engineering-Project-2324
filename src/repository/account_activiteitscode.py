@@ -27,7 +27,7 @@ class AccountActiviteitscode(Base):
     Account: Mapped["Account"] = relationship(back_populates="AccountActiviteitscode")
 
     ActiviteitsId: Mapped[str] = mapped_column(String(50), ForeignKey('Activiteitscode.ActiviteitsId', use_alter=True))
-    Activiteit: Mapped["Activiteitscode"] = relationship(back_populates="ActiviteitsId")
+    Activiteit: Mapped["Activiteitscode"] = relationship(back_populates="AccountActiviteitscode")
 
 
 def insert_accountActiviteitscode_data(accountActiviteitscode_data, session):

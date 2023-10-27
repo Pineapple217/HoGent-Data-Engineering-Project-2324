@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from account_activiteitscode import AccountActiviteitscode
 
+
 BATCH_SIZE = 10
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class Activiteitscode(Base):
     Naam: Mapped[str] = mapped_column(String(50))
     Status: Mapped[bool] = mapped_column(Boolean)
 
-    Pageviews   :Mapped["AccountActiviteitscode"] = relationship(back_populates="Activiteit")
+    AccountActiviteitscode   :Mapped["AccountActiviteitscode"] = relationship(back_populates="Activiteit")
 
 
 def insert_activiteitscode_data(activiteitscode_data, session):
