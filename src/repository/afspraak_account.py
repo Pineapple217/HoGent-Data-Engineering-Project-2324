@@ -23,14 +23,14 @@ class AfspraakAccount(Base):
     __tablename__ = "AfspraakAccount"
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
-    AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakID'))
-    afspraak: Mapped["AfspraakContact"] = relationship("AfspraakContact", backref="AfspraakAccount")
+    AfspraakId: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakId'))
+    afspraak: Mapped["AfspraakContact"] = relationship(back_populates="AfspraakAccount")
     #Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     #Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
     #Einddatum: Mapped[Date] = mapped_column(Date, nullable=True)
-    AccountID: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'))
-    account: Mapped["Account"] = relationship("Account", backref="AccountAfspraak")
+    AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'))
+    account: Mapped["Account"] = relationship(back_populates="AfspraakAccount")
     #KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
 
@@ -56,12 +56,12 @@ def seed_afspraak_account():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         aa = AfspraakAccount(
-            AfspraakID=row["crm_Afspraak_ACCOUNT_GELINKT_Afspraak"],
+            AfspraakId=row["crm_Afspraak_ACCOUNT_GELINKT_Afspraak"],
             #Thema=row["crm_Afspraak_ACCOUNT_GELINKT_Thema"],
             #Subthema=row["crm_Afspraak_ACCOUNT_GELINKT_Subthema"],
             #Onderwerp=row["crm_Afspraak_ACCOUNT_GELINKT_Onderwerp"],
             #Einddatum=row["crm_Afspraak_ACCOUNT_GELINKT_Eindtijd"],
-            AccountID=row["crm_Afspraak_ACCOUNT_GELINKT_Account"],
+            AccountId=row["crm_Afspraak_ACCOUNT_GELINKT_Account"],
             #KeyPhrases=row["crm_Afspraak_ACCOUNT_GELINKT_KeyPhrases"]
         )
 
@@ -79,14 +79,14 @@ def seed_afspraak_account():
         
     session.execute(text("""
         DELETE FROM AfspraakAccount
-        WHERE AfspraakID NOT IN 
-            (SELECT AfspraakID FROM AfspraakContact);
+        WHERE AfspraakId NOT IN 
+            (SELECT AfspraakId FROM AfspraakContact);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 
     session.execute(text("""
         DELETE FROM AfspraakAccount
-        WHERE AccountID NOT IN 
+        WHERE AccountId NOT IN 
             (SELECT AccountId FROM Account);
     """)) #delete, want niet bruikbaar met null
     session.commit()
