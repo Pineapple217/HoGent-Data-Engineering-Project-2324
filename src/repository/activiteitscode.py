@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class Activiteitscode(Base):
     __tablename__ = "Activiteitscode"  
     __table_args__ = {"extend_existing": True}
-    ActiviteitsId: Mapped[str] = mapped_column(String(50), primary_key=True)
+    ActiviteitscodeId: Mapped[str] = mapped_column(String(50), primary_key=True)
     Naam: Mapped[str] = mapped_column(String(50))
     Status: Mapped[bool] = mapped_column(Boolean)
 
