@@ -7,6 +7,12 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .contactfiche import Contactfiche
+    from .info_en_klachten import InfoEnKlachten
+    from .account_financiele_data import AccountFinancieleData
 
 BATCH_SIZE = 10_000
 
@@ -35,7 +41,7 @@ class Account(Base):
     
     # FK
     InfoEnKlachten: Mapped["InfoEnKlachten"] = relationship(back_populates="Account")
-    
+    Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Account")
     AccountFinancieleData: Mapped["AccountFinancieleData"] = relationship(back_populates="Onderneming")
 
 
