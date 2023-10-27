@@ -27,7 +27,7 @@ class AfspraakContact(Base):
     KeyPhrases: Mapped[str] = mapped_column(String(3000)    , nullable=True)
     
     ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
-    contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakContact")
+    Contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakContact")
 
 def insert_AfspraakContact_data(AfspraakContact_data, session):
     session.bulk_save_objects(AfspraakContact_data)
