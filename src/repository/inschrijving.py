@@ -31,7 +31,7 @@ class Inschrijving(Base):
     CampagneNaam: Mapped[str] = mapped_column(String(200))
     # FK
     ContactficheId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Contactfiche.ContactPersoon", use_alter=True), nullable=True
+        ForeignKey("Contactfiche.ContactPersoonId", use_alter=True), nullable=True
     )
     Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Inschrijving")
     CampagneId: Mapped[Optional[str]] = mapped_column(
@@ -109,7 +109,7 @@ def seed_inschrijving():
         SET Inschrijving.ContactficheId = NULL
         WHERE Inschrijving.ContactficheId
         NOT IN 
-        (SELECT ContactPersoon FROM Contactfiche)
+        (SELECT ContactPersoonId FROM Contactfiche)
     """
         )
     )  # delete, want niet bruikbaar met null

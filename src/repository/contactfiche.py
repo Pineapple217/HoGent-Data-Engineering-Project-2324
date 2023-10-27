@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from .account import Account
     from .persoon import Persoon
     from .inschrijving import Inschrijving
+    from .send_email_clicks import SendEmailClicks
     
 BATCH_SIZE = 10_000
 
@@ -24,7 +25,7 @@ class Contactfiche(Base):
     __table_args__ = {"extend_existing": True}
     #Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)  # Id aanmaken want primary key is niet te vinden
     #edit: ContactPersoon is PK, want hiernaar wordt gerefereerd uit andere tables. Is ook uniek in de hele datafile. Kan wel interessant zijn voor DWH
-    ContactPersoon: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
+    ContactPersoonId: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
     FunctieTitel: Mapped[str] = mapped_column(String(255), nullable=True)
     Status: Mapped[str] = mapped_column(String(50))
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
@@ -36,6 +37,8 @@ class Contactfiche(Base):
     Account: Mapped["Persoon"] = relationship("Persoon", backref="ContactfichePersoon")
 
     Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Contactfiche")
+
+    SendEmailClicks      :Mapped["SendEmailClicks"] = relationship(back_populates="Contact")
 
 
 def insert_contactfiche_data(contactfiche_data, session):
@@ -63,7 +66,7 @@ def seed_contactfiche():
     
     for i, row in df.iterrows():
         p = Contactfiche(
-            ContactPersoon=row["crm_Contact_Contactpersoon"],
+            ContactPersoonId=row["crm_Contact_Contactpersoon"],
             AccountId=row["crm_Contact_Account"],
             FunctieTitel=row["crm_Contact_Functietitel"],
             PersoonId=row["crm_Contact_Persoon_ID"],

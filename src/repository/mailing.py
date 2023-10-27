@@ -23,10 +23,11 @@ logger = logging.getLogger(__name__)
 class Mailing(Base):
     __tablename__ = "Mailing"
     __table_args__ = {"extend_existing": True}
-    Mailing     :Mapped[str]  = mapped_column(String(50), primary_key=True)
+    MailingId     :Mapped[str]  = mapped_column(String(50), primary_key=True)
     Name        :Mapped[str]  = mapped_column(String(200), nullable=True)
     SentOn      :Mapped[Date] = mapped_column(Date)
     Onderwerp   :Mapped[str]  = mapped_column(String(200))
+
     SendClicks  :Mapped["SendEmailClicks"] = relationship(back_populates="EmailVersturen")
     Visits      :Mapped["Visit"] = relationship(back_populates="EmailSend")
 
@@ -56,7 +57,7 @@ def seed_mailing():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         p = Mailing(
-            Mailing     = row['crm_CDI_Mailing_Mailing'],
+            MailingId     = row['crm_CDI_Mailing_Mailing'],
             Name        = row['crm_CDI_Mailing_Name'],
             SentOn      = row['crm_CDI_Mailing_Sent_On'],
             Onderwerp   = row['crm_CDI_Mailing_Onderwerp'],

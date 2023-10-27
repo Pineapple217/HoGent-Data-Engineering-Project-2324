@@ -21,7 +21,7 @@ class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    Contactpersoon: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    ContactPersoonId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
     contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContactficheFunctieContact")
     Functie: Mapped[str] = mapped_column(String(50), ForeignKey('Functie.Functie', use_alter=True), nullable=True)
     functieFK: Mapped["Functie"] = relationship("Functie", backref="ContactficheFunctie")
@@ -68,8 +68,8 @@ def seed_contactfiche_functie():
     
     session.execute(text("""
         DELETE FROM ContactficheFunctie
-        WHERE Contactpersoon NOT IN 
-            (SELECT ContactPersoon FROM Contactfiche);
+        WHERE ContactPersoonId NOT IN 
+            (SELECT ContactPersoonId FROM Contactfiche);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 

@@ -25,11 +25,9 @@ logger = logging.getLogger(__name__)
 class Pageview(Base):
     __tablename__ = "Pageviews"
     __table_args__ = {"extend_existing": True}
-    PageView: Mapped[str] = mapped_column(String(200), primary_key=True)
+    PageViewId: Mapped[str] = mapped_column(String(200), primary_key=True)
     AnonymousVisitor: Mapped[str] = mapped_column(String(50), nullable=True)
     Browser: Mapped[str] = mapped_column(String(50), nullable=True)
-    Contact: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
-    contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKPageviewsContact")
     Duration: Mapped[int] = mapped_column(Integer, nullable=True)
     OperatingSystem: Mapped[str] = mapped_column(String(50))
     ReferrerType: Mapped[str] = mapped_column(String(50))
@@ -46,7 +44,10 @@ class Pageview(Base):
     Status: Mapped[str] = mapped_column(String(50))
     RedenVanStatus: Mapped[str] = mapped_column(String(50))
 
-    VisitId: Mapped[Optional[str]] = mapped_column(ForeignKey("Visits.Visit", use_alter=True), nullable=True)
+    ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
+    contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKPageviewsContact")
+
+    VisitId: Mapped[Optional[str]] = mapped_column(ForeignKey("Visits.VisitId", use_alter=True), nullable=True)
     Visit: Mapped["Visit"] = relationship(back_populates="Pageviews")
 
     CampagneId: Mapped[Optional[str]] = mapped_column(ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True)
@@ -66,7 +67,7 @@ def seed_pageviews():
     chunks = pd.read_csv(
         csv, delimiter=";", encoding="latin-1", keep_default_na=True, na_values=[""], chunksize=50_000
     )
-    df = pd.concat(chunks) 
+    df = pd.concat(chunks)
     df = df.replace({np.nan: None})
     # Sommige lege waardes worden als NaN ingelezeno
     # NaN mag niet in een varchar
@@ -91,10 +92,10 @@ def seed_pageviews():
             AnonymousVisitor=row["crm CDI_PageView[Anonymous Visitor]"],
             Browser=row["crm CDI_PageView[Browser]"],
             CampagneId=row["crm CDI_PageView[Campaign]"],
-            Contact=row["crm CDI_PageView[Contact]"],
+            ContactId=row["crm CDI_PageView[Contact]"],
             Duration=row["crm CDI_PageView[Duration]"],
             OperatingSystem=row["crm CDI_PageView[Operating System]"],
-            PageView=row["crm CDI_PageView[Page View]"],
+            PageViewId=row["crm CDI_PageView[Page View]"],
             ReferrerType=row["crm CDI_PageView[Referrer Type]"],
             Time=row["crm CDI_PageView[Time]"],
             PageTitle=row["crm CDI_PageView[Page Title]"],
@@ -127,7 +128,7 @@ def seed_pageviews():
         SET PageViews.VisitId = NULL
         WHERE Pageviews.VisitId
         NOT IN
-        (SELECT Visit FROM Visits)
+        (SELECT VisitId FROM Visits)
     """))
     session.commit()
 
@@ -136,15 +137,15 @@ def seed_pageviews():
         SET PageViews.CampagneId = NULL
         WHERE Pageviews.CampagneId
         NOT IN
-        (SELECT Id FROM Campagne)
+        (SELECT CampagneId FROM Campagne)
     """))
     session.commit()
 
     session.execute(text("""
         UPDATE Pageviews
-        SET PageViews.Contact = NULL
-        WHERE Pageviews.Contact
+        SET PageViews.ContactId = NULL
+        WHERE Pageviews.ContactId
         NOT IN
-        (SELECT ContactPersoon FROM Contactfiche)
+        (SELECT ContactPersoonId FROM Contactfiche)
     """))
     session.commit()

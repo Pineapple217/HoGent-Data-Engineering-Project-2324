@@ -23,7 +23,7 @@ class AfspraakContact(Base):
     Thema: Mapped[str] = mapped_column(String(255), nullable=True)
     Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
-    ContactID: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    ContactID: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
     contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKAfspraakContact")
     Einddatum: Mapped[Date] = mapped_column(Date)
     KeyPhrases: Mapped[str] = mapped_column(String(3000)    , nullable=True)
@@ -77,7 +77,7 @@ def seed_afspraak_contact():
         SET AfspraakContact.ContactID = NULL
         WHERE AfspraakContact.ContactID
         NOT IN
-        (SELECT ContactPersoon FROM Contactfiche)
+        (SELECT ContactPersoonId FROM Contactfiche)
     """))
     session.commit()
 

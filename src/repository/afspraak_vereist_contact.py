@@ -22,7 +22,7 @@ class AfspraakVereistContact(Base):
     Id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
     AfspraakID: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakID'))
     afspraak: Mapped["AfspraakContact"] = relationship("AfspraakContact", backref="AfspraakVereistContact")
-    VereistContactID: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactPersoon'), primary_key=True)
+    VereistContactID: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactPersoonId'), primary_key=True)
     contact: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContact")
     
     
@@ -65,7 +65,7 @@ def seed_afspraak_vereist_contact():
     session.execute(text("""
         DELETE FROM AfspraakVereistContact
         WHERE VereistContactID NOT IN 
-            (SELECT ContactPersoon FROM Contactfiche);
+            (SELECT ContactPersoonId FROM Contactfiche);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 

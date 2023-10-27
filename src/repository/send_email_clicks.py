@@ -26,11 +26,12 @@ logger = logging.getLogger(__name__)
 class SendEmailClicks(Base):
     __tablename__ = "SendEmailClicks"
     __table_args__ = {"extend_existing": True}
-    SentEmail       :Mapped[str] = mapped_column(String(50), primary_key=True)
+    SentEmailId       :Mapped[str] = mapped_column(String(50), primary_key=True)
     Clicks          :Mapped[int] = mapped_column(Integer)
-    Contact         :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
-    contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKSentEmailClicksContact")
-    EmailVersturenId:Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.Mailing"), nullable=True)
+
+    ContactId         :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
+    Contact: Mapped["Contactfiche"] = relationship(back_populates="SendEmailClicks")
+    EmailVersturenId:Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.MailingId"), nullable=True)
     EmailVersturen  :Mapped[Optional["Mailing"]] = relationship(back_populates="SendClicks")
     
 
@@ -66,9 +67,9 @@ def seed_send_email_clicks():
     for _, row in df.iterrows():
         email_id = row['crm_CDI_SentEmail_kliks_E_mail_versturen']
         p = SendEmailClicks(
-            SentEmail       = row['crm_CDI_SentEmail_kliks_Sent_Email'],
+            SentEmailId       = row['crm_CDI_SentEmail_kliks_Sent_Email'],
             Clicks          = row['crm_CDI_SentEmail_kliks_Clicks'],
-            Contact         = row['crm_CDI_SentEmail_kliks_Contact'],
+            ContactId         = row['crm_CDI_SentEmail_kliks_Contact'],
             EmailVersturenId  = email_id,
         )
         if email_id not in valid_mailings:
@@ -87,9 +88,9 @@ def seed_send_email_clicks():
 
     session.execute(text("""
         UPDATE SendEmailClicks
-        SET SendEmailClicks.Contact = NULL
-        WHERE SendEmailClicks.Contact
+        SET SendEmailClicks.ContactId = NULL
+        WHERE SendEmailClicks.ContactId
         NOT IN
-        (SELECT ContactPersoon FROM Contactfiche)
+        (SELECT ContactPersoonId FROM Contactfiche)
     """))
     session.commit()

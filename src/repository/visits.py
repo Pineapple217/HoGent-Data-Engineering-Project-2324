@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class Visit(Base):
     __tablename__ = "Visits"
     __table_args__ = {"extend_existing": True}
-    Visit                   :Mapped[str] = mapped_column(String(50), primary_key=True)
+    VisitId                   :Mapped[str] = mapped_column(String(50), primary_key=True)
     AdobeReader             :Mapped[bool] = mapped_column(Boolean)
     Bounce                  :Mapped[bool] = mapped_column(Boolean)
     Browser                 :Mapped[str] = mapped_column(String(50), nullable=True)
@@ -33,7 +33,7 @@ class Visit(Base):
     Campaign                :Mapped[str] = mapped_column(String(50), nullable=True)
     IPStad                  :Mapped[str] = mapped_column(String(50), nullable=True)
     IPCompany               :Mapped[str] = mapped_column(String(200), nullable=True)
-    Contact                 :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoon', use_alter=True), nullable=True)
+    Contact                 :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactPersoonId', use_alter=True), nullable=True)
     contactFK               :Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKVisitsContact") 
     ContactNaam             :Mapped[str] = mapped_column(String(200))
     ContainsSocialProfile   :Mapped[bool] = mapped_column(Boolean)
@@ -61,7 +61,7 @@ class Visit(Base):
     AangemaaktOp            :Mapped[DateTime] = mapped_column(DateTime)
     GewijzigdOp             :Mapped[DateTime] = mapped_column(DateTime)
 
-    EmailSendId             :Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.Mailing"), nullable=True)
+    EmailSendId             :Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.MailingId"), nullable=True)
     EmailSend               :Mapped[Optional["Mailing"]] = relationship(back_populates="Visits")
 
     Pageviews               :Mapped["Pageview"] = relationship(back_populates="Visit")
@@ -111,7 +111,7 @@ def seed_visits():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         p = Visit(
-            Visit                   =  row['crm_CDI_Visit_Visit'],
+            VisitId                   =  row['crm_CDI_Visit_Visit'],
             AdobeReader             =  row['crm_CDI_Visit_Adobe_Reader'],
             Bounce                  =  row['crm_CDI_Visit_Bounce'],
             Browser                 =  row['crm_CDI_Visit_Browser'],
@@ -164,7 +164,7 @@ def seed_visits():
         SET Visits.EmailSendId = NULL
         WHERE Visits.EmailSendId
         NOT IN
-        (SELECT Mailing FROM Mailing);
+        (SELECT MailingId FROM Mailing);
     """))
     session.commit()
 
@@ -173,6 +173,6 @@ def seed_visits():
         SET Visits.Contact = NULL
         WHERE Visits.Contact
         NOT IN
-        (SELECT ContactPersoon FROM Contactfiche)
+        (SELECT ContactPersoonId FROM Contactfiche)
     """))
     session.commit()
