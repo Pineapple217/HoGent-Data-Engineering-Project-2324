@@ -174,6 +174,6 @@ def seed_visits():
         SET Visits.ContactId = NULL
         WHERE Visits.ContactId
         NOT IN
-        (SELECT ContactPersoonId FROM Contactfiche)
+        (SELECT ContactpersoonId FROM Contactfiche)
     """))
     session.commit()

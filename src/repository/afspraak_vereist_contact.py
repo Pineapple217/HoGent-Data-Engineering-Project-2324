@@ -68,7 +68,7 @@ def seed_afspraak_vereist_contact():
     session.execute(text("""
         DELETE FROM AfspraakVereistContact
         WHERE VereistContactId NOT IN 
-            (SELECT ContactPersoonId FROM Contactfiche);
+            (SELECT ContactpersoonId FROM Contactfiche);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 

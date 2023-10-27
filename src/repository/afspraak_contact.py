@@ -83,7 +83,7 @@ def seed_afspraak_contact():
         SET AfspraakContact.ContactId = NULL
         WHERE AfspraakContact.ContactId
         NOT IN
-        (SELECT ContactPersoonId FROM Contactfiche)
+        (SELECT ContactpersoonId FROM Contactfiche)
     """))
     session.commit()
 

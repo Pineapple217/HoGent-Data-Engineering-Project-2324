@@ -75,7 +75,7 @@ def seed_contactfiche():
     
     for i, row in df.iterrows():
         p = Contactfiche(
-            ContactPersoonId=row["crm_Contact_Contactpersoon"],
+            ContactpersoonId=row["crm_Contact_Contactpersoon"],
             AccountId=row["crm_Contact_Account"],
             FunctieTitel=row["crm_Contact_Functietitel"],
             PersoonId=row["crm_Contact_Persoon_ID"],

@@ -70,8 +70,8 @@ def seed_contactfiche_functie():
     
     session.execute(text("""
         DELETE FROM ContactficheFunctie
-        WHERE ContactPersoonId NOT IN 
-            (SELECT ContactPersoonId FROM Contactfiche);
+        WHERE ContactpersoonId NOT IN 
+            (SELECT ContactpersoonId FROM Contactfiche);
     """)) #delete, want niet bruikbaar met null
     session.commit()
 

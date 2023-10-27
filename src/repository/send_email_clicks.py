@@ -91,6 +91,6 @@ def seed_send_email_clicks():
         SET SendEmailClicks.ContactId = NULL
         WHERE SendEmailClicks.ContactId
         NOT IN
-        (SELECT ContactPersoonId FROM Contactfiche)
+        (SELECT ContactpersoonId FROM Contactfiche)
     """))
     session.commit()

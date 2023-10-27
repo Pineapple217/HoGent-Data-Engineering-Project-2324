@@ -146,6 +146,6 @@ def seed_pageviews():
         SET PageViews.ContactId = NULL
         WHERE Pageviews.ContactId
         NOT IN
-        (SELECT ContactPersoonId FROM Contactfiche)
+        (SELECT ContactpersoonId FROM Contactfiche)
     """))
     session.commit()

@@ -103,7 +103,7 @@ def seed_inschrijving():
         SET Inschrijving.ContactficheId = NULL
         WHERE Inschrijving.ContactficheId
         NOT IN 
-        (SELECT ContactPersoonId FROM Contactfiche)
+        (SELECT ContactpersoonId FROM Contactfiche)
     """
         )
     )  # delete, want niet bruikbaar met null
