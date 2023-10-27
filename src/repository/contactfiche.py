@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from .persoon import Persoon
     from .inschrijving import Inschrijving
     from .send_email_clicks import SendEmailClicks
+    from .afspraak_contact import AfspraakContact
     
 BATCH_SIZE = 10_000
 
@@ -31,14 +32,14 @@ class Contactfiche(Base):
     VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
 
     AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'), nullable=True)
-    Account: Mapped["Account"] = relationship("Account", backref="ContactficheAccount")
+    Account: Mapped["Account"] = relationship(back_populates="Account")
 
     PersoonId: Mapped[str] = mapped_column(String(100), ForeignKey('Persoon.PersoonId'), nullable=True)
-    Account: Mapped["Persoon"] = relationship("Persoon", backref="ContactfichePersoon")
+    Account: Mapped["Persoon"] = relationship(back_populates="Persoon")
 
     Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Contactfiche")
-
-    SendEmailClicks      :Mapped["SendEmailClicks"] = relationship(back_populates="Contact")
+    SendEmailClicks      :Mapped["SendEmailClicks"] = relationship(back_populates="Contactfiche")
+    AfspraakContact: Mapped["AfspraakContact"] = relationship(back_populates="Contactfiche")
 
 
 def insert_contactfiche_data(contactfiche_data, session):
