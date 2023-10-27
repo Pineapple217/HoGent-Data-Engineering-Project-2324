@@ -171,8 +171,8 @@ def seed_visits():
 
     session.execute(text("""
         UPDATE Visits
-        SET Visits.Contact = NULL
-        WHERE Visits.Contact
+        SET Visits.ContactId = NULL
+        WHERE Visits.ContactId
         NOT IN
         (SELECT ContactPersoonId FROM Contactfiche)
     """))
