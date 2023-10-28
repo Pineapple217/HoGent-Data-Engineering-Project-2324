@@ -18,6 +18,7 @@ BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
+
 class InfoEnKlachten(Base):
     __tablename__ = "InfoEnKlachten"
     __table_args__ = {"extend_existing": True}

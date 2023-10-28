@@ -29,9 +29,11 @@ class Inschrijving(Base):
     DatumInschrijving: Mapped[DATETIME2] = mapped_column(DATETIME2)
     FacturatieBedrag: Mapped[Float] = mapped_column(Float)
     CampagneNaam: Mapped[str] = mapped_column(String(200))
+    
     # FK
     ContactficheId: Mapped[Optional[str]] = mapped_column(ForeignKey("Contactfiche.ContactpersoonId", use_alter=True), nullable=True)
     Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Inschrijving")
+    
     CampagneId: Mapped[Optional[str]] = mapped_column(ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True)
     Campagne: Mapped["Campagne"] = relationship(back_populates="Inschrijving")
 
@@ -54,25 +56,19 @@ def seed_inschrijving():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Inschrijvingen.csv"
-    df = pd.read_csv(
-        csv,
-        delimiter=",",
-        encoding="utf-8",
-        keep_default_na=True,
-        na_values=[""],
-    )
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
     df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
-    # NaN mag niet in een varchar
-    df["crm_Inschrijving_Datum_inschrijving"] = pd.to_datetime(
-        df["crm_Inschrijving_Datum_inschrijving"], format="%d-%m-%Y"
-    )
+ 
+    df["crm_Inschrijving_Datum_inschrijving"] = pd.to_datetime(df["crm_Inschrijving_Datum_inschrijving"], format="%d-%m-%Y")
+    
     inschrijving_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         p = Inschrijving(
             InschrijvingId=row["crm_Inschrijving_Inschrijving"],
             AanwezigAfwezig=row["crm_Inschrijving_Aanwezig_Afwezig"],
@@ -83,7 +79,6 @@ def seed_inschrijving():
             CampagneId=row["crm_Inschrijving_Campagne"],
             CampagneNaam=row["crm_Inschrijving_Campagne_Naam_"],
         )
-
         inschrijving_data.append(p)
 
         if len(inschrijving_data) >= BATCH_SIZE:
@@ -91,7 +86,6 @@ def seed_inschrijving():
             inschrijving_data = []
             progress_bar.update(BATCH_SIZE)
 
-    # Insert any remaining data
     if inschrijving_data:
         insert_inschrijving_data(inschrijving_data, session)
         progress_bar.update(len(inschrijving_data))
@@ -106,7 +100,7 @@ def seed_inschrijving():
         (SELECT ContactpersoonId FROM Contactfiche)
     """
         )
-    )  # delete, want niet bruikbaar met null
+    )
     session.commit()
 
     session.execute(

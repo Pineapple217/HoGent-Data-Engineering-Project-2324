@@ -1,7 +1,7 @@
 import logging
 import os
 from dotenv import load_dotenv
-from sqlalchemy import Table, create_engine, MetaData, text
+from sqlalchemy import create_engine, MetaData, text
 
 from repository.base import Base
 
@@ -111,8 +111,7 @@ def db_init():
 def db_seed():
     logger.info("Starting seeding...")
     drop_fk()
-    
-    #ordening obv hoeveel FK verwijzen naar hun PK
+    # Finale ordening obv hoeveel FK's verwijzen naar hun PK
     seed_persoon()                
     seed_account()                #3
     seed_contactfiche()           #3
@@ -135,5 +134,4 @@ def db_seed():
     seed_afspraak_vereist_contact()
     seed_account_activiteitscode()
     seed_contactfiche_functie()
-    
     enable_fk()

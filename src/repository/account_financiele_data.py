@@ -2,7 +2,7 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
-from sqlalchemy import String, Integer, FLOAT, ForeignKey, text
+from sqlalchemy import Integer, FLOAT, ForeignKey, text
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
+
 
 class AccountFinancieleData(Base):
     __tablename__ = "AccountFinancieleData"
@@ -47,8 +48,10 @@ def seed_account_financiele_data():
     df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
 
     df["crm_FinancieleData_Gewijzigd_op"] = pd.to_datetime(df["crm_FinancieleData_Gewijzigd_op"], format="%d-%m-%Y %H:%M:%S")
+    
     df['crm_FinancieleData_FTE'] = df['crm_FinancieleData_FTE'].str.replace(',', '.')
     df['crm_FinancieleData_Toegevoegde_waarde'] = df['crm_FinancieleData_Toegevoegde_waarde'].str.replace(',', '.')
+    
     df['crm_FinancieleData_FTE'] = pd.to_numeric(df['crm_FinancieleData_FTE'],errors='coerce')
     df['crm_FinancieleData_Toegevoegde_waarde'] = pd.to_numeric(df['crm_FinancieleData_Toegevoegde_waarde'],errors='coerce')
     df['crm_FinancieleData_Aantal_maanden'] = pd.to_numeric(df['crm_FinancieleData_Aantal_maanden'],errors='coerce')

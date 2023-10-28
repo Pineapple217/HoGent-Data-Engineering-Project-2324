@@ -16,29 +16,23 @@ if TYPE_CHECKING:
     from .inschrijving import Inschrijving
 
 BATCH_SIZE = 10_000
+
 logger = logging.getLogger(__name__)
 
 
 class SessieInschrijving(Base):
-    __tablename__ = "SessieInschrijving"  # snakecase
+    __tablename__ = "SessieInschrijving" 
     __table_args__ = {"extend_existing": True}
-    SessieInschrijvingId: Mapped[str] = mapped_column(
-        String(50), nullable=True, primary_key=True
-    )
+    SessieInschrijvingId: Mapped[str] = mapped_column(String(50), nullable=True, primary_key=True)
     Sessie: Mapped[str] = mapped_column(String(50), nullable=True)
     Inschrijving: Mapped[str] = mapped_column(String(50), nullable=True)
 
     # FK
-    SessieId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Sessie.SessieId", use_alter=True), nullable=True
-    )
+    SessieId: Mapped[Optional[str]] = mapped_column(ForeignKey("Sessie.SessieId", use_alter=True), nullable=True)
     Sessie: Mapped["Sessie"] = relationship(back_populates="SessieInschrijving")
-    InschrijvingId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Inschrijving.InschrijvingId", use_alter=True), nullable=True
-    )
-    Inschrijving: Mapped["Inschrijving"] = relationship(
-        back_populates="SessieInschrijving"
-    )
+    
+    InschrijvingId: Mapped[Optional[str]] = mapped_column(ForeignKey("Inschrijving.InschrijvingId", use_alter=True), nullable=True)
+    Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="SessieInschrijving")
 
 
 def insert_sessie_inschrijving_data(sessie_inschrijving_data, session):
@@ -52,24 +46,19 @@ def seed_sessie_inschrijving():
     session = Session()
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Sessie inschrijving.csv"
-    df = pd.read_csv(
-        csv,
-        delimiter=",",
-        encoding="utf-8",
-        keep_default_na=True,
-        na_values=[""],
-    )
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""],)
+    
     # csv bevat veel lege rijen, dit drop alle rijen die volledig leeg zijn
     df = df.dropna(how="all", axis=0)
-    df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
+    
+    # Sommige lege waardes worden als NaN ingelezen
     # NaN mag niet in een varchar
+    df = df.replace({np.nan: None})
+    
     sessie_inschrijving_data = []
-
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         p = SessieInschrijving(
             SessieInschrijvingId=row["crm_SessieInschrijving_SessieInschrijving"],
             SessieId=row["crm_SessieInschrijving_Sessie"],
@@ -99,6 +88,7 @@ def seed_sessie_inschrijving():
         )
     )
     session.commit()
+    
     session.execute(
         text(
             """

@@ -13,12 +13,12 @@ if TYPE_CHECKING:
     from .account import Account
     from .afspraak_contact import AfspraakContact
 
-
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
-#data in commentaar is data die al in AfspraakContact staat, maar gejoined is. Ander duplicate data.
+
+# Data in commentaar is data die al in AfspraakContact staat, maar gejoined is. Anders hebben we duplicate data.
 class AfspraakAccount(Base):
     __tablename__ = "AfspraakAccount"
     __table_args__ = {"extend_existing": True}
@@ -43,14 +43,16 @@ def seed_afspraak_account():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + '/Afspraak_account_gelinkt_cleaned.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
+    
     df = df.drop_duplicates()
     df = df.replace({np.nan: None})
-    df["crm_Afspraak_ACCOUNT_GELINKT_Eindtijd"] = pd.to_datetime(
-        df["crm_Afspraak_ACCOUNT_GELINKT_Eindtijd"], format="%d-%m-%Y"
-    )
+    
+    df["crm_Afspraak_ACCOUNT_GELINKT_Eindtijd"] = pd.to_datetime(df["crm_Afspraak_ACCOUNT_GELINKT_Eindtijd"], format="%d-%m-%Y")
+    
     AfspraakAccount_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
@@ -64,7 +66,6 @@ def seed_afspraak_account():
             AccountId=row["crm_Afspraak_ACCOUNT_GELINKT_Account"],
             #KeyPhrases=row["crm_Afspraak_ACCOUNT_GELINKT_KeyPhrases"]
         )
-
         AfspraakAccount_data.append(aa)
         
         if len(AfspraakAccount_data) >= BATCH_SIZE:

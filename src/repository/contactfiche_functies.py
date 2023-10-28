@@ -2,7 +2,7 @@ from .base import Base
 
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
-from sqlalchemy import String, Integer, ForeignKey, text
+from sqlalchemy import Integer, ForeignKey, text
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
+
 
 class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
@@ -33,27 +34,24 @@ class ContactficheFunctie(Base):
 def insert_contactfiche_functie_data(contactfiche_functie_data, session):
     session.bulk_save_objects(contactfiche_functie_data)
     session.commit()
+    
 
 def seed_contactfiche_functie():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Contact functie.csv"
-    df = pd.read_csv(
-        csv,
-        delimiter=",",
-        encoding="utf-8",
-        keep_default_na=True,
-        na_values=[""]
-    )
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
     df = df.dropna(how='all', axis=0)
     df = df.replace({np.nan: None})
+    
     contactfiche_functie_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         p = ContactficheFunctie(
             ContactpersoonId=row["crm_ContactFunctie_Contactpersoon"],
             FunctieId=row["crm_ContactFunctie_Functie"],
@@ -69,7 +67,7 @@ def seed_contactfiche_functie():
         insert_contactfiche_functie_data(contactfiche_functie_data, session)
         progress_bar.update(len(contactfiche_functie_data))
 
-    
+  
     session.execute(text("""
         DELETE FROM ContactficheFunctie
         WHERE ContactpersoonId NOT IN 

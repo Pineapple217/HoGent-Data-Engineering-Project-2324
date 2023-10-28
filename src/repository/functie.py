@@ -12,6 +12,7 @@ BATCH_SIZE = 10
 
 logger = logging.getLogger(__name__)
 
+
 class Functie(Base):
     __tablename__ = "Functie"
     __table_args__ = {"extend_existing": True}
@@ -31,21 +32,17 @@ def seed_functie():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Functie.csv"
-    df = pd.read_csv(
-        csv,
-        delimiter=",",
-        encoding="utf-8",
-        keep_default_na=True,
-        na_values=[""],
-    )
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
     df = df.replace({np.nan: None})
+    
     functie_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         p = Functie(
             FunctieId=row["crm_Functie_Functie"],
             Naam=row["crm_Functie_Naam"],

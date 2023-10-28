@@ -14,10 +14,10 @@ from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .contactfiche import Contactfiche
 
-
 BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
+
 
 class Persoon(Base):
     __tablename__ = "Persoon"
@@ -52,8 +52,8 @@ class Persoon(Base):
     TypePersberichtenBelangrijkeMeldingen: Mapped[str] = mapped_column(String(50), nullable=True)
     Marketingcommunicatie: Mapped[str] = mapped_column(String(50), nullable=True)
 
+    # FK
     Contactfiche: Mapped["Contactfiche"] = relationship(back_populates="Persoon")
-
 
 
 def insert_persoon_data(persoon_data, session):
@@ -65,17 +65,19 @@ def seed_persoon():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + '/Persoon.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
+    
     df = df.replace({np.nan: None})
-
+    
     yes_no_mapping = {'Nee': 0, 'Ja': 1}
     actief_inactief_mapping = {'Inactief': 0, 'Actief': 1}
+    
     persoon_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    futures = []
     for _, row in df.iterrows():
         p = Persoon(
             PersoonId=row["crm_Persoon_persoon"],
@@ -108,7 +110,6 @@ def seed_persoon():
             TypePersberichtenBelangrijkeMeldingen=yes_no_mapping.get(row["crm_Persoon_Mail_type_persberichten_belangrijke_meldingen"], None),
             Marketingcommunicatie=row["crm_Persoon_Marketingcommunicatie"]
         )
-
         persoon_data.append(p)
         
         if len(persoon_data) >= BATCH_SIZE:
@@ -119,7 +120,3 @@ def seed_persoon():
     if persoon_data:
         insert_persoon_data(persoon_data, session)
         progress_bar.update(len(persoon_data))
-
-        
-        
-

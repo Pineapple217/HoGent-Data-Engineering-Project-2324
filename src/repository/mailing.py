@@ -23,11 +23,12 @@ logger = logging.getLogger(__name__)
 class Mailing(Base):
     __tablename__ = "Mailing"
     __table_args__ = {"extend_existing": True}
-    MailingId     :Mapped[str]  = mapped_column(String(50), primary_key=True)
+    MailingId   :Mapped[str]  = mapped_column(String(50), primary_key=True)
     Name        :Mapped[str]  = mapped_column(String(200), nullable=True)
     SentOn      :Mapped[Date] = mapped_column(Date)
     Onderwerp   :Mapped[str]  = mapped_column(String(200))
 
+    # FK
     SendClicks  :Mapped["SendEmailClicks"] = relationship(back_populates="EmailVersturen")
     Visits      :Mapped["Visit"] = relationship(back_populates="EmailSend")
 
@@ -43,15 +44,14 @@ def seed_mailing():
     session = Session()
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/CDI mailing.csv"
-    df = pd.read_csv(
-        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""]
-    )
-    df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
+    # Sommige lege waardes worden als NaN ingelezen
     # NaN mag niet in een varchar
-    df["crm_CDI_Mailing_Sent_On"] = pd.to_datetime(
-        df["crm_CDI_Mailing_Sent_On"], format="%d-%m-%Y"
-    )
+    df = df.replace({np.nan: None})
+    
+    df["crm_CDI_Mailing_Sent_On"] = pd.to_datetime(df["crm_CDI_Mailing_Sent_On"], format="%d-%m-%Y")
+    
     mailing_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)

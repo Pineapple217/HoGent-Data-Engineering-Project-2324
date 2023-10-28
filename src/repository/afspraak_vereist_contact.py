@@ -17,17 +17,18 @@ BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
+
 class AfspraakVereistContact(Base):
     __tablename__ = "AfspraakVereistContact"
     __table_args__ = {'extend_existing': True}
     AfspraakVereistContactId: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # zelf toegevoegd, tabel heeft geen primary key
 
+    # FK
     AfspraakId: Mapped[str] = mapped_column(String(255), ForeignKey('AfspraakContact.AfspraakId'))
     Afspraak: Mapped["AfspraakContact"] = relationship(back_populates="AfspraakVereistContact")
 
     VereistContactId: Mapped[str] = mapped_column(String(255),ForeignKey('Contactfiche.ContactpersoonId'), primary_key=True)
     Contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakVereistContact")
-    
     
 
 def insert_AfspraakVereistContact_data(AfspraakVereistContact_data, session):
@@ -39,9 +40,11 @@ def seed_afspraak_vereist_contact():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + '/Activiteit vereist contact.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
+    
     df = df.drop_duplicates()
     df = df.replace({np.nan: None})
     
@@ -53,7 +56,6 @@ def seed_afspraak_vereist_contact():
             AfspraakId=row["crm_ActiviteitVereistContact_ActivityId"],
             VereistContactId=row["crm_ActiviteitVereistContact_ReqAttendee"],
         )
-
         AfspraakVereistContact_data.append(avc)
         
         if len(AfspraakVereistContact_data) >= BATCH_SIZE:

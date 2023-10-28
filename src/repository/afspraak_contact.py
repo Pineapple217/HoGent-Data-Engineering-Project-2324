@@ -18,6 +18,7 @@ BATCH_SIZE = 10_000
 
 logger = logging.getLogger(__name__)
 
+
 class AfspraakContact(Base):
     __tablename__ = "AfspraakContact"
     __table_args__ = {"extend_existing": True}
@@ -26,8 +27,9 @@ class AfspraakContact(Base):
     Subthema: Mapped[str] = mapped_column(String(255), nullable=True)
     Onderwerp: Mapped[str] = mapped_column(String(255), nullable=True)
     Einddatum: Mapped[Date] = mapped_column(Date)
-    KeyPhrases: Mapped[str] = mapped_column(String(3000)    , nullable=True)
+    KeyPhrases: Mapped[str] = mapped_column(String(3000), nullable=True)
     
+    # FK
     ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
     Contact: Mapped["Contactfiche"] = relationship(back_populates="AfspraakContact")
 
@@ -44,14 +46,15 @@ def seed_afspraak_contact():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + '/Afspraak betreft contact_cleaned.csv'
     df = pd.read_csv(csv, delimiter=",", encoding='utf-8-sig', keep_default_na=True, na_values=[''])
+    
     df = df.drop_duplicates()
     df = df.replace({np.nan: None})
-    df["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"] = pd.to_datetime(
-        df["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"], format="%d-%m-%Y"
-    )
+    
+    df["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"] = pd.to_datetime(df["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"], format="%d-%m-%Y")
     
     AfspraakContact_data = []
     logger.info("Seeding inserting rows")
@@ -66,7 +69,6 @@ def seed_afspraak_contact():
             Einddatum=row["crm_Afspraak_BETREFT_CONTACTFICHE_Eindtijd"],
             KeyPhrases=row["crm_Afspraak_BETREFT_CONTACTFICHE_KeyPhrases"]
         )
-
         AfspraakContact_data.append(ac)
         
         if len(AfspraakContact_data) >= BATCH_SIZE:

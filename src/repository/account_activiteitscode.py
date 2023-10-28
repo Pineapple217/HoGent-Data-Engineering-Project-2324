@@ -13,16 +13,17 @@ if TYPE_CHECKING:
     from .account import Account
     from .activiteitscode import Activiteitscode
 
-
 BATCH_SIZE = 1_000
 
 logger = logging.getLogger(__name__)
+
 
 class AccountActiviteitscode(Base):
     __tablename__ = "AccountActiviteitscode"
     __table_args__ = {"extend_existing": True}
     AccountActiviteitscodeId: Mapped[str] = mapped_column(String(50), primary_key=True)
 
+    # FK
     AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId', use_alter=True))
     Account: Mapped["Account"] = relationship(back_populates="AccountActiviteitscode")
 
@@ -39,22 +40,19 @@ def seed_account_activiteitscode():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Account activiteitscode.csv"
-    df = pd.read_csv(
-        csv,
-        delimiter=",",
-        encoding="utf-8",
-        keep_default_na=True,
-        na_values=[""],
-    )
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
     df = df.dropna(how="all", axis=0)
     df = df.replace({np.nan: None})
 
     accountActiviteitscode_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    for i, row in df.iterrows():
+    
+    for _, row in df.iterrows():
         p = AccountActiviteitscode(
             AccountId=row["crm_Account_ActiviteitsCode_Account"],
             ActiviteitsId=row["crm_Account_ActiviteitsCode_Activiteitscode"],
