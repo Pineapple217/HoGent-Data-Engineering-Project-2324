@@ -16,12 +16,13 @@ if TYPE_CHECKING:
     from .inschrijving import Inschrijving
 
 BATCH_SIZE = 10_000
+DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
 
 class Campagne(Base):
-    __tablename__ = "Campagne"  # snakecase
+    __tablename__ = "Campagne"
     __table_args__ = {"extend_existing": True}
     CampagneId: Mapped[str] = mapped_column(String(50), primary_key=True)
     CampagneNr: Mapped[str] = mapped_column(String(50), nullable=True)
@@ -35,10 +36,9 @@ class Campagne(Base):
     URLVoka: Mapped[str] = mapped_column(String(150), nullable=True)
     SoortCampagne: Mapped[str] = mapped_column(String(50))
 
+    # FK
     Pageviews: Mapped["Pageview"] = relationship(back_populates="Campagne")
-
     Sessie: Mapped["Sessie"] = relationship(back_populates="Campagne")
-
     Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Campagne")
 
 
@@ -51,23 +51,15 @@ def seed_campagne():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Campagnes.csv"
-    df = pd.read_csv(
-        csv,
-        delimiter=",",
-        encoding="utf-8",
-        keep_default_na=True,
-        na_values=[""],
-    )
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
     df = df.replace({np.nan: None})
 
-    df["crm_Campagne_Einddatum"] = pd.to_datetime(
-        df["crm_Campagne_Einddatum"], format="%d-%m-%Y %H:%M:%S"
-    )
-    df["crm_Campagne_Startdatum"] = pd.to_datetime(
-        df["crm_Campagne_Startdatum"], format="%d-%m-%Y %H:%M:%S"
-    )
+    df["crm_Campagne_Einddatum"] = pd.to_datetime(df["crm_Campagne_Einddatum"], format=DATE_FORMAT)
+    df["crm_Campagne_Startdatum"] = pd.to_datetime(df["crm_Campagne_Startdatum"], format=DATE_FORMAT)
 
     campagne_data = []
     logger.info("Seeding inserting rows")

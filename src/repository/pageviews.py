@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from .campagne import Campagne
     from .contactfiche import Contactfiche
 
-
 BATCH_SIZE = 10_000
+DATE_FORMAT = "%d/%m/%Y"
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ class Pageview(Base):
     Status: Mapped[str] = mapped_column(String(50))
     RedenVanStatus: Mapped[str] = mapped_column(String(50))
 
+    # FK 
     ContactId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
     Contact: Mapped["Contactfiche"] = relationship(back_populates='Pageviews')
 
@@ -52,6 +53,7 @@ class Pageview(Base):
 
     CampagneId: Mapped[Optional[str]] = mapped_column(ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True)
     Campagne: Mapped["Campagne"] = relationship(back_populates="Pageviews")
+    
 
 def insert_pageviews_data(pageviews_data, session):
     session.bulk_save_objects(pageviews_data)
@@ -62,27 +64,20 @@ def seed_pageviews():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/cdi_pageviews.csv"
-    chunks = pd.read_csv(
-        csv, delimiter=";", encoding="latin-1", keep_default_na=True, na_values=[""], chunksize=50_000
-    )
+    chunks = pd.read_csv(csv, delimiter=";", encoding="latin-1", keep_default_na=True, na_values=[""], chunksize=50_000)
     df = pd.concat(chunks)
-    df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
+    
+    # Sommige lege waardes worden als NaN ingelezen
     # NaN mag niet in een varchar
-    df["crm CDI_PageView[Viewed On]"] = pd.to_datetime(
-        df["crm CDI_PageView[Viewed On]"], format="%d/%m/%Y"
-    )
-    df["crm CDI_PageView[Time]"] = pd.to_datetime(
-        df["crm CDI_PageView[Time]"], format="%m-%d-%Y %H:%M:%S (%Z)"
-    )
-    df["crm CDI_PageView[Aangemaakt op]"] = pd.to_datetime(
-        df["crm CDI_PageView[Aangemaakt op]"], format="%d/%m/%Y"
-    )
-    df["crm CDI_PageView[Gewijzigd op]"] = pd.to_datetime(
-        df["crm CDI_PageView[Gewijzigd op]"], format="%d/%m/%Y"
-    )
+    df = df.replace({np.nan: None})
+    
+    df["crm CDI_PageView[Viewed On]"] = pd.to_datetime(df["crm CDI_PageView[Viewed On]"], format=DATE_FORMAT)
+    df["crm CDI_PageView[Time]"] = pd.to_datetime(df["crm CDI_PageView[Time]"], format="%m-%d-%Y %H:%M:%S (%Z)")
+    df["crm CDI_PageView[Aangemaakt op]"] = pd.to_datetime(df["crm CDI_PageView[Aangemaakt op]"], format=DATE_FORMAT)
+    df["crm CDI_PageView[Gewijzigd op]"] = pd.to_datetime(df["crm CDI_PageView[Gewijzigd op]"], format=DATE_FORMAT)
 
     pageviews_data = []
     logger.info("Seeding inserting rows")

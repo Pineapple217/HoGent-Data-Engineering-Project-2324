@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from .sessie_inschrijving import SessieInschrijving
 
 BATCH_SIZE = 10_000
+DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
@@ -32,14 +33,11 @@ class Sessie(Base):
     StartDatumTijd: Mapped[DATETIME2] = mapped_column(DATETIME2, nullable=True)
     ThemaNaam: Mapped[str] = mapped_column(String(50), nullable=True)
 
-    CampagneId: Mapped[Optional[str]] = mapped_column(
-        ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True
-    )
+    # FK
+    CampagneId: Mapped[Optional[str]] = mapped_column(ForeignKey("Campagne.CampagneId", use_alter=True), nullable=True)
     Campagne: Mapped["Campagne"] = relationship(back_populates="Sessie")
 
-    SessieInschrijving: Mapped["SessieInschrijving"] = relationship(
-        back_populates="Sessie"
-    )
+    SessieInschrijving: Mapped["SessieInschrijving"] = relationship(back_populates="Sessie")
 
 
 def insert_sessie_data(sessie_data, session):
@@ -51,29 +49,22 @@ def seed_sessie():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/Sessie.csv"
-    df = pd.read_csv(
-        csv,
-        delimiter=",",
-        encoding="utf-8",
-        keep_default_na=True,
-        na_values=[""],
-    )
-    df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""],)
+    
+    # Sommige lege waardes worden als NaN ingelezen
     # NaN mag niet in een varchar
-    df["crm_Sessie_Eind_Datum_Tijd"] = pd.to_datetime(
-        df["crm_Sessie_Eind_Datum_Tijd"], format="%d-%m-%Y %H:%M:%S"
-    )
-    df["crm_Sessie_Start_Datum_Tijd"] = pd.to_datetime(
-        df["crm_Sessie_Start_Datum_Tijd"], format="%d-%m-%Y %H:%M:%S"
-    )
+    df = df.replace({np.nan: None})
+
+    df["crm_Sessie_Eind_Datum_Tijd"] = pd.to_datetime(df["crm_Sessie_Eind_Datum_Tijd"], format=DATE_FORMAT)
+    df["crm_Sessie_Start_Datum_Tijd"] = pd.to_datetime(df["crm_Sessie_Start_Datum_Tijd"], format=DATE_FORMAT)
+    
     sessie_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         p = Sessie(
             SessieId=row["crm_Sessie_Sessie"],
             Activiteitstype=row["crm_Sessie_Activiteitstype"],
@@ -84,7 +75,6 @@ def seed_sessie():
             StartDatumTijd=row["crm_Sessie_Start_Datum_Tijd"],
             ThemaNaam=row["crm_Sessie_Thema_Naam_"],
         )
-
         sessie_data.append(p)
 
         if len(sessie_data) >= BATCH_SIZE:

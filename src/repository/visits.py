@@ -9,7 +9,6 @@ from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from typing import Optional, TYPE_CHECKING
-
 from tqdm import tqdm
 
 if TYPE_CHECKING:
@@ -18,6 +17,7 @@ if TYPE_CHECKING:
     from .contactfiche import Contactfiche
 
 BATCH_SIZE = 10_000
+DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class Visit(Base):
     __tablename__ = "Visits"
     __table_args__ = {"extend_existing": True}
-    VisitId                   :Mapped[str] = mapped_column(String(50), primary_key=True)
+    VisitId                 :Mapped[str] = mapped_column(String(50), primary_key=True)
     AdobeReader             :Mapped[bool] = mapped_column(Boolean)
     Bounce                  :Mapped[bool] = mapped_column(Boolean)
     Browser                 :Mapped[str] = mapped_column(String(50), nullable=True)
@@ -59,11 +59,12 @@ class Visit(Base):
     AangemaaktOp            :Mapped[DateTime] = mapped_column(DateTime)
     GewijzigdOp             :Mapped[DateTime] = mapped_column(DateTime)
 
+    # FK    
     EmailSendId             :Mapped[Optional[str]] = mapped_column(ForeignKey("Mailing.MailingId"), nullable=True)
     EmailSend               :Mapped[Optional["Mailing"]] = relationship(back_populates="Visits")
 
-    ContactId                :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
-    Contact                  :Mapped["Contactfiche"] = relationship(back_populates="Visit") 
+    ContactId               :Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
+    Contact                 :Mapped["Contactfiche"] = relationship(back_populates="Visit") 
 
     Pageviews               :Mapped["Pageview"] = relationship(back_populates="Visit")
 
@@ -77,34 +78,24 @@ def seed_visits():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/CDI visits.csv"
-    chunks = pd.read_csv(
-        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=10_000
-    )
+    chunks = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=10_000)
     df = pd.concat(chunks)
+    
     df['crm_CDI_Visit_Adobe_Reader'] = df['crm_CDI_Visit_Adobe_Reader'].replace({'Ja': True, 'Nee': False})
     df['crm_CDI_Visit_Bounce'] = df['crm_CDI_Visit_Bounce'].replace({'Ja': True, 'Nee': False})
     df['crm_CDI_Visit_containssocialprofile'] = df['crm_CDI_Visit_containssocialprofile'].replace({'Ja': True, 'Nee': False})
     df['crm_CDI_Visit_First_Visit'] = df['crm_CDI_Visit_First_Visit'].replace({'Ja': True, 'Nee': False})
 
-
-    df['crm_CDI_Visit_Ended_On'] = pd.to_datetime(
-        df['crm_CDI_Visit_Ended_On'], format="%d-%m-%Y %H:%M:%S"
-    )
-    df['crm_CDI_Visit_Started_On'] = pd.to_datetime(
-        df['crm_CDI_Visit_Started_On'], format="%d-%m-%Y %H:%M:%S"
-    )
-    df['crm_CDI_Visit_Aangemaakt_op'] = pd.to_datetime(
-        df['crm_CDI_Visit_Aangemaakt_op'], format="%d-%m-%Y %H:%M:%S"
-    )
-    df['crm_CDI_Visit_Gewijzigd_op'] = pd.to_datetime(
-        df['crm_CDI_Visit_Gewijzigd_op'], format="%d-%m-%Y %H:%M:%S"
-    )
+    df['crm_CDI_Visit_Ended_On'] = pd.to_datetime(df['crm_CDI_Visit_Ended_On'], format=DATE_FORMAT)
+    df['crm_CDI_Visit_Started_On'] = pd.to_datetime(df['crm_CDI_Visit_Started_On'], format=DATE_FORMAT)
+    df['crm_CDI_Visit_Aangemaakt_op'] = pd.to_datetime(df['crm_CDI_Visit_Aangemaakt_op'], format=DATE_FORMAT)
+    df['crm_CDI_Visit_Gewijzigd_op'] = pd.to_datetime(df['crm_CDI_Visit_Gewijzigd_op'], format=DATE_FORMAT)
     
-    df['crm_CDI_Visit_Time'] = pd.to_datetime(
-        df['crm_CDI_Visit_Time'], format="%m-%d-%Y %H:%M:%S (%Z)"
-    )
+    df['crm_CDI_Visit_Time'] = pd.to_datetime(df['crm_CDI_Visit_Time'], format="%m-%d-%Y %H:%M:%S (%Z)")
+    
     df = df.replace({np.nan: None})
 
     visits_data = []
@@ -112,7 +103,7 @@ def seed_visits():
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         p = Visit(
-            VisitId                   =  row['crm_CDI_Visit_Visit'],
+            VisitId                 =  row['crm_CDI_Visit_Visit'],
             AdobeReader             =  row['crm_CDI_Visit_Adobe_Reader'],
             Bounce                  =  row['crm_CDI_Visit_Bounce'],
             Browser                 =  row['crm_CDI_Visit_Browser'],
@@ -120,7 +111,7 @@ def seed_visits():
             Campaign                =  row['crm_CDI_Visit_Campaign'],
             IPStad                  =  row['crm_CDI_Visit_IP_Stad'],
             IPCompany               =  row['crm_CDI_Visit_IP_Company'],
-            ContactId                 =  row['crm_CDI_Visit_Contact'],
+            ContactId               =  row['crm_CDI_Visit_Contact'],
             ContactNaam             =  row['crm_CDI_Visit_Contact_Naam_'],
             ContainsSocialProfile   =  row['crm_CDI_Visit_containssocialprofile'],
             IPLand                  =  row['crm_CDI_Visit_IP_Land'],

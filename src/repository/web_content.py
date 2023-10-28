@@ -3,15 +3,15 @@ from .base import Base
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String, DateTime, Integer, Date
+from sqlalchemy import String, DateTime
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-
 BATCH_SIZE = 1_000
+DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class WebContent(Base):
     __tablename__ = "WebContent"
     __table_args__ = {"extend_existing": True}
-    WebContentId                  :Mapped[str] = mapped_column(String(50), primary_key=True)
+    WebContentId                :Mapped[str] = mapped_column(String(50), primary_key=True)
     Campaign                    :Mapped[str] = mapped_column(String(50), nullable=True)
     CampaignName                :Mapped[str] = mapped_column(String(200), nullable=True)
     Name                        :Mapped[str] = mapped_column(String(200))
@@ -41,30 +41,27 @@ def seed_web_content():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+    
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/CDI web content.csv"
-    df = pd.read_csv(
-        csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""]
-    )
-    df = df.replace({np.nan: None})
-    # Sommige lege waardes worden als NaN ingelezeno
+    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+    
+    # Sommige lege waardes worden als NaN ingelezen
     # NaN mag niet in een varchar
-    df['crm_CDI_WebContent_Created_On'] = pd.to_datetime(
-        df['crm_CDI_WebContent_Created_On'], format="%d-%m-%Y %H:%M:%S"
-    )
-    df['crm_CDI_WebContent_Modified_On'] = pd.to_datetime(
-        df['crm_CDI_WebContent_Modified_On'], format="%d-%m-%Y %H:%M:%S"
-    )
+    df = df.replace({np.nan: None})
+    
+    df['crm_CDI_WebContent_Created_On'] = pd.to_datetime(df['crm_CDI_WebContent_Created_On'], format=DATE_FORMAT)
+    df['crm_CDI_WebContent_Modified_On'] = pd.to_datetime(df['crm_CDI_WebContent_Modified_On'], format=DATE_FORMAT)
+    
     send_web_content_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
-
         p = WebContent(
             Campaign                    = row['crm_CDI_WebContent_Campaign'],
             CampaignName                = row['crm_CDI_WebContent_Campaign_Name'],
             Name                        = row['crm_CDI_WebContent_Name'],
-            WebContentId                  = row['crm_CDI_WebContent_Web_Content'],
+            WebContentId                = row['crm_CDI_WebContent_Web_Content'],
             GemaaktDoorNaam             = row['crm_CDI_WebContent_Gemaakt_door_Naam_'],
             CreatedOn                   = row['crm_CDI_WebContent_Created_On'],
             GewijzigdDoorNaam           = row['crm_CDI_WebContent_Gewijzigd_door_Naam_'],
