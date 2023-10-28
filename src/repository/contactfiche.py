@@ -47,7 +47,7 @@ class Contactfiche(Base):
     AfspraakVereistContact: Mapped["AfspraakVereistContact"] = relationship(back_populates="Contact")
     Pageviews: Mapped["Pageview"] = relationship(back_populates="Contact")
     Visit: Mapped["Visit"] = relationship(back_populates="Contact")
-    
+    ContactficheFunctie: Mapped["ContactficheFunctie"] = relationship(back_populates="Contactpersoon")
 
 
 def insert_contactfiche_data(contactfiche_data, session):

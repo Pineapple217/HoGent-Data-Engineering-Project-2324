@@ -21,12 +21,14 @@ class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
     __table_args__ = {"extend_existing": True}
     Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    ContactpersoonId: Mapped[str] = mapped_column(String(255), ForeignKey('Contactfiche.ContactpersoonId', use_alter=True), nullable=True)
-    contactFK: Mapped["Contactfiche"] = relationship("Contactfiche", backref="FKContactficheFunctieContact")
     
     # FK
+    ContactpersoonId: Mapped[Optional[str]] = mapped_column(ForeignKey("Contactfiche.ContactpersoonId", use_alter=True), nullable=True)
+    Contactpersoon: Mapped["Contactfiche"] = relationship(back_populates="ContactficheFunctie")
+    
     FunctieId: Mapped[Optional[str]] = mapped_column(ForeignKey("Functie.FunctieId", use_alter=True), nullable=True)
     Functie: Mapped["Functie"] = relationship(back_populates="ContactficheFunctie")
+    
 
 def insert_contactfiche_functie_data(contactfiche_functie_data, session):
     session.bulk_save_objects(contactfiche_functie_data)
