@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class ContactficheFunctie(Base):
     __tablename__ = "ContactficheFunctie" 
     __table_args__ = {"extend_existing": True}
-    Id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ContactficheFunctieId: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     
     # FK
     ContactpersoonId: Mapped[Optional[str]] = mapped_column(ForeignKey("Contactfiche.ContactpersoonId", use_alter=True), nullable=True)
