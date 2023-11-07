@@ -161,4 +161,4 @@ cython_debug/
 
 
 # personal notebooks
-notebooks/
+# notebooks/
