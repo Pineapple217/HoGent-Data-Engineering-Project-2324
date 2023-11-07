@@ -28,11 +28,17 @@ table_names = [
     "Gebruiker",
     "InfoEnKlachten",
     "Account",
-    "Campagne",
     "Persoon",
-    "ActiviteitContact",
     "AfspraakContact",
     "AfspraakAccount",
+    "AfspraakVereistContact",
+    "ContactficheFunctie",
+    "Contactfiche",
+    "AccountActiviteitscode",
+    "Functie",
+    "Activiteitscode",
+    "AccountFinancieleData",
+    "Campagne",
 ]
 
 table_names = Base.metadata.tables.keys()
