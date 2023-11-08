@@ -3,17 +3,17 @@
 -- CREATE VIEW materialized_view_ml AS
 WITH ThemasPerPersoon AS (
     SELECT 
-        Persoon.PersoonId,
-        CAST(ThemaDuurzaamheid AS INT) AS ThemaDuurzaamheid,
-        CAST(ThemaFinancieelFiscaal AS INT) AS ThemaFinancieelFiscaal,
-        CAST(ThemaInnovatie AS INT) AS ThemaInnovatie,
-        CAST(ThemaInternationaalOndernemen AS INT) AS ThemaInternationaalOndernemen,
-        CAST(ThemaMobiliteit AS INT) AS ThemaMobiliteit,
-        CAST(ThemaOmgeving AS INT) AS ThemaOmgeving,
-        CAST(ThemaSalesMarketingCommunicatie AS INT) AS ThemaSalesMarketingCommunicatie,
-        CAST(ThemaStrategieEnAlgemeenManagement AS INT) AS ThemaStrategieEnAlgemeenManagement,
-        CAST(ThemaTalent AS INT) AS ThemaTalent,
-        CAST(ThemaWelzijn AS INT) AS ThemaWelzijn
+        PersoonId,
+        ThemaDuurzaamheid,
+        ThemaFinancieelFiscaal,
+        ThemaInnovatie,
+        ThemaInternationaalOndernemen,
+        ThemaMobiliteit,
+        ThemaOmgeving,
+        ThemaSalesMarketingCommunicatie,
+        ThemaStrategieEnAlgemeenManagement,
+        ThemaTalent,
+        ThemaWelzijn
     FROM Persoon
 )
 SELECT * 

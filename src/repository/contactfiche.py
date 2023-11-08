@@ -33,7 +33,7 @@ class Contactfiche(Base):
     ContactpersoonId: Mapped[str] = mapped_column(String(255), nullable=False, primary_key=True)
     FunctieTitel: Mapped[str] = mapped_column(String(255), nullable=True)
     Status: Mapped[str] = mapped_column(String(50))
-    VokaMedewerker: Mapped[BIT] = mapped_column(BIT)
+    VokaMedewerker: Mapped[int] = mapped_column(Integer)
 
     # FK
     AccountId: Mapped[str] = mapped_column(String(50), ForeignKey('Account.AccountId'), nullable=True)
