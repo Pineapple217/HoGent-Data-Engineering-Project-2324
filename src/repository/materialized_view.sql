@@ -1,24 +1,18 @@
-/* Gebruik de correlation.ipynb onder notebooks voor een heat map */
-
--- CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_view_ml AS
-SELECT 
-    Campagne.RedenVanStatus as campagne_statusreden,
-    Campagne.Startdatum,
-    Campagne.TypeCampagne,
-    Campagne.SoortCampagne,
-
-    Persoon.Marketingcommunicatie,
-    Persoon.RedenVanStatus as persoon_statusreden,
-
-    Inschrijving.AanwezigAfwezig,
-    Inschrijving.Bron,
-    
-    Sessie.Activiteitstype,
-    Sessie.Product,
-    Sessie.ThemaNaam
-FROM Campagne
-JOIN Inschrijving ON Inschrijving.CampagneId = Campagne.CampagneId
-JOIN SessieInschrijving ON SessieInschrijving.InschrijvingId = Inschrijving.InschrijvingId
-JOIN Sessie ON Sessie.SessieId = SessieInschrijving.SessieId
-JOIN Contactfiche on Contactfiche.ContactpersoonId = Inschrijving.ContactficheId
-JOIN Persoon ON Persoon.PersoonId = Contactfiche.PersoonId
+-- CREATE VIEW materialized_view_ml AS
+WITH ThemasPerPersoon AS (
+    SELECT 
+        Persoon.PersoonId,
+        CAST(ThemaDuurzaamheid AS INT) AS ThemaDuurzaamheid,
+        CAST(ThemaFinancieelFiscaal AS INT) AS ThemaFinancieelFiscaal,
+        CAST(ThemaInnovatie AS INT) AS ThemaInnovatie,
+        CAST(ThemaInternationaalOndernemen AS INT) AS ThemaInternationaalOndernemen,
+        CAST(ThemaMobiliteit AS INT) AS ThemaMobiliteit,
+        CAST(ThemaOmgeving AS INT) AS ThemaOmgeving,
+        CAST(ThemaSalesMarketingCommunicatie AS INT) AS ThemaSalesMarketingCommunicatie,
+        CAST(ThemaStrategieEnAlgemeenManagement AS INT) AS ThemaStrategieEnAlgemeenManagement,
+        CAST(ThemaTalent AS INT) AS ThemaTalent,
+        CAST(ThemaWelzijn AS INT) AS ThemaWelzijn
+    FROM Persoon
+)
+SELECT * 
+FROM ThemasPerPersoon;
