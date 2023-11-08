@@ -1,3 +1,5 @@
+/* Gebruik de correlation.ipynb onder notebooks voor een heat map */
+
 -- CREATE VIEW materialized_view_ml AS
 WITH ThemasPerPersoon AS (
     SELECT 
