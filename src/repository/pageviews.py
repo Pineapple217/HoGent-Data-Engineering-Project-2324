@@ -75,7 +75,7 @@ def seed_pageviews():
     df = df.replace({np.nan: None})
     
     df["crm_CDI_PageView_Viewed_On"] = pd.to_datetime(df["crm_CDI_PageView_Viewed_On"], format=DATE_FORMAT)
-    df["crm_CDI_PageView_Time"] = pd.to_datetime(df["crm_CDI_PageView_Time"], format=DATE_FORMAT)
+    df["crm_CDI_PageView_Time"] = pd.to_datetime(df["crm_CDI_PageView_Time"], format="%m-%d-%Y %H:%M:%S (%Z)")
     df["crm_CDI_PageView_Aangemaakt_op"] = pd.to_datetime(df["crm_CDI_PageView_Aangemaakt_op"], format=DATE_FORMAT)
     df["crm_CDI_PageView_Gewijzigd_op"] = pd.to_datetime(df["crm_CDI_PageView_Gewijzigd_op"], format=DATE_FORMAT)
 
