@@ -74,37 +74,37 @@ def seed_pageviews():
     # NaN mag niet in een varchar
     df = df.replace({np.nan: None})
     
-    df["crm CDI_PageView[Viewed On]"] = pd.to_datetime(df["crm CDI_PageView[Viewed On]"], format=DATE_FORMAT)
-    df["crm CDI_PageView[Time]"] = pd.to_datetime(df["crm CDI_PageView[Time]"], format="%m-%d-%Y %H:%M:%S (%Z)")
-    df["crm CDI_PageView[Aangemaakt op]"] = pd.to_datetime(df["crm CDI_PageView[Aangemaakt op]"], format=DATE_FORMAT)
-    df["crm CDI_PageView[Gewijzigd op]"] = pd.to_datetime(df["crm CDI_PageView[Gewijzigd op]"], format=DATE_FORMAT)
+    df["crm_CDI_PageView_Viewed_On"] = pd.to_datetime(df["crm_CDI_PageView_Viewed_On"], format=DATE_FORMAT)
+    df["crm_CDI_PageView_Time"] = pd.to_datetime(df["crm_CDI_PageView_Time"], format="%m-%d-%Y %H:%M:%S (%Z)")
+    df["crm_CDI_PageView_Aangemaakt_op"] = pd.to_datetime(df["crm_CDI_PageView_Aangemaakt_op"], format=DATE_FORMAT)
+    df["crm_CDI_PageView_Gewijzigd_op"] = pd.to_datetime(df["crm_CDI_PageView_Gewijzigd_op"], format=DATE_FORMAT)
 
     pageviews_data = []
     logger.info("Seeding inserting rows")
     progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     for _, row in df.iterrows():
         p = Pageview(
-            AnonymousVisitor=row["crm CDI_PageView[Anonymous Visitor]"],
-            Browser=row["crm CDI_PageView[Browser]"],
-            CampagneId=row["crm CDI_PageView[Campaign]"],
-            ContactId=row["crm CDI_PageView[Contact]"],
-            Duration=row["crm CDI_PageView[Duration]"],
-            OperatingSystem=row["crm CDI_PageView[Operating System]"],
-            PageViewId=row["crm CDI_PageView[Page View]"],
-            ReferrerType=row["crm CDI_PageView[Referrer Type]"],
-            Time=row["crm CDI_PageView[Time]"],
-            PageTitle=row["crm CDI_PageView[Page Title]"],
-            Type=row["crm CDI_PageView[Type]"],
-            Url=row["crm CDI_PageView[Url]"],
-            ViewedOn=row["crm CDI_PageView[Viewed On]"],
-            VisitId=row["crm CDI_PageView[Visit]"],
-            VisitorKey=row["crm CDI_PageView[Visitor Key]"],
-            WebContent=row["crm CDI_PageView[Web Content]"],
-            AangemaaktOp=row["crm CDI_PageView[Aangemaakt op]"],
-            GewijzigdDoor=row["crm CDI_PageView[Gewijzigd door]"],
-            GewijzigdOp=row["crm CDI_PageView[Gewijzigd op]"],
-            Status=row["crm CDI_PageView[Status]"],
-            RedenVanStatus=row["crm CDI_PageView[Reden van status]"],
+            AnonymousVisitor=row["crm_CDI_PageView_Anonymous_Visitor"],
+            Browser=row["crm_CDI_PageView_Browser"],
+            CampagneId=row["crm_CDI_PageView_Campaign"],
+            ContactId=row["crm_CDI_PageView_Contact"],
+            Duration=row["crm_CDI_PageView_Duration"],
+            OperatingSystem=row["crm_CDI_PageView_Operating_System"],
+            PageViewId=row["crm_CDI_PageView_Page_View"],
+            ReferrerType=row["crm_CDI_PageView_Referrer_Type"],
+            Time=row["crm_CDI_PageView_Time"],
+            PageTitle=row["crm_CDI_PageView_Page_Title"],
+            Type=row["crm_CDI_PageView_Type"],
+            Url=row["crm_CDI_PageView_Url"],
+            ViewedOn=row["crm_CDI_PageView_Viewed_On"],
+            VisitId=row["crm_CDI_PageView_Visit"],
+            VisitorKey=row["crm_CDI_PageView_Visitor_Key"],
+            WebContent=row["crm_CDI_PageView_Web_Content"],
+            AangemaaktOp=row["crm_CDI_PageView_Aangemaakt_op"],
+            GewijzigdDoor=row["crm_CDI_PageView_Gewijzigd_door"],
+            GewijzigdOp=row["crm_CDI_PageView_Gewijzigd_op"],
+            Status=row["crm_CDI_PageView_Status"],
+            RedenVanStatus=row["crm_CDI_PageView_Reden_van_status"],
         )
         pageviews_data.append(p)
 
