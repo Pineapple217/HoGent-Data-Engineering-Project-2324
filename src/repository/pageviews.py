@@ -67,14 +67,14 @@ def seed_pageviews():
     
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/cdi_pageviews.csv"
-    chunks = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=50_000, low_memory=False)
+    chunks = pd.read_csv(csv, delimiter=",", encoding="latin-1", keep_default_na=True, na_values=[""], chunksize=50_000, low_memory=False)
     df = pd.concat(chunks)
     
     # Sommige lege waardes worden als NaN ingelezen
     # NaN mag niet in een varchar
     df = df.replace({np.nan: None})
     
-    df["crm_CDI_PageView_Viewed_On"] = pd.to_datetime(df["crm_CDI_PageView_Viewed_On"], format=DATE_FORMAT)
+    df["crm_CDI_PageView_Viewed_On"] = pd.to_datetime(df["crm_CDI_PageView_Viewed_On"], format="%m-%d-%Y %H:%M:%S")
     df["crm_CDI_PageView_Time"] = pd.to_datetime(df["crm_CDI_PageView_Time"], format="%m-%d-%Y %H:%M:%S (%Z)")
     df["crm_CDI_PageView_Aangemaakt_op"] = pd.to_datetime(df["crm_CDI_PageView_Aangemaakt_op"], format=DATE_FORMAT)
     df["crm_CDI_PageView_Gewijzigd_op"] = pd.to_datetime(df["crm_CDI_PageView_Gewijzigd_op"], format=DATE_FORMAT)
