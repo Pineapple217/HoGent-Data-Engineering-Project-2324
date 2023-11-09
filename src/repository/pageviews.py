@@ -67,7 +67,7 @@ def seed_pageviews():
     
     logger.info("Reading CSV...")
     csv = DATA_PATH + "/cdi_pageviews.csv"
-    chunks = pd.read_csv(csv, delimiter=",", encoding="latin-1", keep_default_na=True, na_values=[""], chunksize=50_000, low_memory=False)
+    chunks = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=50_000, low_memory=False)
     df = pd.concat(chunks)
     
     # Sommige lege waardes worden als NaN ingelezen
