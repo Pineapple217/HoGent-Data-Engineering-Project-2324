@@ -2,6 +2,7 @@ import argparse
 import logging
 from repository.main import db_init, db_seed, db_drop, db_rebuild
 from test.main import db_test
+from csv_merge import main as csv_merge
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,7 +23,6 @@ def main():
     x = subparsers.add_parser(
         "db_seed", help="Fills all tables of the database"
     )
-    x.add_argument('--table', help='testest')
     x.set_defaults(func=db_seed)
     subparsers.add_parser(
         "db_test", help="Test if the database is working"
@@ -33,6 +33,9 @@ def main():
     subparsers.add_parser(
         "db_rebuild", help="Drops, inits and seeds the database"
     ).set_defaults(func=db_rebuild)
+    subparsers.add_parser(
+        "csvmerge", help="Merges csv files"
+    ).set_defaults(func=csv_merge)
 
     args = parser.parse_args()
 
