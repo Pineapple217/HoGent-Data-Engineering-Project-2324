@@ -49,6 +49,7 @@ def insert_campagne_data(campagne_data, session):
     session.commit()
 
 def move_csv_file(csv_path, destination_folder, timestamp=True):
+    # verplaats de verwerkte csv naar de old folder met een timestamp om naamconflicten te vermijden  
     if timestamp:
         timestamp_str = datetime.datetime.now().strftime("%Y_W%U")
         base_name = os.path.basename(csv_path)
@@ -63,12 +64,14 @@ def seed_campagne():
     Session = sessionmaker(bind=engine)
     session = Session()
 
+    # bijhouden welke campagnes al in de database zitten op basis van hun ID (primary key)
     existing_ids = set()
 
+    # maak deze folders aan! verdeel de csv's
     old_csv_dir = os.path.join(DATA_PATH, "old")
     new_csv_dir = os.path.join(DATA_PATH, "new")
 
-    for folder in [old_csv_dir, new_csv_dir]:  # Process both "old" and "new" folders
+    for folder in [old_csv_dir, new_csv_dir]: # loop over beide folders
         logger.info(f"Processing CSV files in '{folder}' folder...")
 
         for filename in os.listdir(folder):
@@ -83,9 +86,12 @@ def seed_campagne():
                 df["crm_Campagne_Einddatum"] = pd.to_datetime(df["crm_Campagne_Einddatum"], format=DATE_FORMAT)
                 df["crm_Campagne_Startdatum"] = pd.to_datetime(df["crm_Campagne_Startdatum"], format=DATE_FORMAT)
 
+                # laat de rijen vallen die al in de database zitten
                 df_no_duplicates = df[~df["crm_Campagne_Campagne"].isin(existing_ids)]
+                # werk de set van de bestaande campagne ID's bij
                 existing_ids.update(df_no_duplicates["crm_Campagne_Campagne"])
 
+                # hou bij hoeveel nieuwe rijen er zijn
                 new_rows_count = len(df_no_duplicates)
 
                 campagne_data = []
@@ -116,8 +122,10 @@ def seed_campagne():
                     insert_campagne_data(campagne_data, session)
                     progress_bar.update(len(campagne_data))
 
+                # verplaats de csv naar de old folder, enkel een timestamp geven aan de nieuwe csv
                 move_csv_file(csv_path, old_csv_dir, timestamp=(folder == new_csv_dir))
 
+                # log hoeveel nieuwe rijen er zijn toegevoegd
                 print(f"Number of new (non-duplicate) rows found in {csv_path}: {new_rows_count}")
 
     session.close()
