@@ -32,6 +32,7 @@ Connecteren met de database gebruik makend van sqlcmd
 ## Connect lokaal met de DB op VIC
 
 Link de lokale poort 1438 met poort 1433 op de VM door middel van een ssh tunnel
+
 ```
 ssh -p 40095 -L 1438:localhost:1433 vicuser@vichogent.be
 ```
@@ -41,10 +42,13 @@ Open lokaal SSMS en log als volgt in.
 ![VICConnect](img/LocalVICConnect.PNG)
 
 # PowerBI
+
 Link de lokale poort 1438 met poort 1433 op de VM door middel van een ssh tunnel
+
 ```
 ssh -p 40095 -L 1438:localhost:1433 vicuser@vichogent.be
 ```
+
 Open daarna PowerBI en selecteer 'Import data from SQL Server'.
 
 ![PowerBI1](img/PowerBI1.PNG)
@@ -58,6 +62,7 @@ Geef bij 'Database' de gebruikersnaam en het wachtwoord op en connecteer.
 ![PowerBI3](img/PowerBI3.PNG)
 
 je kan een melding krijgen over een connectie die niet encrypted is.
+
 # Python setup
 
 ```console
@@ -86,3 +91,11 @@ DATA_PATH=../Data
 # Data folder
 
 alles csv's in de de root van de DATA_PATH folder
+
+# API Server
+
+start dev-server
+
+```
+uvicorn server:server --reload --app-dir ./src
+```
