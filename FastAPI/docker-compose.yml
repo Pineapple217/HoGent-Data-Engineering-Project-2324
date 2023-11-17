@@ -10,17 +10,3 @@ services:
       - .:/app
     ports:
       - 8008:8000
-    # environment:
-    #   - DATABASE_URL=postgresql://fastapi_traefik:fastapi_traefik@db:5432/fastapi_traefik
-    # depends_on:
-    #   - sqlserver
-  # sqlserver:
-  #   container_name: sqlserver-db
-  #   image: sqlserver-image
-  #   build:
-  #     context: .
-  #   ports:
-  #     - "1433:1433"
-  #   environment:
-  #     SA_PASSWORD: "Password123*"
-  #     ACCEPT_EULA: "Y"
