@@ -48,28 +48,37 @@ def insert_campagne_data(campagne_data, session):
     session.bulk_save_objects(campagne_data)
     session.commit()
 
+# verplaats de verwerkte csv naar de old folder met een timestamp om naamconflicten te vermijden 
 def move_csv_file(csv_path, destination_folder, timestamp=True):
-    # verplaats de verwerkte csv naar de old folder met een timestamp om naamconflicten te vermijden  
+    base_name = os.path.basename(csv_path)
+    file_name, file_extension = os.path.splitext(base_name)
+
     if timestamp:
-        timestamp_str = datetime.datetime.now().strftime("%Y_W%U")
-        base_name = os.path.basename(csv_path)
-        new_path = os.path.join(destination_folder, f"{base_name}_{timestamp_str}")
+        timestamp_str = datetime.datetime.now().strftime("%Y_%m_%d")
+        new_path = os.path.join(destination_folder, f"{file_name}_{timestamp_str}{file_extension}")
     else:
-        new_path = os.path.join(destination_folder, os.path.basename(csv_path))
+        new_path = os.path.join(destination_folder, base_name)
     
     os.rename(csv_path, new_path)
+
+# alle campagnes die al in de database zitten ophalen
+def get_existing_ids(session):
+    return set(session.query(Campagne.CampagneId).all())
 
 def seed_campagne():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # bijhouden welke campagnes al in de database zitten op basis van hun ID (primary key)
-    existing_ids = set()
+    # bijhouden welke campagnes al in de database zitten 
+    existing_ids = get_existing_ids(session)
 
     # maak deze folders aan! verdeel de csv's
     old_csv_dir = os.path.join(DATA_PATH, "old")
     new_csv_dir = os.path.join(DATA_PATH, "new")
+    
+    if not os.path.exists(old_csv_dir) or not os.path.exists(new_csv_dir):
+        raise Exception("The folders 'old' and 'new' must exist in the data folder")
 
     for folder in [old_csv_dir, new_csv_dir]: # loop over beide folders
         logger.info(f"Processing CSV files in '{folder}' folder...")
@@ -85,10 +94,10 @@ def seed_campagne():
 
                 df["crm_Campagne_Einddatum"] = pd.to_datetime(df["crm_Campagne_Einddatum"], format=DATE_FORMAT)
                 df["crm_Campagne_Startdatum"] = pd.to_datetime(df["crm_Campagne_Startdatum"], format=DATE_FORMAT)
-
+                
                 # laat de rijen vallen die al in de database zitten
                 df_no_duplicates = df[~df["crm_Campagne_Campagne"].isin(existing_ids)]
-                # werk de set van de bestaande campagne ID's bij
+                # werk de set van de bestaande ID's bij
                 existing_ids.update(df_no_duplicates["crm_Campagne_Campagne"])
 
                 # hou bij hoeveel nieuwe rijen er zijn
