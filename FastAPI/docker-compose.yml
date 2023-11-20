@@ -9,6 +9,6 @@ services:
     volumes:
       - .:/app
     ports:
-      - 8008:8000
+      - 8000:8000
     environment:
-      - DB_URL: "mssql+pyodbc://SA:Password123*@localhost:1433/voka?driver=ODBC+Driver+17+for+SQL+Server"
+      DB_URL: "mssql+pyodbc://SA:Password123*@172.18.0.1:1433/voka?driver=ODBC+Driver+17+for+SQL+Server"
