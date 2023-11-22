@@ -49,11 +49,12 @@ def calc(contact_id: str):
     similarity_matrix = cosine_similarity(df_pivot, [df_pivot.loc[select_contact]]).reshape(1,-1)[0]
     similarities = df_pivot.index.join(similarity_matrix)
     similarities = pd.DataFrame({'ContactPersoonId':df_pivot.index, 'sim':similarity_matrix}).set_index('ContactPersoonId')
-    similar_users = similarities[similarities['sim'] > 0.75].sort_values(by='sim', ascending=False)
+    similar_users = similarities[similarities['sim'] > 0.5].sort_values(by='sim', ascending=False)
     done_campaigns = df1.loc[df1.index == select_contact]['CampagneId']
     similar_campagnes = df1[df1.index.isin(similar_users.index)].replace(0, np.nan).dropna(axis=1, how='all')
     similar_campagnes = similar_campagnes.drop_duplicates(subset=['CampagneId'])
     similar_campagnes = similar_campagnes[similar_campagnes['Startdatum'] > '2023-11-16']
+
     return similar_campagnes
 
 
