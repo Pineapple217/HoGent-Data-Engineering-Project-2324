@@ -38,10 +38,10 @@ query2 = """
 df2 = pd.read_sql(query2, engine)
 df2.set_index('ContactId', inplace=True)
 df2["rating"] = 1
-df1_pivot = pd.pivot_table(df1, index='ContactPersoonId', columns=['Ondernemingsaard', 'Ondernemingstype', 'PrimaireActiviteit', 'Functie'], values='rating', fill_value = 0).astype('float16')
-df2_pivot = pd.pivot_table(df2, index='ContactId', columns=['PageTitle'], values='rating', fill_value = 0).astype('float16')
+df1_pivot = pd.pivot_table(df1, index='ContactPersoonId', columns=['Ondernemingsaard', 'Ondernemingstype', 'PrimaireActiviteit', 'Functie'], values='rating', fill_value = 0)
+df2_pivot = pd.pivot_table(df2, index='ContactId', columns=['PageTitle'], values='rating', fill_value = 0)
 
-df_pivot = pd.concat([df1_pivot, df2_pivot], axis=1, join='inner').astype('float16')
+df_pivot = pd.concat([df1_pivot, df2_pivot], axis=1, join='inner')
 del [[ df1_pivot, df2_pivot]]
 
 def calc(contact_id: str):
