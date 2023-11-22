@@ -1,10 +1,12 @@
 from .base import Base
-
+from .loadAndCompare import load_csv, checkHeaders
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Integer, ForeignKey, text
 from sqlalchemy.dialects.mssql import BIT
 from repository.main import get_engine, DATA_PATH
+import os
+import datetime
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -56,39 +58,88 @@ def insert_contactfiche_data(contactfiche_data, session):
     session.commit()
 
 
+#functie om seeded file van new > old met timestamp te verplaatsen
+def move_csv_file(csv_path, destination_folder):
+    base_name = os.path.basename(csv_path)
+    file_name, file_extension = os.path.splitext(base_name)
+
+    timestamp_str = datetime.datetime.now().strftime("%Y_%m_%d_%H-%M-%S")
+    new_path = os.path.join(destination_folder, f"{file_name}_{timestamp_str}{file_extension}")
+    
+    os.rename(csv_path, new_path)
+
+#functie om alle id's te querien, zodat gelijke rijden niet appended worden
+def get_existing_ids(session):
+    return set(session.query(Contactfiche.ContactpersoonId).all()) 
+
 def seed_contactfiche():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
+
+    #query bestaande id's
+    existing_ids = get_existing_ids(session)
+
+    #stel dirs voor old en new in en check of ze kloppen
+    old_csv_dir = os.path.join(DATA_PATH, "old")
+    new_csv_dir = os.path.join(DATA_PATH, "new")
+    if not os.path.exists(old_csv_dir) or not os.path.exists(new_csv_dir):
+        raise FileNotFoundError("The folders 'old' and 'new' must exist in the data folder")
     
-    logger.info("Reading CSV...")
-    csv = DATA_PATH + "/Contact.csv"
-    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
-    
-    df = df.replace({np.nan: None})
-    
+    folder_new = new_csv_dir
+
     contactfiche_data = []
-    logger.info("Seeding inserting rows")
-    progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    for _, row in df.iterrows():
-        p = Contactfiche(
-            ContactpersoonId=row["crm_Contact_Contactpersoon"],
-            AccountId=row["crm_Contact_Account"],
-            FunctieTitel=row["crm_Contact_Functietitel"],
-            PersoonId=row["crm_Contact_Persoon_ID"],
-            Status=row["crm_Contact_Status"],
-            VokaMedewerker=row["crm_Contact_Voka_medewerker"],
-        )
-        contactfiche_data.append(p)
+    for filename in os.listdir(folder_new): #check alle filenames in 'new'
+        if filename == 'Contact.csv': #hardcoded filename, zodat startswith niet fout kan lopen
+            csv_path = os.path.join(folder_new, filename) #vul filepath aan met gevonden file
+    
+            logger.info(f"Reading CSV: {csv_path}")
+            df, error = load_csv(csv_path) #load_csv uit loadAndCompare.py, probeert met hardcoded delimiters en encodings een df te maken
+            if error:
+                print(error)
+            
+            df = df.replace({np.nan: None})
+            
+            logger.info("Seeding inserting rows")
+            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+            for _, row in df.iterrows():
 
-        if len(contactfiche_data) >= BATCH_SIZE:
-            insert_contactfiche_data(contactfiche_data, session)
-            contactfiche_data = []
-            progress_bar.update(BATCH_SIZE)
+                contactpersoon_id = row["crm_Contact_Contactpersoon"]
 
-    if contactfiche_data:
-        insert_contactfiche_data(contactfiche_data, session)
-        progress_bar.update(len(contactfiche_data))
+                existing_record = session.query(Contactfiche).filter_by(ContactpersoonId=contactpersoon_id).first()
+
+                if existing_record:
+                    continue
+
+                existing_ids.add(contactpersoon_id)
+
+                p = Contactfiche(
+                    ContactpersoonId=row["crm_Contact_Contactpersoon"],
+                    AccountId=row["crm_Contact_Account"],
+                    FunctieTitel=row["crm_Contact_Functietitel"],
+                    PersoonId=row["crm_Contact_Persoon_ID"],
+                    Status=row["crm_Contact_Status"],
+                    VokaMedewerker=row["crm_Contact_Voka_medewerker"],
+                )
+                contactfiche_data.append(p)
+
+                if len(contactfiche_data) >= BATCH_SIZE:
+                    insert_contactfiche_data(contactfiche_data, session)
+                    contactfiche_data = []
+                    progress_bar.update(BATCH_SIZE)
+
+            if contactfiche_data:
+                insert_contactfiche_data(contactfiche_data, session)
+                progress_bar.update(len(contactfiche_data))
+
+            progress_bar.close()
+
+            move_csv_file(csv_path, old_csv_dir)
+
+            logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(contactfiche_data)}")
+
+    if not contactfiche_data:
+        logger.info("No new data was given. Data is up to date already.")
 
     session.execute(text("""
         UPDATE Contactfiche
