@@ -71,6 +71,7 @@ def seed_inschrijving():
 
     inschrijving_data = []
     for filename in os.listdir(folder_new): #check alle filenames in 'new'
+        #Oppassen met inschrijving: de hele eerste file heeft inschrijving als naam, maar is niet in zelfde formaat als nieuwere 2 files
         if filename == 'Inschrijving.csv' or filename == "Inschrijvingen.csv": #kan ook met startswith
             csv_path = os.path.join(folder_new, filename)
     
@@ -105,7 +106,7 @@ def seed_inschrijving():
                     )
                     inschrijving_data.append(p)
 
-                inschrijving_data(inschrijving_data, session)
+                insert_inschrijving_data(inschrijving_data, session)
                 progress_bar.update(len(inschrijving_data))
 
             progress_bar.close()
