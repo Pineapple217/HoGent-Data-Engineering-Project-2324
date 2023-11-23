@@ -1,11 +1,12 @@
 from .base import Base
-
+from .functionalities import load_csv, move_csv_file
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy import String, DateTime, Integer, Boolean, Float, ForeignKey, text
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
+import os
 import pandas as pd
 import numpy as np
 from typing import Optional, TYPE_CHECKING
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
     from .pageviews import Pageview
     from .contactfiche import Contactfiche
 
-BATCH_SIZE = 10_000
+BATCH_SIZE = 20_000
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
@@ -73,83 +74,109 @@ def insert_visits_data(pageviews_data, session):
     session.bulk_save_objects(pageviews_data)
     session.commit()
 
+def get_existing_ids(session):
+    return [result[0] for result in session.query(Visit.VisitId).all()]
 
 def seed_visits():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     
-    logger.info("Reading CSV...")
-    csv = DATA_PATH + "/CDI visits.csv"
-    chunks = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""], chunksize=10_000)
-    df = pd.concat(chunks)
-    
-    df['crm_CDI_Visit_Adobe_Reader'] = df['crm_CDI_Visit_Adobe_Reader'].replace({'Ja': True, 'Nee': False})
-    df['crm_CDI_Visit_Bounce'] = df['crm_CDI_Visit_Bounce'].replace({'Ja': True, 'Nee': False})
-    df['crm_CDI_Visit_containssocialprofile'] = df['crm_CDI_Visit_containssocialprofile'].replace({'Ja': True, 'Nee': False})
-    df['crm_CDI_Visit_First_Visit'] = df['crm_CDI_Visit_First_Visit'].replace({'Ja': True, 'Nee': False})
+    existing_ids = get_existing_ids(session)
 
-    df['crm_CDI_Visit_Ended_On'] = pd.to_datetime(df['crm_CDI_Visit_Ended_On'], format=DATE_FORMAT)
-    df['crm_CDI_Visit_Started_On'] = pd.to_datetime(df['crm_CDI_Visit_Started_On'], format=DATE_FORMAT)
-    df['crm_CDI_Visit_Aangemaakt_op'] = pd.to_datetime(df['crm_CDI_Visit_Aangemaakt_op'], format=DATE_FORMAT)
-    df['crm_CDI_Visit_Gewijzigd_op'] = pd.to_datetime(df['crm_CDI_Visit_Gewijzigd_op'], format=DATE_FORMAT)
+    old_csv_dir = os.path.join(DATA_PATH, "old")
+    new_csv_dir = os.path.join(DATA_PATH, "new")
+    if not os.path.exists(old_csv_dir) or not os.path.exists(new_csv_dir):
+        raise FileNotFoundError("The folders 'old' and 'new' must exist in the data folder")
     
-    df['crm_CDI_Visit_Time'] = pd.to_datetime(df['crm_CDI_Visit_Time'], format="%m-%d-%Y %H:%M:%S (%Z)")
-    
-    df = df.replace({np.nan: None})
+    folder_new = new_csv_dir
 
     visits_data = []
-    logger.info("Seeding inserting rows")
-    progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    for _, row in df.iterrows():
-        p = Visit(
-            VisitId                 =  row['crm_CDI_Visit_Visit'],
-            AdobeReader             =  row['crm_CDI_Visit_Adobe_Reader'],
-            Bounce                  =  row['crm_CDI_Visit_Bounce'],
-            Browser                 =  row['crm_CDI_Visit_Browser'],
-            CampagneCode            =  row['crm_CDI_Visit_Campagne_Code'],
-            Campaign                =  row['crm_CDI_Visit_Campaign'],
-            IPStad                  =  row['crm_CDI_Visit_IP_Stad'],
-            IPCompany               =  row['crm_CDI_Visit_IP_Company'],
-            ContactId               =  row['crm_CDI_Visit_Contact'],
-            ContactNaam             =  row['crm_CDI_Visit_Contact_Naam_'],
-            ContainsSocialProfile   =  row['crm_CDI_Visit_containssocialprofile'],
-            IPLand                  =  row['crm_CDI_Visit_IP_Land'],
-            Duration                =  row['crm_CDI_Visit_Duration'],
-            EmailSendId             =  row['crm_CDI_Visit_Email_Send'],
-            EndedOn                 =  row['crm_CDI_Visit_Ended_On'],
-            EntryPage               =  row['crm_CDI_Visit_Entry_Page'],
-            ExitPage                =  row['crm_CDI_Visit_Exit_Page'],
-            FirstVisit              =  row['crm_CDI_Visit_First_Visit'],
-            IPAddress               =  row['crm_CDI_Visit_IP_Address'],
-            IPOrganization          =  row['crm_CDI_Visit_IP_Organization'],
-            Keywords                =  row['crm_CDI_Visit_Keywords'],
-            IPLatitude              =  row['crm_CDI_Visit_IP_Latitude'],
-            IPLongitude             =  row['crm_CDI_Visit_IP_Longitude'],
-            OperatingSystem         =  row['crm_CDI_Visit_Operating_System'],
-            IPPostcode              =  row['crm_CDI_Visit_IP_Postcode'],
-            Referrer                =  row['crm_CDI_Visit_Referrer'],
-            ReferringHost           =  row['crm_CDI_Visit_Referring_Host'],
-            Score                   =  row['crm_CDI_Visit_Score'],
-            ReferrerType            =  row['crm_CDI_Visit_Referrer_Type'],
-            StartedOn               =  row['crm_CDI_Visit_Started_On'],
-            IPStatus                =  row['crm_CDI_Visit_IP_Status'],
-            Time                    =  row['crm_CDI_Visit_Time'],
-            TotalPages              =  row['crm_CDI_Visit_Total_Pages'],
-            AangemaaktOp            =  row['crm_CDI_Visit_Aangemaakt_op'],
-            GewijzigdOp             =  row['crm_CDI_Visit_Gewijzigd_op'],
-        )
-        visits_data.append(p)
+    for filename in os.listdir(folder_new): #check alle filenames in 'new'
+        if filename == 'CDI visits.csv':
+            csv_path = os.path.join(folder_new, filename)
+    
+            logger.info(f"Reading CSV: {csv_path}")
+            df, error = load_csv(csv_path)
+            if error:
+                raise Exception(f"Error loading CSV: {csv_path, error}")
+            
+            df = df.replace({np.nan: None})
 
-        if len(visits_data) >= BATCH_SIZE:
-            insert_visits_data(visits_data, session)
-            visits_data = []
-            progress_bar.update(BATCH_SIZE)
+            df = df[~df['crm_CDI_Visit_Visit'].isin(existing_ids)]  
 
-    # Insert any remaining data
-    if visits_data:
-        insert_visits_data(visits_data, session)
-        progress_bar.update(len(visits_data))
+            df['crm_CDI_Visit_Adobe_Reader'] = df['crm_CDI_Visit_Adobe_Reader'].replace({'Ja': True, 'Nee': False})
+            df['crm_CDI_Visit_Bounce'] = df['crm_CDI_Visit_Bounce'].replace({'Ja': True, 'Nee': False})
+            df['crm_CDI_Visit_containssocialprofile'] = df['crm_CDI_Visit_containssocialprofile'].replace({'Ja': True, 'Nee': False})
+            df['crm_CDI_Visit_First_Visit'] = df['crm_CDI_Visit_First_Visit'].replace({'Ja': True, 'Nee': False})
+
+            df['crm_CDI_Visit_Ended_On'] = pd.to_datetime(df['crm_CDI_Visit_Ended_On'], format=DATE_FORMAT)
+            df['crm_CDI_Visit_Started_On'] = pd.to_datetime(df['crm_CDI_Visit_Started_On'], format=DATE_FORMAT)
+            df['crm_CDI_Visit_Aangemaakt_op'] = pd.to_datetime(df['crm_CDI_Visit_Aangemaakt_op'], format=DATE_FORMAT)
+            df['crm_CDI_Visit_Gewijzigd_op'] = pd.to_datetime(df['crm_CDI_Visit_Gewijzigd_op'], format=DATE_FORMAT)
+            
+            df['crm_CDI_Visit_Time'] = pd.to_datetime(df['crm_CDI_Visit_Time'], format="%m-%d-%Y %H:%M:%S (%Z)")
+        
+            df = df.replace({np.nan: None})
+
+            # data in chunks steken
+            chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
+
+            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+
+            for chunk in chunks:
+                visits_data = []
+                for _, row in chunk.iterrows():
+                    p = Visit(
+                        VisitId                 =  row['crm_CDI_Visit_Visit'],
+                        AdobeReader             =  row['crm_CDI_Visit_Adobe_Reader'],
+                        Bounce                  =  row['crm_CDI_Visit_Bounce'],
+                        Browser                 =  row['crm_CDI_Visit_Browser'],
+                        CampagneCode            =  row['crm_CDI_Visit_Campagne_Code'],
+                        Campaign                =  row['crm_CDI_Visit_Campaign'],
+                        IPStad                  =  row['crm_CDI_Visit_IP_Stad'],
+                        IPCompany               =  row['crm_CDI_Visit_IP_Company'],
+                        ContactId               =  row['crm_CDI_Visit_Contact'],
+                        ContactNaam             =  row['crm_CDI_Visit_Contact_Naam_'],
+                        ContainsSocialProfile   =  row['crm_CDI_Visit_containssocialprofile'],
+                        IPLand                  =  row['crm_CDI_Visit_IP_Land'],
+                        Duration                =  row['crm_CDI_Visit_Duration'],
+                        EmailSendId             =  row['crm_CDI_Visit_Email_Send'],
+                        EndedOn                 =  row['crm_CDI_Visit_Ended_On'],
+                        EntryPage               =  row['crm_CDI_Visit_Entry_Page'],
+                        ExitPage                =  row['crm_CDI_Visit_Exit_Page'],
+                        FirstVisit              =  row['crm_CDI_Visit_First_Visit'],
+                        IPAddress               =  row['crm_CDI_Visit_IP_Address'],
+                        IPOrganization          =  row['crm_CDI_Visit_IP_Organization'],
+                        Keywords                =  row['crm_CDI_Visit_Keywords'],
+                        IPLatitude              =  row['crm_CDI_Visit_IP_Latitude'],
+                        IPLongitude             =  row['crm_CDI_Visit_IP_Longitude'],
+                        OperatingSystem         =  row['crm_CDI_Visit_Operating_System'],
+                        IPPostcode              =  row['crm_CDI_Visit_IP_Postcode'],
+                        Referrer                =  row['crm_CDI_Visit_Referrer'],
+                        ReferringHost           =  row['crm_CDI_Visit_Referring_Host'],
+                        Score                   =  row['crm_CDI_Visit_Score'],
+                        ReferrerType            =  row['crm_CDI_Visit_Referrer_Type'],
+                        StartedOn               =  row['crm_CDI_Visit_Started_On'],
+                        IPStatus                =  row['crm_CDI_Visit_IP_Status'],
+                        Time                    =  row['crm_CDI_Visit_Time'],
+                        TotalPages              =  row['crm_CDI_Visit_Total_Pages'],
+                        AangemaaktOp            =  row['crm_CDI_Visit_Aangemaakt_op'],
+                        GewijzigdOp             =  row['crm_CDI_Visit_Gewijzigd_op'],
+                    )
+                    visits_data.append(p)
+
+                insert_visits_data(visits_data, session)
+                progress_bar.update(len(visits_data))
+
+            progress_bar.close()
+
+            move_csv_file(csv_path, old_csv_dir)
+
+            logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(df)}")
+
+    if not visits_data:
+        logger.info("No new data was given. Data is up to date already.")
 
     session.execute(text("""
         UPDATE Visits
