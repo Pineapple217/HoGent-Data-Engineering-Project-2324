@@ -1,11 +1,12 @@
 from .base import Base
-
+from .functionalities import load_csv, move_csv_file
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy import String, Integer, ForeignKey, text
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
+import os
 import pandas as pd
 import numpy as np
 from typing import Optional
@@ -39,48 +40,65 @@ def insert_send_email_clicks_data(pageviews_data, session):
     session.bulk_save_objects(pageviews_data)
     session.commit()
 
+def get_existing_ids(session):
+    return [result[0] for result in session.query(SendEmailClicks.SentEmailId).all()]
+
 
 def seed_send_email_clicks():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
-    logger.info("Reading CSV...")
-    csv = DATA_PATH + "/CDI sent email clicks.csv"
-    df = pd.read_csv(csv, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
-    
-    # Sommige lege waardes worden als NaN ingelezen
-    # NaN mag niet in een varchar
-    df = df.replace({np.nan: None})
 
-    csv_fk = DATA_PATH + "/CDI mailing.csv"
-    df_fk = pd.read_csv(csv_fk, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
-    df_fk = df_fk.replace({np.nan: None})
-    valid_mailings = df_fk['crm_CDI_Mailing_Mailing'].tolist()
+    existing_ids = get_existing_ids(session)
+
+    old_csv_dir = os.path.join(DATA_PATH, "old")
+    new_csv_dir = os.path.join(DATA_PATH, "new")
+    if not os.path.exists(old_csv_dir) or not os.path.exists(new_csv_dir):
+        raise FileNotFoundError("The folders 'old' and 'new' must exist in the data folder")
+    
+    folder_new = new_csv_dir
 
     send_email_clicks_data = []
-    logger.info("Seeding inserting rows")
-    progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-    for _, row in df.iterrows():
-        email_id = row['crm_CDI_SentEmail_kliks_E_mail_versturen']
-        p = SendEmailClicks(
-            SentEmailId       = row['crm_CDI_SentEmail_kliks_Sent_Email'],
-            Clicks            = row['crm_CDI_SentEmail_kliks_Clicks'],
-            ContactId         = row['crm_CDI_SentEmail_kliks_Contact'],
-            EmailVersturenId  = email_id,
-        )
-        if email_id not in valid_mailings:
-            p.EmailVersturenId = None
-        send_email_clicks_data.append(p)
+    for filename in os.listdir(folder_new): #check alle filenames in 'new'
+        if filename == 'CDI sent email clicks.csv':
+            csv_path = os.path.join(folder_new, filename)
+    
+            logger.info(f"Reading CSV: {csv_path}")
+            df, error = load_csv(csv_path)
+            if error:
+                raise Exception(f"Error loading CSV: {csv_path, error}")
+            
+            df = df.replace({np.nan: None})
 
-        if len(send_email_clicks_data) >= BATCH_SIZE:
-            insert_send_email_clicks_data(send_email_clicks_data, session)
-            send_email_clicks_data = []
-            progress_bar.update(BATCH_SIZE)
+            df = df[~df['crm_CDI_SentEmail_kliks_Sent_Email'].isin(existing_ids)]  
 
-    # Insert any remaining data
-    if send_email_clicks_data:
-        insert_send_email_clicks_data(send_email_clicks_data, session)
-        progress_bar.update(len(send_email_clicks_data))
+            # data in chunks steken
+            chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
+
+            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+            
+            for chunk in chunks:
+                send_email_clicks_data = []
+                for _, row in chunk.iterrows():
+                    p = SendEmailClicks(
+                        SentEmailId       = row['crm_CDI_SentEmail_kliks_Sent_Email'],
+                        Clicks            = row['crm_CDI_SentEmail_kliks_Clicks'],
+                        ContactId         = row['crm_CDI_SentEmail_kliks_Contact'],
+                        EmailVersturenId  = row['crm_CDI_SentEmail_kliks_E_mail_versturen'],
+                    )
+                    send_email_clicks_data.append(p)
+
+                insert_send_email_clicks_data(send_email_clicks_data, session)
+                progress_bar.update(len(send_email_clicks_data))
+
+            progress_bar.close()
+
+            move_csv_file(csv_path, old_csv_dir)
+
+            logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(df)}")
+
+    if not send_email_clicks_data:
+        logger.info("No new data was given. Data is up to date already.")
 
     session.execute(text("""
         UPDATE SendEmailClicks
@@ -88,5 +106,14 @@ def seed_send_email_clicks():
         WHERE SendEmailClicks.ContactId
         NOT IN
         (SELECT ContactpersoonId FROM Contactfiche)
+    """))
+    session.commit()
+
+    session.execute(text("""
+        UPDATE SendEmailClicks
+        SET SendEmailClicks.EmailVersturenId = NULL
+        WHERE SendEmailClicks.EmailVersturenId
+        NOT IN
+        (SELECT MailingId FROM Mailing)
     """))
     session.commit()
