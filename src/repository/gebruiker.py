@@ -101,7 +101,7 @@ def seed_gebruiker():
             # verplaats het csv bestand naar de "old" map voor reeds verwerkte bestanden
             move_csv_file(csv_path, old_csv_dir)
 
-            logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(gebruiker_data)}")
+            logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(df)}")
     
     # als er geen nieuwe data is, dan is de lijst leeg
     if not gebruiker_data:
