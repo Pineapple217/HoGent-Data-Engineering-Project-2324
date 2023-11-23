@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from .pageviews import Pageview
     from .visits import Visit
     
-BATCH_SIZE = 10_000
+BATCH_SIZE = 50_000
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,6 @@ def seed_contactfiche():
     #query bestaande id's
     existing_ids = get_existing_ids(session)
     
-
     #stel dirs voor old en new in en check of ze kloppen
     old_csv_dir = os.path.join(DATA_PATH, "old")
     new_csv_dir = os.path.join(DATA_PATH, "new")
