@@ -57,6 +57,7 @@ Place a new CSV file in the "new" folder to add more new data.
 Run the seeding again.
 '''
 
+# verplaatst het csv bestand naar de "old" map met een timestamp om naamconflicten te voorkomen en data bij te houden
 def move_csv_file(csv_path, destination_folder):
     base_name = os.path.basename(csv_path)
     file_name, file_extension = os.path.splitext(base_name)
@@ -66,51 +67,47 @@ def move_csv_file(csv_path, destination_folder):
     
     os.rename(csv_path, new_path)
 
+# geeft een lijst van alle campagne ids die al in de database zitten door de campagne tabel te queryen, enkel de campagne id kolom wordt teruggegeven
 def get_existing_ids(session):
-    return set(session.query(Campagne.CampagneId).all())
+    return [result[0] for result in session.query(Campagne.CampagneId).all()]
 
 def seed_campagne():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
 
+    # haal alle campagne ids op die al in de database zitten
     existing_ids = get_existing_ids(session)
     
+    # pad naar de csv bestanden, deze moeten in de mappen "old" en "new" zitten
     old_csv_dir = os.path.join(DATA_PATH, "old")
     new_csv_dir = os.path.join(DATA_PATH, "new")
     
+    # check of de mappen "old" en "new" bestaan
     if not os.path.exists(old_csv_dir) or not os.path.exists(new_csv_dir):
         raise FileNotFoundError("The folders 'old' and 'new' must exist in the data folder")
 
     folder_new = new_csv_dir
-
     campagne_data = []
+
+    # enkel de csv bestanden in de "new" map worden ingelezen, de bestanden in de "old" map zijn reeds verwerkt
     for filename in os.listdir(folder_new):
         if filename.startswith("Campagne"):
             csv_path = os.path.join(folder_new, filename)
-
             logger.info(f"Reading CSV: {csv_path}")
             df = pd.read_csv(csv_path, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+            
+            # verwijder de rijen waarvan de campagne id al in de database zit
+            df = df[~df["crm_Campagne_Campagne"].isin(existing_ids)]
 
             df = df.replace({np.nan: None})
 
             df["crm_Campagne_Einddatum"] = pd.to_datetime(df["crm_Campagne_Einddatum"], format=DATE_FORMAT)
             df["crm_Campagne_Startdatum"] = pd.to_datetime(df["crm_Campagne_Startdatum"], format=DATE_FORMAT)
-            
+
             logger.info("Seeding inserting rows")
-
             progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-
             for _, row in df.iterrows():
-                campagne_id = row["crm_Campagne_Campagne"]
-
-                existing_record = session.query(Campagne).filter_by(CampagneId=campagne_id).first()
-
-                if existing_record:
-                    continue
-
-                existing_ids.add(campagne_id)
-
                 p = Campagne(
                     CampagneId=row["crm_Campagne_Campagne"],
                     CampagneNr=row["crm_Campagne_Campagne_Nr"],
@@ -137,10 +134,12 @@ def seed_campagne():
 
             progress_bar.close()
 
+            # verplaats het csv bestand naar de "old" map voor reeds verwerkte bestanden
             move_csv_file(csv_path, old_csv_dir)
 
             logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(campagne_data)}")
     
+    # als er geen nieuwe data is, dan is de lijst leeg
     if not campagne_data:
         logger.info("No new data was given. Data is up to date already.")
         
