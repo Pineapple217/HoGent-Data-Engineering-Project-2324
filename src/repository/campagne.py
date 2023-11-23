@@ -108,9 +108,8 @@ def seed_campagne():
             df["crm_Campagne_Einddatum"] = pd.to_datetime(df["crm_Campagne_Einddatum"], format=DATE_FORMAT)
             df["crm_Campagne_Startdatum"] = pd.to_datetime(df["crm_Campagne_Startdatum"], format=DATE_FORMAT)
 
-            chunks = []
-            for i in range(0, df.shape[0], BATCH_SIZE): #
-                chunks.append(df[i:i + BATCH_SIZE]) 
+            # data in chunks steken
+            chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
             
             logger.info("Seeding inserting rows")
             progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)

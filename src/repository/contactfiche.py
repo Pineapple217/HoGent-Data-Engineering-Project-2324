@@ -104,9 +104,9 @@ def seed_contactfiche():
             df = df[~df['crm_Contact_Contactpersoon'].isin(existing_ids)]  
 
             # data in chunks steken
-            chunks = []
-            for i in range(0, df.shape[0], BATCH_SIZE): #range van 0 tot aantal rijen in df, stap volgens batch size (hier 10,000)
-                chunks.append(df[i:i + BATCH_SIZE]) #maak lijst van chunks obv filtered df van i tot i + 10,000
+            chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
+                #range van 0 tot aantal rijen in df, stap volgens batch size (hier 5,000)
+                #maak lijst van chunks obv filtered df van i tot i + 5,000
 
             progress_bar = tqdm(total=len(chunks), unit=" chunks", unit_scale=True)
 
