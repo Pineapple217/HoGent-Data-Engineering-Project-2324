@@ -116,8 +116,6 @@ def seed_visits():
             df['crm_CDI_Visit_Gewijzigd_op'] = pd.to_datetime(df['crm_CDI_Visit_Gewijzigd_op'], format=DATE_FORMAT)
             
             df['crm_CDI_Visit_Time'] = pd.to_datetime(df['crm_CDI_Visit_Time'], format="%m-%d-%Y %H:%M:%S (%Z)")
-        
-            df = df.replace({np.nan: None})
 
             # data in chunks steken
             chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
