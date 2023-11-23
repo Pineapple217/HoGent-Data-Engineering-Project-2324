@@ -1,4 +1,5 @@
 import pandas as pd
+import datetime
 import os
 
 def load_csv(file_path):
@@ -14,6 +15,16 @@ def load_csv(file_path):
                 continue  #probeer volgende combinatie
 
     return None, "Unable to read file with encodings 'utf-8', 'latin1' and 'utf-8-sig' and delimiters ',' and ';' "
+
+# verplaatst het csv bestand naar de "old" map met een timestamp om naamconflicten te voorkomen en data bij te houden
+def move_csv_file(csv_path, destination_folder):
+    base_name = os.path.basename(csv_path)
+    file_name, file_extension = os.path.splitext(base_name)
+
+    timestamp_str = datetime.datetime.now().strftime("%Y_%m_%d_%H-%M-%S")
+    new_path = os.path.join(destination_folder, f"{file_name}_{timestamp_str}{file_extension}")
+    
+    os.rename(csv_path, new_path)
 
 #code misschien voor later
 # def vergelijkHeaders(oldfile, newfile, path_old, path_new):

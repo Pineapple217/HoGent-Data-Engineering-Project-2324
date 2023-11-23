@@ -1,5 +1,5 @@
 from .base import Base
-from .functionalities import load_csv
+from .functionalities import load_csv, move_csv_file
 
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
@@ -23,6 +23,7 @@ DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
+
 class Campagne(Base):
     __tablename__ = "Campagne"
     __table_args__ = {"extend_existing": True}
@@ -43,9 +44,11 @@ class Campagne(Base):
     Sessie: Mapped["Sessie"] = relationship(back_populates="Campagne")
     Inschrijving: Mapped["Inschrijving"] = relationship(back_populates="Campagne")
 
+
 def insert_campagne_data(campagne_data, session):
     session.bulk_save_objects(campagne_data)
     session.commit()
+
 
 '''
 USAGE:
@@ -58,19 +61,11 @@ Place a new CSV file in the "new" folder to add more new data.
 Run the seeding again.
 '''
 
-# verplaatst het csv bestand naar de "old" map met een timestamp om naamconflicten te voorkomen en data bij te houden
-def move_csv_file(csv_path, destination_folder):
-    base_name = os.path.basename(csv_path)
-    file_name, file_extension = os.path.splitext(base_name)
-
-    timestamp_str = datetime.datetime.now().strftime("%Y_%m_%d_%H-%M-%S")
-    new_path = os.path.join(destination_folder, f"{file_name}_{timestamp_str}{file_extension}")
-    
-    os.rename(csv_path, new_path)
 
 # geeft een lijst van alle campagne ids die al in de database zitten door de campagne tabel te queryen, enkel de campagne id kolom wordt teruggegeven
 def get_existing_ids(session):
     return [result[0] for result in session.query(Campagne.CampagneId).all()]
+
 
 def seed_campagne():
     engine = get_engine()
@@ -107,12 +102,12 @@ def seed_campagne():
 
             df["crm_Campagne_Einddatum"] = pd.to_datetime(df["crm_Campagne_Einddatum"], format=DATE_FORMAT)
             df["crm_Campagne_Startdatum"] = pd.to_datetime(df["crm_Campagne_Startdatum"], format=DATE_FORMAT)
-
-            # data in chunks steken
-            chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
             
             logger.info("Seeding inserting rows")
             progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+            
+            # data in chunks steken
+            chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
             for chunk in chunks:
                 campagne_data = []
                 for _, row in chunk.iterrows(): 

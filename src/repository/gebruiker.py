@@ -1,12 +1,11 @@
 from .base import Base
-from .functionalities import load_csv
+from .functionalities import load_csv, move_csv_file
 
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String
 from repository.main import get_engine, DATA_PATH
 import os
-import datetime
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -42,17 +41,6 @@ Place a new CSV file in the "new" folder to add more new data.
 Run the seeding again.
 '''
 
-
-# verplaatst het csv bestand naar de "old" map met een timestamp om naamconflicten te voorkomen en data bij te houden
-def move_csv_file(csv_path, destination_folder):
-    base_name = os.path.basename(csv_path)
-    file_name, file_extension = os.path.splitext(base_name)
-
-    timestamp_str = datetime.datetime.now().strftime("%Y_%m_%d_%H-%M-%S")
-    new_path = os.path.join(destination_folder, f"{file_name}_{timestamp_str}{file_extension}")
-    
-    os.rename(csv_path, new_path)
-    
 
 # geeft een lijst van alle ids die al in de database zitten door de tabel te queryen, enkel de id kolom wordt teruggegeven
 def get_existing_ids(session):
