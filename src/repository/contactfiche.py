@@ -1,5 +1,5 @@
 from .base import Base
-from .loadAndCompare import load_csv, checkHeaders
+from .functionalities import load_csv
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Integer, ForeignKey, text
@@ -70,7 +70,7 @@ def move_csv_file(csv_path, destination_folder):
 
 #functie om alle id's te querien, zodat gelijke rijden niet appended worden
 def get_existing_ids(session):
-    return set(session.query(Contactfiche.ContactpersoonId).all()) 
+    return [result[0] for result in session.query(Contactfiche.ContactpersoonId).all()]
 
 def seed_contactfiche():
     engine = get_engine()
@@ -79,6 +79,7 @@ def seed_contactfiche():
 
     #query bestaande id's
     existing_ids = get_existing_ids(session)
+    
 
     #stel dirs voor old en new in en check of ze kloppen
     old_csv_dir = os.path.join(DATA_PATH, "old")
@@ -94,49 +95,43 @@ def seed_contactfiche():
             csv_path = os.path.join(folder_new, filename) #vul filepath aan met gevonden file
     
             logger.info(f"Reading CSV: {csv_path}")
-            df, error = load_csv(csv_path) #load_csv uit loadAndCompare.py, probeert met hardcoded delimiters en encodings een df te maken
+            df, error = load_csv(csv_path) #load_csv uit functionalities.py, probeert met hardcoded delimiters en encodings een df te maken
             if error:
-                print(error)
+                raise Exception(f"Error loading CSV: {csv_path, error}")
             
             df = df.replace({np.nan: None})
-            
-            logger.info("Seeding inserting rows")
-            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-            for _, row in df.iterrows():
 
-                contactpersoon_id = row["crm_Contact_Contactpersoon"]
+            #filter df op alle contactpersonen die nog niet(~) bestaan, voor iterrows
+            df = df[~df['crm_Contact_Contactpersoon'].isin(existing_ids)]  
 
-                existing_record = session.query(Contactfiche).filter_by(ContactpersoonId=contactpersoon_id).first()
+            # data in chunks steken
+            chunks = []
+            for i in range(0, df.shape[0], BATCH_SIZE): #range van 0 tot aantal rijen in df, stap volgens batch size (hier 10,000)
+                chunks.append(df[i:i + BATCH_SIZE]) #maak lijst van chunks obv filtered df van i tot i + 10,000
 
-                if existing_record:
-                    continue
+            progress_bar = tqdm(total=len(chunks), unit=" chunks", unit_scale=True)
 
-                existing_ids.add(contactpersoon_id)
+            for chunk in chunks:
+                contactfiche_data = []
+                for _, row in chunk.iterrows():
+                    p = Contactfiche(
+                            ContactpersoonId=row["crm_Contact_Contactpersoon"],
+                            AccountId=row["crm_Contact_Account"],
+                            FunctieTitel=row["crm_Contact_Functietitel"],
+                            PersoonId=row["crm_Contact_Persoon_ID"],
+                            Status=row["crm_Contact_Status"],
+                            VokaMedewerker=row["crm_Contact_Voka_medewerker"]
+                    )
+                    contactfiche_data.append(p)
 
-                p = Contactfiche(
-                    ContactpersoonId=row["crm_Contact_Contactpersoon"],
-                    AccountId=row["crm_Contact_Account"],
-                    FunctieTitel=row["crm_Contact_Functietitel"],
-                    PersoonId=row["crm_Contact_Persoon_ID"],
-                    Status=row["crm_Contact_Status"],
-                    VokaMedewerker=row["crm_Contact_Voka_medewerker"],
-                )
-                contactfiche_data.append(p)
-
-                if len(contactfiche_data) >= BATCH_SIZE:
-                    insert_contactfiche_data(contactfiche_data, session)
-                    contactfiche_data = []
-                    progress_bar.update(BATCH_SIZE)
-
-            if contactfiche_data:
                 insert_contactfiche_data(contactfiche_data, session)
-                progress_bar.update(len(contactfiche_data))
+                progress_bar.update(1)
 
             progress_bar.close()
 
             move_csv_file(csv_path, old_csv_dir)
 
-            logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(contactfiche_data)}")
+            logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(df)}")
 
     if not contactfiche_data:
         logger.info("No new data was given. Data is up to date already.")
