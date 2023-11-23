@@ -3,10 +3,8 @@ from .functionalities import load_csv, move_csv_file
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Integer, ForeignKey, text
-from sqlalchemy.dialects.mssql import BIT
 from repository.main import get_engine, DATA_PATH
 import os
-import datetime
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -98,7 +96,7 @@ def seed_contactfiche():
                 #range van 0 tot aantal rijen in df, stap volgens batch size (hier 5,000)
                 #maak lijst van chunks obv filtered df van i tot i + 5,000
 
-            progress_bar = tqdm(total=len(chunks), unit=" chunks", unit_scale=True)
+            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
 
             for chunk in chunks:
                 contactfiche_data = []
@@ -114,7 +112,7 @@ def seed_contactfiche():
                     contactfiche_data.append(p)
 
                 insert_contactfiche_data(contactfiche_data, session)
-                progress_bar.update(1)
+                progress_bar.update(len(contactfiche_data))
 
             progress_bar.close()
 
