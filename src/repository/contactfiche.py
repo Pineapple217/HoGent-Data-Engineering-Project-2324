@@ -1,5 +1,5 @@
 from .base import Base
-from .functionalities import load_csv
+from .functionalities import load_csv, move_csv_file
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Integer, ForeignKey, text
@@ -57,16 +57,6 @@ def insert_contactfiche_data(contactfiche_data, session):
     session.bulk_save_objects(contactfiche_data)
     session.commit()
 
-
-#functie om seeded file van new > old met timestamp te verplaatsen
-def move_csv_file(csv_path, destination_folder):
-    base_name = os.path.basename(csv_path)
-    file_name, file_extension = os.path.splitext(base_name)
-
-    timestamp_str = datetime.datetime.now().strftime("%Y_%m_%d_%H-%M-%S")
-    new_path = os.path.join(destination_folder, f"{file_name}_{timestamp_str}{file_extension}")
-    
-    os.rename(csv_path, new_path)
 
 #functie om alle id's te querien, zodat gelijke rijden niet appended worden
 def get_existing_ids(session):
