@@ -99,7 +99,7 @@ def seed_account():
             # data in chunks steken
             chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
 
-            progress_bar = tqdm(total=len(chunks), unit=" chunks", unit_scale=True)
+            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
 
             for chunk in chunks:
                 account_data = []
@@ -126,7 +126,7 @@ def seed_account():
                     account_data.append(p)
 
                 insert_account_data(account_data, session)
-                progress_bar.update(1)
+                progress_bar.update(len(account_data))
                 
             progress_bar.close()
 

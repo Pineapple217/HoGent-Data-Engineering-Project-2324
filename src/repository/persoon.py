@@ -112,7 +112,7 @@ def seed_persoon():
                 #range van 0 tot aantal rijen in df, stap volgens batch size (hier 5,000)
                 #maak lijst van chunks obv filtered df van i tot i + 5,000
 
-            progress_bar = tqdm(total=len(chunks), unit=" chunks", unit_scale=True)
+            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
     
 
             for chunk in chunks:
@@ -152,7 +152,7 @@ def seed_persoon():
                     persoon_data.append(p)
 
                 insert_persoon_data(persoon_data, session)
-                progress_bar.update(1)
+                progress_bar.update(len(persoon_data))
 
             progress_bar.close()
 
