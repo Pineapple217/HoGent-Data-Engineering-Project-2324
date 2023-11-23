@@ -1,4 +1,5 @@
 from .base import Base
+from .functionalities import load_csv
 
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
@@ -92,10 +93,12 @@ def seed_campagne():
 
     # enkel de csv bestanden in de "new" map worden ingelezen, de bestanden in de "old" map zijn reeds verwerkt
     for filename in os.listdir(folder_new):
-        if filename.startswith("Campagne"):
+        if filename == 'Campagnes.csv':
             csv_path = os.path.join(folder_new, filename)
             logger.info(f"Reading CSV: {csv_path}")
-            df = pd.read_csv(csv_path, delimiter=",", encoding="utf-8", keep_default_na=True, na_values=[""])
+            df, error = load_csv(csv_path)
+            if error:
+                raise Exception(f"Error loading CSV: {csv_path, error}")
             
             # verwijder de rijen waarvan de campagne id al in de database zit
             df = df[~df["crm_Campagne_Campagne"].isin(existing_ids)]
@@ -105,30 +108,30 @@ def seed_campagne():
             df["crm_Campagne_Einddatum"] = pd.to_datetime(df["crm_Campagne_Einddatum"], format=DATE_FORMAT)
             df["crm_Campagne_Startdatum"] = pd.to_datetime(df["crm_Campagne_Startdatum"], format=DATE_FORMAT)
 
+            chunks = []
+            for i in range(0, df.shape[0], BATCH_SIZE): #
+                chunks.append(df[i:i + BATCH_SIZE]) 
+            
             logger.info("Seeding inserting rows")
             progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-            for _, row in df.iterrows():
-                p = Campagne(
-                    CampagneId=row["crm_Campagne_Campagne"],
-                    CampagneNr=row["crm_Campagne_Campagne_Nr"],
-                    Einddatum=row["crm_Campagne_Einddatum"],
-                    CampagneNaam=row["crm_Campagne_Naam"],
-                    NaamInMail=row["crm_Campagne_Naam_in_email"],
-                    RedenVanStatus=row["crm_Campagne_Reden_van_status"],
-                    Startdatum=row["crm_Campagne_Startdatum"],
-                    Status=row["crm_Campagne_Status"],
-                    TypeCampagne=row["crm_Campagne_Type_campagne"],
-                    URLVoka=row["crm_Campagne_URL_voka_be"],
-                    SoortCampagne=row["crm_Campagne_Soort_Campagne"],
-                )
-                campagne_data.append(p)
+            for chunk in chunks:
+                campagne_data = []
+                for _, row in chunk.iterrows(): 
+                    p = Campagne(
+                        CampagneId=row["crm_Campagne_Campagne"],
+                        CampagneNr=row["crm_Campagne_Campagne_Nr"],
+                        Einddatum=row["crm_Campagne_Einddatum"],
+                        CampagneNaam=row["crm_Campagne_Naam"],
+                        NaamInMail=row["crm_Campagne_Naam_in_email"],
+                        RedenVanStatus=row["crm_Campagne_Reden_van_status"],
+                        Startdatum=row["crm_Campagne_Startdatum"],
+                        Status=row["crm_Campagne_Status"],
+                        TypeCampagne=row["crm_Campagne_Type_campagne"],
+                        URLVoka=row["crm_Campagne_URL_voka_be"],
+                        SoortCampagne=row["crm_Campagne_Soort_Campagne"],
+                    )
+                    campagne_data.append(p)
 
-                if len(campagne_data) >= BATCH_SIZE:
-                    insert_campagne_data(campagne_data, session)
-                    campagne_data = []
-                    progress_bar.update(BATCH_SIZE)
-
-            if campagne_data:
                 insert_campagne_data(campagne_data, session)
                 progress_bar.update(len(campagne_data))
 
