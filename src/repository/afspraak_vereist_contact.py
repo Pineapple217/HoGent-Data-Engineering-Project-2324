@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, ForeignKey, text
 from repository.main import get_engine, DATA_PATH
 import os
+import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from typing import TYPE_CHECKING
@@ -49,7 +50,11 @@ Run the seeding again.
 '''
 
 
-# geen filtering op bestaande ids in de database wegens autoincrement primary key
+# filtering op beide kolommen (tussentabel) om te voorkomen dat er dubbele rijen worden ingevoegd
+def get_existing_afspraak_contact_ids(session):
+    afspraak_ids = [result[0] for result in session.query(AfspraakVereistContact.AfspraakId).all()]
+    contact_ids = [result[0] for result in session.query(AfspraakVereistContact.VereistContactId).all()]
+    return afspraak_ids, contact_ids
 
 
 def seed_afspraak_vereist_contact():
@@ -68,6 +73,9 @@ def seed_afspraak_vereist_contact():
     folder_new = new_csv_dir
     afspraak_vereist_contact_data = []
     
+    # haal de bestaande ids op
+    existing_afspraak_ids, existing_contact_ids = get_existing_afspraak_contact_ids(session)
+    
     # enkel de csv bestanden in de "new" map worden ingelezen, de bestanden in de "old" map zijn reeds verwerkt
     for filename in os.listdir(folder_new):
         if filename == 'Activiteit vereist contact.csv':
@@ -76,6 +84,12 @@ def seed_afspraak_vereist_contact():
             df, error = load_csv(csv_path)
             if error:
                 raise Exception(f"Error loading CSV: {csv_path, error}")
+            
+            # dataframe met de bestaande combinaties van afspraak en vereist contact
+            existing_ids_df = pd.DataFrame({'crm_ActiviteitVereistContact_ActivityId': existing_afspraak_ids, 'crm_ActiviteitVereistContact_ReqAttendee': existing_contact_ids})
+            df = df.merge(existing_ids_df, on=['crm_ActiviteitVereistContact_ActivityId', 'crm_ActiviteitVereistContact_ReqAttendee'], how='left', indicator=True)
+            # dataframe met enkel de nieuwe rijen (waar afspraak en vereist contact een unieke combinatie vormen)
+            df = df[df['_merge'] == 'left_only'].drop('_merge', axis=1)
             
             df = df.drop_duplicates()
             df = df.replace({np.nan: None})
