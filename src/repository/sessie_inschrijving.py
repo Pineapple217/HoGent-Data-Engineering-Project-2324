@@ -8,7 +8,6 @@ from sqlalchemy import String, ForeignKey, text
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import os
-import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from typing import TYPE_CHECKING, Optional
@@ -17,7 +16,7 @@ if TYPE_CHECKING:
     from .sessie import Sessie
     from .inschrijving import Inschrijving
 
-BATCH_SIZE = 10_000
+BATCH_SIZE = 25_000
 
 logger = logging.getLogger(__name__)
 

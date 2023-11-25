@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .account import Account
 
-BATCH_SIZE = 10_000
+BATCH_SIZE = 25_000
 
 logger = logging.getLogger(__name__)
 
