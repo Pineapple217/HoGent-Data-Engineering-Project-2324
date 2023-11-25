@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import Integer, ForeignKey, text
 from repository.main import get_engine, DATA_PATH
 import os
+import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from typing import TYPE_CHECKING, Optional
@@ -49,7 +50,11 @@ Run the seeding again.
 '''
 
 
-# geen filtering op bestaande ids in de database wegens autoincrement primary key
+# filtering op beide kolommen (tussentabel) om te voorkomen dat er dubbele rijen worden ingevoegd
+def get_existing_contactpersoon_functie_ids(session):
+    contactpersoon_ids = [result[0] for result in session.query(ContactficheFunctie.ContactpersoonId).all()]
+    functie_ids = [result[0] for result in session.query(ContactficheFunctie.FunctieId).all()]
+    return contactpersoon_ids, functie_ids
 
 
 def seed_contactfiche_functie():
@@ -68,6 +73,9 @@ def seed_contactfiche_functie():
     folder_new = new_csv_dir
     contactfiche_functie_data = []
     
+    # haal de bestaande ids op
+    existing_contactpersoon_ids, existing_functie_ids = get_existing_contactpersoon_functie_ids(session)
+    
     # enkel de csv bestanden in de "new" map worden ingelezen, de bestanden in de "old" map zijn reeds verwerkt
     for filename in os.listdir(folder_new):
         if filename == 'Contact functie.csv':
@@ -76,6 +84,12 @@ def seed_contactfiche_functie():
             df, error = load_csv(csv_path)
             if error:
                 raise Exception(f"Error loading CSV: {csv_path, error}")
+            
+            # dataframe met de bestaande combinaties van contactpersoon en functie
+            existing_ids_df = pd.DataFrame({'crm_ContactFunctie_Contactpersoon': existing_contactpersoon_ids, 'crm_ContactFunctie_Functie': existing_functie_ids})
+            df = df.merge(existing_ids_df, on=['crm_ContactFunctie_Contactpersoon', 'crm_ContactFunctie_Functie'], how='left', indicator=True)
+            # dataframe met enkel de nieuwe rijen (waar contactpersoon en functie een unieke combinatie vormen)
+            df = df[df['_merge'] == 'left_only'].drop('_merge', axis=1)
             
             # data cleaning
             df = df.dropna(how='all', axis=0)
