@@ -1,11 +1,11 @@
 from .base import Base
 from .functionalities import load_csv, move_csv_file
+
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String
 from repository.main import get_engine, DATA_PATH
 import os
-import pandas as pd
 import numpy as np
 from tqdm import tqdm
 

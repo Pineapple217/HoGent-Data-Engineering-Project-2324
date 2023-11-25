@@ -1,5 +1,6 @@
 from .base import Base
 from .functionalities import load_csv, move_csv_file
+
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
@@ -7,7 +8,6 @@ from sqlalchemy import String, Integer, ForeignKey, text
 from sqlalchemy.orm import sessionmaker
 from repository.main import get_engine, DATA_PATH
 import os
-import pandas as pd
 import numpy as np
 from typing import Optional
 from tqdm import tqdm

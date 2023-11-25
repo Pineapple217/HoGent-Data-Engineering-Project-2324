@@ -7,7 +7,6 @@ from sqlalchemy import String
 from sqlalchemy.dialects.mssql import DATETIME2
 from repository.main import get_engine, DATA_PATH
 import os
-import datetime
 import pandas as pd
 import numpy as np
 from typing import TYPE_CHECKING

@@ -1,5 +1,6 @@
 from .base import Base
 from .functionalities import load_csv, move_csv_file
+
 import logging
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship

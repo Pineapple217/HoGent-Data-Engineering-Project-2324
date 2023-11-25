@@ -1,5 +1,6 @@
 from .base import Base
 from .functionalities import load_csv, move_csv_file
+
 import logging
 from sqlalchemy.orm import Mapped, mapped_column, sessionmaker, relationship
 from sqlalchemy import String, Date, ForeignKey, text
