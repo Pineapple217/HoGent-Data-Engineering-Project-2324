@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from .pageviews import Pageview
     from .contactfiche import Contactfiche
 
-BATCH_SIZE = 20_000
+BATCH_SIZE = 10_000
 DATE_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
@@ -75,37 +75,55 @@ def insert_visits_data(pageviews_data, session):
     session.bulk_save_objects(pageviews_data)
     session.commit()
 
+
+'''
+USAGE:
+Create the directories "old" and "new" in the data folder.
+Place new CSV file in the "new" folder.
+Run the seeding.
+The processed CSV file will be moved to the "old" folder with a timestamp.
+The "new" folder will now be empty.
+Place a new CSV file in the "new" folder to add more new data.
+Run the seeding again.
+'''
+
+
+# geeft een lijst van alle ids die al in de database zitten door de tabel te queryen, enkel de id kolom wordt teruggegeven
 def get_existing_ids(session):
     return [result[0] for result in session.query(Visit.VisitId).all()]
+
 
 def seed_visits():
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     
+    # haal alle ids op die al in de database zitten
     existing_ids = get_existing_ids(session)
-
+    
+    # pad naar de csv bestanden, deze moeten in de mappen "old" en "new" zitten
     old_csv_dir = os.path.join(DATA_PATH, "old")
     new_csv_dir = os.path.join(DATA_PATH, "new")
+    
+    # check of de mappen "old" en "new" bestaan
     if not os.path.exists(old_csv_dir) or not os.path.exists(new_csv_dir):
         raise FileNotFoundError("The folders 'old' and 'new' must exist in the data folder")
-    
-    folder_new = new_csv_dir
 
+    folder_new = new_csv_dir
     visits_data = []
-    for filename in os.listdir(folder_new): #check alle filenames in 'new'
+    
+    # enkel de csv bestanden in de "new" map worden ingelezen, de bestanden in de "old" map zijn reeds verwerkt
+    for filename in os.listdir(folder_new):
         if filename == 'CDI visits.csv':
             csv_path = os.path.join(folder_new, filename)
-    
             logger.info(f"Reading CSV: {csv_path}")
             df, error = load_csv(csv_path)
             if error:
                 raise Exception(f"Error loading CSV: {csv_path, error}")
             
-            df = df.replace({np.nan: None})
-
-            df = df[~df['crm_CDI_Visit_Visit'].isin(existing_ids)]  
-
+            # verwijder de rijen waarvan de id al in de database zit
+            df = df[~df["crm_CDI_Visit_Visit"].isin(existing_ids)]
+            
             df['crm_CDI_Visit_Adobe_Reader'] = df['crm_CDI_Visit_Adobe_Reader'].replace({'Ja': True, 'Nee': False})
             df['crm_CDI_Visit_Bounce'] = df['crm_CDI_Visit_Bounce'].replace({'Ja': True, 'Nee': False})
             df['crm_CDI_Visit_containssocialprofile'] = df['crm_CDI_Visit_containssocialprofile'].replace({'Ja': True, 'Nee': False})
@@ -117,15 +135,17 @@ def seed_visits():
             df['crm_CDI_Visit_Gewijzigd_op'] = pd.to_datetime(df['crm_CDI_Visit_Gewijzigd_op'], format=DATE_FORMAT)
             
             df['crm_CDI_Visit_Time'] = pd.to_datetime(df['crm_CDI_Visit_Time'], format="%m-%d-%Y %H:%M:%S (%Z)")
-
+            
+            df = df.replace({np.nan: None})
+            
+            logger.info("Seeding inserting rows")
+            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
+            
             # data in chunks steken
             chunks = [df[i:i + BATCH_SIZE] for i in range(0, df.shape[0], BATCH_SIZE)]
-
-            progress_bar = tqdm(total=len(df), unit=" rows", unit_scale=True)
-
             for chunk in chunks:
                 visits_data = []
-                for _, row in chunk.iterrows():
+                for _, row in chunk.iterrows(): 
                     p = Visit(
                         VisitId                 =  row['crm_CDI_Visit_Visit'],
                         AdobeReader             =  row['crm_CDI_Visit_Adobe_Reader'],
@@ -170,27 +190,29 @@ def seed_visits():
 
             progress_bar.close()
 
+            # verplaats het csv bestand naar de "old" map voor reeds verwerkte bestanden
             move_csv_file(csv_path, old_csv_dir)
 
             logger.info(f"Number of new (non-duplicate) rows found in {csv_path}: {len(df)}")
-
+    
+    # als er geen nieuwe data is, dan is de lijst leeg
     if not visits_data:
         logger.info("No new data was given. Data is up to date already.")
-
+        
     session.execute(text("""
         UPDATE Visits
         SET Visits.EmailSendId = NULL
-        WHERE Visits.EmailSendId
-        NOT IN
-        (SELECT MailingId FROM Mailing);
+        WHERE Visits.EmailSendId IS NOT NULL
+        AND Visits.EmailSendId NOT IN
+        (SELECT MailingId FROM Mailing WHERE MailingId IS NOT NULL);
     """))
     session.commit()
 
     session.execute(text("""
         UPDATE Visits
         SET Visits.ContactId = NULL
-        WHERE Visits.ContactId
-        NOT IN
-        (SELECT ContactpersoonId FROM Contactfiche)
+        WHERE Visits.ContactId IS NOT NULL
+        AND Visits.ContactId NOT IN
+        (SELECT ContactpersoonId FROM Contactfiche WHERE ContactpersoonId IS NOT NULL);
     """))
     session.commit()
