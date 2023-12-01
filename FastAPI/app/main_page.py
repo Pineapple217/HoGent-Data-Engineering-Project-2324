@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sklearn.metrics.pairwise import cosine_similarity
 
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import LabelEncoder
+
 from fastapi import FastAPI, Query
 from typing import Annotated, List
 
@@ -43,9 +46,19 @@ df_pageviews.set_index('ContactId', inplace=True)
 df_pageviews["rating"] = 2
 df_pivot_main = pd.pivot_table(df, index='ContactPersoonId', columns=['Ondernemingsaard', 'Ondernemingstype', 'PrimaireActiviteit', 'Functie'], values='rating', fill_value = 0)
 df_pivot_main.sort_index(inplace=True)
-df_pivot_pageviews = pd.pivot_table(df_pageviews, index='ContactId', columns=['PageTitle'], values='rating', fill_value = 0)
-df_pivot_pageviews.sort_index(inplace=True)
-df_pivot = pd.concat([df_pivot_main, df_pivot_pageviews], axis=1, join='outer').fillna(0)
+# df_pivot_pageviews = pd.pivot_table(df_pageviews, index='ContactId', columns=['PageTitle'], values='rating', fill_value = 0)
+# df_pivot_pageviews.sort_index(inplace=True)
+label_encoder = LabelEncoder()
+df_pageviews['CategoryEncoded'] = label_encoder.fit_transform(df_pageviews['PageTitle'])
+
+# # Apply PCA for dimensionality reduction
+pca = PCA(n_components=2, random_state=42)
+pca_result = pca.fit_transform(df_pageviews[['rating', 'CategoryEncoded']])
+
+# # Create a new DataFrame with the reduced dimensions
+pca_df = pd.DataFrame(data=pca_result, columns=['Dimension 1', 'Dimension 2'], index=df_pageviews.index)
+grouped_data = pca_df.groupby(pca_df.index).mean()
+df_pivot = pd.concat([df_pivot_main, grouped_data], axis=1, join='outer').fillna(0)
 
 def calc(contact_ids: list):
     # select_contact = ['DA252429-E5A6-ED11-AAD1-6045BD8956C9', '915D6FF4-A972-E111-B43A-00505680000A']
