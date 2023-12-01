@@ -21,9 +21,9 @@ query = """
     join Functie f on f.FunctieId = cf.FunctieId
     where i.CampagneId is not null;
 """
-df_omschrijving = pd.read_sql(query, engine)
-df_omschrijving.set_index('ContactPersoonId', inplace=True)
-df_omschrijving["rating"] = 5
+df= pd.read_sql(query, engine)
+df.set_index('ContactPersoonId', inplace=True)
+df["rating"] = 5
 
 query2 = """
     with pageview_count as(
@@ -38,14 +38,13 @@ query2 = """
     order by count desc)
 """
 df_pageviews = pd.read_sql(query2, engine)
-df_pageviews.set_index('ContactPersoonId', inplace=True)
+df_pageviews.set_index('ContactId', inplace=True)
 df_pageviews["rating"] = 2
 
-df_campagne = df_omschrijving.iloc[:, 0:3]
+df_campagne = df.iloc[:, 0:3]
 df_campagne = df_campagne[df_campagne['Startdatum'] > '2022-11-06']
 df_campagne['rating'] = 10
-df_omschrijving.drop(df_omschrijving.columns[[0, 1, 2]], axis=1, inplace=True)
-df_omschrijving.drop_duplicates(inplace=True)
+df_omschrijving = df.iloc[:, 3:]
 
 def create_set_of_index(dfs: list):
     """
@@ -67,7 +66,7 @@ def add_indexes(df: pd.DataFrame, indexes: set):
     """
     remaining_indexes = indexes.difference(set(df.index))
     df2 = pd.DataFrame(index=list(remaining_indexes), columns=df.columns)
-    df = df.append(df2)
+    df = df._append(df2)
     df.index.name = 'ContactPersoonId'
     return df.fillna(0).astype('int8')
 
@@ -96,6 +95,7 @@ def calc(contact_ids: list):
         similarity_matrix = cosine_similarity(df_pivot, ss)
     except:
         return "geen sims"
+    
     similarity_matrix_df = pd.DataFrame(similarity_matrix, index=df_pivot.index, columns=ss.index)
     stacked_similarity_df = similarity_matrix_df.stack()
     high_similarity_df = pd.DataFrame(stacked_similarity_df[stacked_similarity_df > 0.5])
@@ -103,10 +103,10 @@ def calc(contact_ids: list):
     high_similarity_df.reset_index(inplace=True)
     high_similarity_df.set_index(['Selected', 'Similars'], inplace=True)
     high_similarity_df.sort_index(level='Selected', inplace=True)
-    done_campaigns = df_campagne.loc[select_contact, ["CampagneId"]]
+    done_campaigns = df.loc[select_contact]["CampagneId"].to_frame()
     results = []
     for selected, s_df in high_similarity_df.groupby(level=0):
-        t = df_campagne[df_campagne.index.isin(s_df.reset_index()['Similars'])].replace(0, np.nan).dropna(axis=1, how='all')
+        t = df[df.index.isin(s_df.reset_index()['Similars'])].replace(0, np.nan).dropna(axis=1, how='all')
         t.sort_values('Startdatum', ascending=False, inplace=True)
         t = t[t['Startdatum'] > '2023-11-06']
         results.append((selected, t))
@@ -116,7 +116,7 @@ def calc(contact_ids: list):
         similar_campagnes_not_done.drop_duplicates(inplace=True)
         similar_campagnes_not_done.set_index('CampagneId')
         x = similar_campagnes_not_done.reset_index()[['CampagneId', 'CampagneNaam']].set_index('CampagneId').to_dict()
-        x['cantact'] = s
+        x['contact'] = s
         r.append(x)
     return r
 
