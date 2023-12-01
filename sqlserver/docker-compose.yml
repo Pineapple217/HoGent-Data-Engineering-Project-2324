@@ -10,6 +10,8 @@ services:
     environment:
       SA_PASSWORD: "Password123*"
       ACCEPT_EULA: "Y"
+    volumes:
+      - sqlvolume:/home/vicuser/data/db/mssql
 # Run: docker-compose up -d
 # Stop: docker-compose down
 
