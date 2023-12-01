@@ -12,6 +12,9 @@ services:
       ACCEPT_EULA: "Y"
     volumes:
       - sqlvolume:/var/opt/mssql
+volumes:
+  sqlvolume:
+    driver: local
 # Run: docker-compose up -d
 # Stop: docker-compose down
 
