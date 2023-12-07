@@ -1,3 +1,5 @@
+---- TO DO: view voor epic 3, script aan main applicatie toevoegen, zorgen dat de view periodisch een update krijgt met nieuwe data
+
 /* Gebruik de correlation.ipynb onder notebooks voor een heat map */
 
 use voka;
