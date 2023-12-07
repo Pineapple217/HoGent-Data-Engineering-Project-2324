@@ -10,4 +10,5 @@ fastapi==0.104.1
 # voor scikit-surprise
 setuptools==69.0.2
 wheel==0.42.0
+numpy==1.26.2
 scikit-surprise==1.1.3
