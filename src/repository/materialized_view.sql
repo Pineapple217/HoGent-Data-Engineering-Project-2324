@@ -27,6 +27,7 @@ berekende_sessies as (
 	select 
 		Inschrijving.CampagneId,
 		Persoon.PersoonId,
+		Sessie.ThemaNaam,
 		count(Sessie.SessieId) as aantal_sessies
 	from SessieInschrijving
 		join Sessie on Sessie.SessieId = SessieInschrijving.SessieId
@@ -34,7 +35,7 @@ berekende_sessies as (
 		join Contactfiche on Contactfiche.ContactpersoonId = Inschrijving.ContactficheId
 		join Persoon on Persoon.PersoonId = Contactfiche.PersoonId
 	where Sessie.CampagneId is not null
-	group by Inschrijving.CampagneId, Persoon.PersoonId
+	group by Inschrijving.CampagneId, Persoon.PersoonId, Sessie.ThemaNaam
 )
 /*
 -- werkt nog niet zoals het hoort
@@ -60,6 +61,7 @@ select
 	Campagne.CampagneId,
 	coalesce(aantal_sessies, 0) as aantal_sessies,
 	coalesce(aantal_bezoeken, 0) as aantal_bezoeken,
+	coalesce(berekende_sessies.ThemaNaam, 'Unknown') as SessieThema,
 	-- coalesce(aantal_klikken_op_mail, 0) as aantal_klikken_op_mail,
 	Campagne.SoortCampagne,
 	Campagne.TypeCampagne,
@@ -102,5 +104,5 @@ join Sessie on Sessie.SessieId = SessieInschrijving.SessieId
 join Inschrijving on Inschrijving.InschrijvingId = SessieInschrijving.InschrijvingId
 join Contactfiche on Contactfiche.ContactpersoonId = Inschrijving.ContactficheId
 join Persoon on Persoon.PersoonId = Contactfiche.PersoonId
-where Persoon.PersoonId = 'E56CFED1-2D91-EB11-811E-001DD8B72B62' and Inschrijving.CampagneId = 'B8EF1A5F-A76C-EC11-8943-000D3A2799E1' 
+where Persoon.PersoonId = 'E56CFED1-2D91-EB11-811E-001DD8B72B62' and Inschrijving.CampagneId = 'B8EF1A5F-A76C-EC11-8943-000D3A2799E1'
 */ 
