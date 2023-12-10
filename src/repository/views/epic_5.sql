@@ -2,8 +2,6 @@
 
 /* Gebruik de correlation.ipynb onder notebooks voor een heat map */
 
-use voka;
-
 create view epic_5 as
 
 with 

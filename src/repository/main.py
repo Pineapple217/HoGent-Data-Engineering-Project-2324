@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 DB_URL = os.getenv("DB_URL")
 DATA_PATH = os.getenv("DATA_PATH")
+SQL_FOLDER_PATH = './src/repository/views'
 logger.info("Connecting to database...")  # IDK why dit niet logged
 engine = create_engine(DB_URL)
 conn = engine.connect()
@@ -95,6 +96,11 @@ def db_rebuild():
     db_init()
     db_seed()
 
+def db_build():
+    db_init()
+    db_seed()
+    db_views()
+
 
 def db_drop():
     metadata.drop_all(bind=engine)
@@ -135,3 +141,45 @@ def db_seed():
     seed_account_activiteitscode()
     seed_contactfiche_functie()
     enable_fk()
+
+def remove_old_views():
+    query = text(f"""
+        DECLARE @viewName NVARCHAR(255);
+        DECLARE viewCursor CURSOR FOR
+            SELECT TABLE_SCHEMA + '.' + TABLE_NAME
+            FROM INFORMATION_SCHEMA.VIEWS;
+
+        OPEN viewCursor;
+        FETCH NEXT FROM viewCursor INTO @viewName;
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            EXEC('DROP VIEW ' + @viewName);
+
+            FETCH NEXT FROM viewCursor INTO @viewName;
+        END
+
+        CLOSE viewCursor;
+        DEALLOCATE viewCursor;
+    """)
+    conn.execute(query)
+    conn.commit()
+
+def db_views():
+    logger.info("Removing all old views")
+    remove_old_views()
+    for file_name in os.listdir(SQL_FOLDER_PATH):
+        if file_name.endswith('.sql'):
+            file_path = os.path.join(SQL_FOLDER_PATH, file_name)
+
+            with open(file_path, 'r') as file:
+                sql_query_string = file.read()
+
+            query = text(sql_query_string)
+
+            try:
+                conn.execute(query)
+                conn.commit()
+                logger.info(f"Script {file_name} executed successfully.")
+            except Exception as e:
+                logger.error(f"Error executing script {file_name}: {str(e)}")

@@ -1,6 +1,6 @@
 import argparse
 import logging
-from repository.main import db_init, db_seed, db_drop, db_rebuild
+from repository.main import db_init, db_seed, db_drop, db_rebuild, db_views, db_build
 from test.main import db_test
 
 logging.basicConfig(
@@ -33,6 +33,12 @@ def main():
     subparsers.add_parser(
         "db_rebuild", help="Drops, inits and seeds the database"
     ).set_defaults(func=db_rebuild)
+    subparsers.add_parser(
+        "db_views", help="Creates the needed materialized views"
+    ).set_defaults(func=db_views)
+    subparsers.add_parser(
+        "db_build", help="inits, seeds and creates views"
+    ).set_defaults(func=db_build)
 
     args = parser.parse_args()
 
