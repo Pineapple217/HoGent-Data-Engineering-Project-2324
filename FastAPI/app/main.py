@@ -66,7 +66,7 @@ def calc(contact_ids: list):
     try:
         ss = df_pivot.loc[select_contact]
     except:
-        return "id does not exits"
+        return "id does not exist"
     try: 
         similarity_matrix = cosine_similarity(df_pivot, ss)
     except:
@@ -91,7 +91,7 @@ def calc(contact_ids: list):
         similar_campagnes_not_done.drop_duplicates(inplace=True)
         similar_campagnes_not_done.set_index('CampagneId')
         x = similar_campagnes_not_done.reset_index()[['CampagneId', 'CampagneNaam']].set_index('CampagneId').to_dict()
-        x['cantact'] = s
+        x['contact'] = s
         r.append(x)
     return r
 
