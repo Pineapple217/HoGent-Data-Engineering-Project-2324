@@ -7,8 +7,12 @@
 ### Epic 5
 
 ```python
-curl https://dep2-g1.vichogent.be/campagne?id=6589DBEF-0CBC-ED11-83FF-6045BD895D85
+https://dep2-g1.vichogent.be/campagne?id=6589DBEF-0CBC-ED11-83FF-6045BD895D85
+```
 
+![afbeelding](https://github.com/JulesRosier/DEP2-GROEP-1/assets/99808574/4f90bbb9-defc-4424-a896-5b1a69e7ada7)
+
+```sql
 select * from Campagne
 where CampagneId = '6589DBEF-0CBC-ED11-83FF-6045BD895D85'
 
