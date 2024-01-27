@@ -114,12 +114,12 @@ model = LightFM(
 
 def save_model(model):
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, f'{CHECKPOINT}_model.pickle'), 'wb') as fle:
+    with open( f'{CHECKPOINT}_model.pickle', 'wb') as fle:
         pickle.dump(model, fle, protocol=pickle.HIGHEST_PROTOCOL)
 
 def save_dataset(dataset):
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, f'{CHECKPOINT}_dataset.pickle'), 'wb') as fle:
+    with open(f'{CHECKPOINT}_dataset.pickle', 'wb') as fle:
         pickle.dump(dataset, fle, protocol=pickle.HIGHEST_PROTOCOL)
         
 save_dataset(dataset)
