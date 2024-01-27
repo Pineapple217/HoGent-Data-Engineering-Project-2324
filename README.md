@@ -1,5 +1,21 @@
 # DEP2-GROEP-1
 
+## Demo
+
+# Epic 3
+
+# Epic 5
+
+```python
+curl https://dep2-g1.vichogent.be/campagne?id=6589DBEF-0CBC-ED11-83FF-6045BD895D85
+
+select * from Campagne
+where CampagneId = '6589DBEF-0CBC-ED11-83FF-6045BD895D85'
+
+select * from Persoon
+where PersoonId = 'F49C652D-F83D-EB11-8116-001DD8B72B61'
+```
+
 ## SQL Server Management Studio
 
 ### Server starten
