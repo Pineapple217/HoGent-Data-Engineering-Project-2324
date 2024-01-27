@@ -3,6 +3,7 @@
 import os
 import pickle
 import numpy as np
+from fastapi import FastAPI, Query
 
 script_folder = os.path.dirname(os.path.abspath(__file__))
 
@@ -42,9 +43,11 @@ def get_top_users_for_item(item_id):
 
 # print(get_top_users_for_item('8FCA1D31-1EB7-E811-80F4-001DD8B72B62'))
 
+app = FastAPI()
+
 # ZET UIT COMMENTAAR
-# @app.get("/campagne")
-# def campagne_api(id: str = Query(None)):
-#    if not id:
-#        return "No campaign given"
-#    return get_top_users_for_item(id)
+@app.get("/campagne")
+def campagne_api(id: str = Query(None)):
+   if not id:
+       return "No campaign given"
+   return get_top_users_for_item(id)
