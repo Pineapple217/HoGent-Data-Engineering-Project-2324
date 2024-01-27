@@ -64,10 +64,10 @@ df_pivot = pd.concat([df_pivot_main, grouped_data], axis=1, join='outer').fillna
 script_folder = os.path.dirname(os.path.abspath(__file__))
 
 # model pickle file
-model_pickle_file_path = os.path.join(script_folder, '..', '..', 'notebooks', 'Item based Collaborative filtering', 'LightFM_model.pickle')
+model_pickle_file_path = os.path.join(script_folder, 'LightFM_model.pickle')
 
 # dataset pickle file
-dataset_pickle_file_path = os.path.join(script_folder, '..', '..', 'notebooks', 'Item based Collaborative filtering', 'LightFM_dataset.pickle')
+dataset_pickle_file_path = os.path.join(script_folder, 'LightFM_dataset.pickle')
 
 with open(model_pickle_file_path, 'rb') as model_file:
     model = pickle.load(model_file)
