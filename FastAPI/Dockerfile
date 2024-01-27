@@ -25,4 +25,4 @@ RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17
 # copy project
 COPY . .
 
-RUN python3 lightfm_scipt.py
+RUN python3 lightfm_script.py
