@@ -14,7 +14,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 COPY requirements.txt .
-COPY lightfm_script.py .
+
 RUN pip install -r requirements.txt
 
 RUN apt-get install apt-transport-https
@@ -26,6 +26,4 @@ RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17
 COPY . .
 
 
-ENV DB_URL="mssql+pyodbc://SA:Password123*@172.18.0.1:1433/voka?driver=ODBC+Driver+17+for+SQL+Server"
 
-RUN python3 lightfm_script.py
