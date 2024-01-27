@@ -69,11 +69,6 @@ model_pickle_file_path = 'LightFM_model.pickle'
 # dataset pickle file
 dataset_pickle_file_path = 'LightFM_dataset.pickle'
 
-with open(model_pickle_file_path, 'rb') as model_file:
-    model = pickle.load(model_file)
-
-with open(dataset_pickle_file_path, 'rb') as dataset_file:
-    dataset = pickle.load(dataset_file)
     
 def get_top_users_for_item(item_id):
     """
@@ -85,6 +80,11 @@ def get_top_users_for_item(item_id):
     Returns:
     str: A string containing the top 20 recommended users for the item, sorted by the number of campaigns entered.
     """
+    with open(model_pickle_file_path, 'rb') as model_file:
+        model = pickle.load(model_file)
+
+    with open(dataset_pickle_file_path, 'rb') as dataset_file:
+        dataset = pickle.load(dataset_file)
     item_id_internal = dataset.mapping()[2][item_id]
     
     user_ids_internal = np.array(list(dataset.mapping()[0].values()))
