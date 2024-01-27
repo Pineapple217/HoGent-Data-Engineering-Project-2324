@@ -14,6 +14,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 COPY requirements.txt .
+COPY lightfm_scipt.py .
 RUN pip install -r requirements.txt
 
 RUN apt-get install apt-transport-https
@@ -23,3 +24,5 @@ RUN apt-get update
 RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17
 # copy project
 COPY . .
+
+RUN python3 lightfm_scipt.py
