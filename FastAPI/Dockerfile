@@ -14,7 +14,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 COPY requirements.txt .
-COPY lightfm_scipt.py .
+COPY lightfm_script.py .
 RUN pip install -r requirements.txt
 
 RUN apt-get install apt-transport-https
