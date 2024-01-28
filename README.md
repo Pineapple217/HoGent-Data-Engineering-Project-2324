@@ -125,5 +125,5 @@ alles csv's in de de root van de DATA_PATH folder
 start dev-server
 
 ```
-uvicorn server:server --reload --app-dir ./src
+uvicorn app.main:app --reload --app-dir ./FastAPI
 ```
