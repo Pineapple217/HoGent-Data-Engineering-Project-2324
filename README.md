@@ -4,6 +4,14 @@
 
 ### Epic 3
 
+```python
+https://dep2-g1.vichogent.be/contact?ids=373B8AE4-5512-E811-80EF-001DD8B72B61,AEE24758-1073-E111-B43A-00505680000A
+```
+
+![afbeelding](https://github.com/JulesRosier/DEP2-GROEP-1/assets/99808574/b9afb3dc-3075-4614-b0a4-22a0b6846ba9)
+
+![afbeelding](https://github.com/JulesRosier/DEP2-GROEP-1/assets/99808574/dfcdbd26-fc3f-4ee0-8ab6-b72b8c43c341)
+
 ### Epic 5
 
 ```python

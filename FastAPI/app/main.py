@@ -69,11 +69,6 @@ model_pickle_file_path = 'LightFM_model.pickle'
 # dataset pickle file
 dataset_pickle_file_path = 'LightFM_dataset.pickle'
 
-with open(model_pickle_file_path, 'rb') as model_file:
-    model = pickle.load(model_file)
-
-with open(dataset_pickle_file_path, 'rb') as dataset_file:
-    dataset = pickle.load(dataset_file)
     
 def get_top_users_for_item(item_id):
     """
@@ -85,6 +80,11 @@ def get_top_users_for_item(item_id):
     Returns:
     str: A string containing the top 20 recommended users for the item, sorted by the number of campaigns entered.
     """
+    with open(model_pickle_file_path, 'rb') as model_file:
+        model = pickle.load(model_file)
+
+    with open(dataset_pickle_file_path, 'rb') as dataset_file:
+        dataset = pickle.load(dataset_file)
     item_id_internal = dataset.mapping()[2][item_id]
     
     user_ids_internal = np.array(list(dataset.mapping()[0].values()))
@@ -95,7 +95,9 @@ def get_top_users_for_item(item_id):
 
     top_users_ids = [list(dataset.mapping()[0].keys())[i] for i in top_users_indices]
 
-    return f'Top 20 recommended users for campaign: {top_users_ids}'
+    x = { "Top 20 recommended users for campaign": top_users_ids }
+
+    return x
 
 def calc(contact_ids: list):
     # select_contact = ['DA252429-E5A6-ED11-AAD1-6045BD8956C9', '915D6FF4-A972-E111-B43A-00505680000A']
