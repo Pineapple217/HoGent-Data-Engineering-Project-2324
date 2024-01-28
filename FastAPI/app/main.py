@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
+import json
 
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder
@@ -95,7 +96,9 @@ def get_top_users_for_item(item_id):
 
     top_users_ids = [list(dataset.mapping()[0].keys())[i] for i in top_users_indices]
 
-    return f'Top 20 recommended users for campaign: {top_users_ids}'
+    x = { "Top 20 recommended users for campaign": top_users_ids }
+
+    return x
 
 def calc(contact_ids: list):
     # select_contact = ['DA252429-E5A6-ED11-AAD1-6045BD8956C9', '915D6FF4-A972-E111-B43A-00505680000A']
