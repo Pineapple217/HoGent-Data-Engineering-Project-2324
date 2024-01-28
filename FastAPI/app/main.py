@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
-import json
 
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder
